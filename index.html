@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Call MVP</title>
+    <meta name="theme-color" content="#075e54">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { margin:0; padding:0; height:100vh; background:#0b141a; color:#fff; font-family:system-ui; display:flex; flex-direction:column; }
+        .header { background:#075e54; padding:20px; text-align:center; font-size:22px; }
+        .main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+        #my-code { font-size:50px; letter-spacing:10px; background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; margin:30px 0; }
+        input { width:80%; max-width:320px; padding:16px; font-size:26px; text-align:center; border:none; border-radius:15px; margin:20px 0; }
+        button { background:#25d366; color:white; border:none; padding:16px 50px; font-size:22px; border-radius:50px; cursor:pointer; }
+        #incoming { position:fixed; top:0; left:0; width:100%; height:100%; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:100; }
+        #incoming h2 { font-size:34px; margin-bottom:80px; }
+        .btns { display:flex; gap:120px; }
+        .btns button { width:90px; height:90px; border-radius:50%; font-size:40px; border:none; cursor:pointer; }
+        #decline { background:red; }
+        #accept { background:green; }
+        #status { margin-top:30px; font-size:20px; }
+        audio { display:none; }
+    </style>
+</head>
+<body>
+    <div class="header">Voice Call MVP</div>
+    <div class="main">
+        <div>Your Code:</div>
+        <div id="my-code">------</div>
+        <input type="text" id="target-code" placeholder="Enter 6-digit code" maxlength="6">
+        <button id="call-btn">Call</button>
+        <div id="status"></div>
+    </div>
+
+    <div id="incoming">
+        <h2>Incoming Call</h2>
+        <div class="btns">
+            <button id="decline">✖</button>
+            <button id="accept">✔</button>
+        </div>
+    </div>
+
+    <audio id="remote-audio" autoplay></audio>
+    <audio id="ringtone" src="https://assets.mixkit.co/sfx/preview/mixkit-classic-telephone-ring-1114.mp3" loop></audio>
+
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script>
+        function generateCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        const myCode = generateCode();
+        document.getElementById('my-code').textContent = myCode;
+
+        const peer = new Peer(); // Auto-generates random ID
+        let currentCall = null;
+
+        peer.on('open', () => console.log('Ready'));
+
+        // Incoming call
+        peer.on('call', incomingCall => {
+            currentCall = incomingCall;
+            document.getElementById('incoming').style.display = 'flex';
+            document.getElementById('ringtone').play();
+
+            document.getElementById('decline').onclick = () => {
+                incomingCall.close();
+                hideIncoming();
+            };
+
+            document.getElementById('accept').onclick = () => {
+                hideIncoming();
+                navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+                    incomingCall.answer(stream);
+                    setupRemoteStream(incomingCall);
+                });
+            };
+        });
+
+        function setupRemoteStream(call) {
+            call.on('stream', remoteStream => {
+                document.getElementById('remote-audio').srcObject = remoteStream;
+                document.getElementById('status').textContent = 'Connected!';
+            });
+            call.on('close', () => document.getElementById('status').textContent = 'Call ended');
+        }
+
+        function hideIncoming() {
+            document.getElementById('incoming').style.display = 'none';
+            document.getElementById('ringtone').pause();
+            document.getElementById('ringtone').currentTime = 0;
+        }
+
+        document.getElementById('call-btn').onclick = () => {
+            const target = document.getElementById('target-code').value.trim();
+            if (target.length !== 6 || target === myCode) {
+                alert('Enter a valid different code');
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+                const call = peer.call(target, stream); // Calls directly by code (we'll map code→peerID next)
+                setupRemoteStream(call);
+                document.getElementById('status').textContent = 'Calling...';
+            }).catch(() => alert('Allow microphone access'));
+        };
+    </script>
+</body>
+              </html>
