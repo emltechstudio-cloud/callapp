@@ -1,0 +1,12 @@
+{
+    "name": "Voice Call MVP",
+    "short_name": "Call",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0b141a",
+    "theme_color": "#075e54",
+    "icons": [
+        {"src": "https://via.placeholder.com/192x192/075e54/ffffff?text=C", "sizes": "192x192", "type": "image/png"},
+        {"src": "https://via.placeholder.com/512x512/075e54/ffffff?text=C", "sizes": "512x512", "type": "image/png"}
+    ]
+}
