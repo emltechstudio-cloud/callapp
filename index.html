@@ -2,1561 +2,465 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc3545">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="iNet">
-    <title>iNet</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%23dc3545'/%3E%3Ctext x='50%25' y='50%25' font-size='24' font-family='system-ui' fill='white' text-anchor='middle' dy='.35em'%3Ei%3C/text%3E%3C/svg%3E">
+    <title>iNet | Secure PIN Calling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #fff;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        /* Header */
-        .header {
-            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
-            padding: 15px 20px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header .logo {
-            width: 35px;
-            height: 35px;
-            background: #dc3545;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 300;
-            color: white;
-        }
-        .header h1 {
-            font-size: 20px;
-            font-weight: 500;
-            flex: 1;
-            margin-left: 12px;
-        }
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .header-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px;
-        }
-        
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-        
-        /* Signup Screen */
-        .signup-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 40px 20px;
-            background: white;
-        }
-        .signup-screen .logo-big {
-            width: 120px;
-            height: 120px;
-            background: #dc3545;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-            font-weight: 300;
-            color: white;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(220,53,69,0.3);
-        }
-        .signup-screen h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #1c1c1e;
-        }
-        .signup-screen p {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-        .btn-signup {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 16px 50px;
-            font-size: 18px;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(220,53,69,0.3);
-            transition: all 0.3s;
-        }
-        .btn-signup:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220,53,69,0.4);
-        }
-        
-        /* Tab Content */
-        .tab-content {
-            display: none;
-            padding: 20px;
-            min-height: calc(100vh - 130px);
-        }
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Search Bar */
-        .search-bar {
-            background: white;
-            padding: 15px;
-            margin: -20px -20px 20px -20px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .search-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-        }
-        .search-input:focus {
-            border-color: #dc3545;
-        }
-        
-        /* Recent Calls */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-        .empty-state .icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-        .call-item {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            cursor: pointer;
-        }
-        .call-item:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .call-item .avatar {
-            width: 50px;
-            height: 50px;
-            background: #dc3545;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: 500;
-            margin-right: 15px;
-        }
-        .call-item .info {
-            flex: 1;
-        }
-        .call-item .name {
-            font-size: 18px;
-            font-weight: 500;
-            color: #1c1c1e;
-        }
-        .call-item .pin {
-            font-size: 14px;
-            color: #999;
-            margin-top: 3px;
-        }
-        .call-item .time {
-            font-size: 14px;
-            color: #999;
-        }
-        .call-item .icon {
-            color: #dc3545;
-            font-size: 20px;
-            margin-left: 10px;
-        }
-        .call-duration {
-            font-size: 12px;
-            color: #666;
-            background: #f0f0f0;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-top: 5px;
-            display: inline-block;
-        }
-        
-        /* Contacts */
-        .my-pin-card {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(220,53,69,0.3);
-        }
-        .my-pin-card .label {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-        .my-pin-card .pin {
-            font-size: 36px;
-            font-weight: 600;
-            letter-spacing: 4px;
-            user-select: all;
-        }
-        .contact-item {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            cursor: pointer;
-        }
-        .contact-item:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .contact-item .avatar {
-            width: 50px;
-            height: 50px;
-            background: #dc3545;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: 500;
-            margin-right: 15px;
-        }
-        .contact-item .info {
-            flex: 1;
-        }
-        .contact-item .name {
-            font-size: 18px;
-            font-weight: 500;
-            color: #1c1c1e;
-        }
-        .contact-item .pin {
-            font-size: 14px;
-            color: #999;
-            margin-top: 3px;
-        }
-        .contact-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .contact-btn {
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 5px;
-            color: #666;
-        }
-        .contact-btn:hover {
-            color: #dc3545;
-        }
-        
-        /* Bottom Navigation */
-        .bottom-nav {
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            padding: 8px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        }
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            background: none;
-            color: #999;
-        }
-        .nav-item.active {
-            color: #dc3545;
-        }
-        .nav-item .icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-        .nav-item .label {
-            font-size: 11px;
-        }
-        
-        /* Floating Call Button */
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: #dc3545;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 28px;
-            box-shadow: 0 4px 15px rgba(220,53,69,0.4);
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s;
-            z-index: 100;
-        }
-        .fab:hover {
-            transform: scale(1.1);
-        }
-        
-        /* Dialpad Overlay */
-        .dialpad-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .dialpad-overlay.show {
-            display: flex;
-        }
-        .dialpad {
-            background: white;
-            border-radius: 20px 20px 0 0;
-            width: 100%;
-            max-width: 400px;
-            padding: 30px 20px;
-            position: absolute;
-            bottom: 0;
-        }
-        .dialpad-display {
-            font-size: 36px;
-            text-align: center;
-            padding: 20px;
-            letter-spacing: 5px;
-            color: #1c1c1e;
-            min-height: 60px;
-            word-break: break-all;
-        }
-        .dialpad-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .dialpad-btn {
-            aspect-ratio: 1;
-            border: none;
-            background: #f8f9fa;
-            border-radius: 50%;
-            font-size: 28px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #1c1c1e;
-        }
-        .dialpad-btn:hover {
-            background: #e9ecef;
-        }
-        .dialpad-btn:active {
-            transform: scale(0.95);
-        }
-        .dialpad-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .dialpad-actions button {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-audio {
-            background: #28a745;
-            color: white;
-        }
-        .btn-video {
-            background: #dc3545;
-            color: white;
-        }
-        .btn-close {
-            background: #6c757d;
-            color: white;
-        }
-        .paste-btn {
-            background: #17a2b8;
-            color: white;
-            margin-top: 10px;
-            padding: 10px;
-        }
-        
-        /* Call Type Selector */
-        .call-type-selector {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%;
-            max-width: 300px;
-            text-align: center;
-            z-index: 2000;
-            display: none;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .call-type-selector.show {
-            display: block;
-        }
-        .call-type-selector h3 {
-            margin-bottom: 20px;
-            color: #1c1c1e;
-        }
-        .call-type-btn {
-            width: 100%;
-            padding: 20px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            transition: all 0.3s;
-        }
-        .call-type-audio {
-            background: #28a745;
-            color: white;
-        }
-        .call-type-video {
-            background: #dc3545;
-            color: white;
-        }
-        .call-type-cancel {
-            background: #6c757d;
-            color: white;
-            margin-top: 20px;
-        }
-        .call-type-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* Call Screen */
-        .call-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 60px 20px 40px;
-            z-index: 2000;
-        }
-        .call-screen.show {
-            display: flex;
-        }
-        .call-screen .avatar-big {
-            width: 150px;
-            height: 150px;
-            background: #dc3545;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 60px;
-            font-weight: 500;
-            margin-bottom: 30px;
-        }
-        .call-screen .name {
-            font-size: 24px;
-            color: white;
-            margin-bottom: 10px;
-        }
-        .call-screen .pin {
-            font-size: 18px;
-            color: #999;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-        }
-        .call-screen .status {
-            font-size: 18px;
-            color: #999;
-            margin-bottom: 40px;
-        }
-        .call-screen .duration {
-            font-size: 24px;
-            color: #28a745;
-            margin-top: 10px;
-            font-family: monospace;
-        }
-        .call-controls {
-            display: flex;
-            gap: 20px;
-        }
-        .call-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: none;
-            font-size: 30px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .call-btn.hangup {
-            background: #dc3545;
-            color: white;
-        }
-        .call-btn.answer {
-            background: #28a745;
-            color: white;
-        }
-        .call-btn.mute {
-            background: #6c757d;
-            color: white;
-        }
-        .call-btn.active {
-            background: #ffc107;
-            color: #000;
-        }
-        
-        /* Video Container */
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            aspect-ratio: 4/3;
-            background: #000;
-            border-radius: 15px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-        .video-container video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .video-container .local-video {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 120px;
-            height: 90px;
-            border-radius: 10px;
-            border: 2px solid white;
-        }
-        
-        /* Contact Form Overlay */
-        .contact-form-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .contact-form-overlay.show {
-            display: flex;
-        }
-        .contact-form {
-            background: white;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
-            padding: 30px;
-        }
-        .contact-form h3 {
-            margin-bottom: 20px;
-            color: #1c1c1e;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            color: #666;
-            font-weight: 500;
-        }
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            outline: none;
-        }
-        .form-input:focus {
-            border-color: #dc3545;
-        }
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        .form-actions button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .btn-save {
-            background: #dc3545;
-            color: white;
-        }
-        .btn-cancel {
-            background: #6c757d;
-            color: white;
-        }
-        
-        /* Hidden elements */
-        audio {
-            display: none;
-        }
-        .hidden {
-            display: none !important;
-        }
-        
-        /* Toast Notifications */
-        .toast {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 3000;
-            animation: slideIn 0.3s ease;
-            display: none;
-        }
-        .toast.error {
-            background: #dc3545;
-        }
-        .toast.warning {
-            background: #ffc107;
-            color: #000;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        /* Loading Spinner */
-        .spinner {
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top: 3px solid white;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Offline Indicator */
-        .offline-indicator {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #ffc107;
-            color: #000;
-            text-align: center;
-            padding: 10px;
-            z-index: 4000;
-            display: none;
-        }
-        .offline-indicator.show {
-            display: block;
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .dialpad-btn:active { transform: scale(0.92); background-color: #f3f4f6; }
+        .glass-morphism { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .pulse { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
         }
     </style>
 </head>
-<body>
-    <!-- Offline Indicator -->
-    <div class="offline-indicator" id="offline-indicator">
-        ⚠️ You are offline. Some features may not work.
-    </div>
+<body class="bg-gray-50 h-screen flex flex-col overflow-hidden">
+
+    <!-- Connection Status -->
+    <div id="status-bar" class="bg-red-500 text-white text-xs text-center py-1 hidden">Connecting to server...</div>
 
     <!-- Header -->
-    <div class="header">
-        <div class="logo">i</div>
-        <h1 id="header-title">iNet</h1>
-        <div class="header-actions">
-            <button class="header-btn" onclick="showContactForm()" title="Add Contact">➕</button>
+    <header class="bg-slate-900 text-white p-4 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-red-600 w-8 h-8 rounded-lg flex items-center justify-center font-bold">i</div>
+            <h1 class="text-lg font-semibold" id="app-title">iNet</h1>
         </div>
-    </div>
+        <button onclick="ui.showContactForm()" class="text-xl">＋</button>
+    </header>
 
-    <!-- Main Content -->
-    <div class="main-content">
+    <!-- Main Screens -->
+    <main class="flex-1 overflow-y-auto pb-24">
+        
         <!-- Signup Screen -->
-        <div id="signup-screen" class="signup-screen">
-            <div class="logo-big">i</div>
-            <h2>Welcome to iNet</h2>
-            <p>Call anyone, anywhere with just a PIN.<br>No phone number required.</p>
-            <button class="btn-signup" onclick="signup()">Get Started</button>
-            <div id="signup-status" style="margin-top: 20px; color: #dc3545;"></div>
-        </div>
+        <section id="screen-signup" class="h-full flex flex-col items-center justify-center p-8 text-center hidden">
+            <div class="bg-red-600 w-24 h-24 rounded-3xl flex items-center justify-center text-white text-6xl font-light mb-8 shadow-xl">i</div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome to iNet</h2>
+            <p class="text-gray-500 mb-8">Call anyone with a 6-digit PIN. No phone number or account required.</p>
+            <button onclick="app.signup()" class="bg-red-600 text-white px-12 py-4 rounded-full font-bold text-lg shadow-lg active:scale-95 transition-transform">Get My PIN</button>
+        </section>
 
-        <!-- Recent Calls Tab -->
-        <div id="recent-tab" class="tab-content">
-            <div class="search-bar">
-                <input type="text" class="search-input" placeholder="Search calls..." oninput="searchCalls(this.value)">
+        <!-- Recents Screen -->
+        <section id="screen-recent" class="p-4 space-y-3 hidden">
+            <div id="recent-list" class="space-y-3"></div>
+            <div id="recent-empty" class="py-20 text-center text-gray-400">
+                <p class="text-5xl mb-4">🕒</p>
+                <p>No recent calls</p>
             </div>
-            <div id="recent-calls-list"></div>
-            <div id="recent-empty" class="empty-state">
-                <div class="icon">📞</div>
-                <h3>No Recent Calls</h3>
-                <p>Your call history will appear here</p>
-            </div>
-        </div>
+        </section>
 
-        <!-- Contacts Tab -->
-        <div id="contacts-tab" class="tab-content">
-            <div class="my-pin-card">
-                <div class="label">My PIN</div>
-                <div class="pin" id="my-pin-display">------</div>
-                <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">Tap to copy</div>
+        <!-- Contacts Screen -->
+        <section id="screen-contacts" class="p-4 space-y-4 hidden">
+            <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-2xl p-6 text-white shadow-lg">
+                <p class="text-xs opacity-80 uppercase tracking-widest mb-1">My Personal PIN</p>
+                <div class="text-4xl font-mono font-bold tracking-tighter" id="display-my-pin">------</div>
+                <p class="text-[10px] mt-4 opacity-70">Share this PIN with friends so they can call you.</p>
             </div>
-            <div class="search-bar">
-                <input type="text" class="search-input" placeholder="Search contacts..." oninput="searchContacts(this.value)">
-            </div>
-            <div id="contacts-list"></div>
-            <div id="contacts-empty" class="empty-state">
-                <div class="icon">👥</div>
-                <h3>No Contacts Yet</h3>
-                <p>Add contacts by tapping the + button</p>
-            </div>
-        </div>
+            <div id="contact-list" class="space-y-2"></div>
+        </section>
 
-        <!-- Messages Tab -->
-        <div id="messages-tab" class="tab-content">
-            <div class="empty-state">
-                <div class="icon">💬</div>
-                <h3>Messages</h3>
-                <p>Coming soon...</p>
-            </div>
-        </div>
-    </div>
+    </main>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('recent')">
-            <div class="icon">🕒</div>
-            <div class="label">Recent</div>
+    <!-- Bottom Nav -->
+    <nav id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t flex justify-around p-2 pb-6 glass-morphism hidden">
+        <button onclick="ui.switchTab('recent')" class="flex flex-col items-center gap-1 text-gray-400 nav-link active" data-tab="recent">
+            <span class="text-xl">🕒</span>
+            <span class="text-[10px]">Recent</span>
         </button>
-        <button class="nav-item" onclick="switchTab('contacts')">
-            <div class="icon">👤</div>
-            <div class="label">Contacts</div>
+        <button onclick="ui.switchTab('contacts')" class="flex flex-col items-center gap-1 text-gray-400 nav-link" data-tab="contacts">
+            <span class="text-xl">👤</span>
+            <span class="text-[10px]">Contacts</span>
         </button>
-        <button class="nav-item" onclick="switchTab('messages')">
-            <div class="icon">💬</div>
-            <div class="label">Messages</div>
-        </button>
-    </div>
+    </nav>
 
-    <!-- Floating Call Button -->
-    <button class="fab" onclick="openDialpad()">📞</button>
+    <!-- Floating Dial Button -->
+    <button id="fab-dial" onclick="ui.openDialpad()" class="fixed bottom-20 right-6 w-14 h-14 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl z-40 hidden">📞</button>
 
     <!-- Dialpad Overlay -->
-    <div class="dialpad-overlay" id="dialpad-overlay" onclick="closeDialpadIfOutside(event)">
-        <div class="dialpad" onclick="event.stopPropagation()">
-            <div class="dialpad-display" id="dialpad-display"></div>
-            <div class="dialpad-grid">
-                <button class="dialpad-btn" onclick="dialpadInput('1')">1</button>
-                <button class="dialpad-btn" onclick="dialpadInput('2')">2</button>
-                <button class="dialpad-btn" onclick="dialpadInput('3')">3</button>
-                <button class="dialpad-btn" onclick="dialpadInput('4')">4</button>
-                <button class="dialpad-btn" onclick="dialpadInput('5')">5</button>
-                <button class="dialpad-btn" onclick="dialpadInput('6')">6</button>
-                <button class="dialpad-btn" onclick="dialpadInput('7')">7</button>
-                <button class="dialpad-btn" onclick="dialpadInput('8')">8</button>
-                <button class="dialpad-btn" onclick="dialpadInput('9')">9</button>
-                <button class="dialpad-btn" onclick="dialpadInput('*')">*</button>
-                <button class="dialpad-btn" onclick="dialpadInput('0')">0</button>
-                <button class="dialpad-btn" onclick="dialpadBackspace()">⌫</button>
+    <div id="overlay-dialpad" class="fixed inset-0 bg-black/60 z-50 flex flex-col justify-end hidden">
+        <div class="bg-white rounded-t-3xl p-6 animate-b-slide">
+            <div class="text-center mb-6">
+                <div class="text-4xl font-mono tracking-widest h-12 flex items-center justify-center" id="dial-display"></div>
             </div>
-            <button class="paste-btn" onclick="pasteFromClipboard()">📋 Paste PIN</button>
-            <div class="dialpad-actions">
-                <button class="btn-audio" onclick="makeCall('audio')">🎤 Audio</button>
-                <button class="btn-video" onclick="makeCall('video')">📹 Video</button>
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <!-- Dialpad Buttons -->
+                <button onclick="app.dial('1')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">1</button>
+                <button onclick="app.dial('2')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">2</button>
+                <button onclick="app.dial('3')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">3</button>
+                <button onclick="app.dial('4')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">4</button>
+                <button onclick="app.dial('5')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">5</button>
+                <button onclick="app.dial('6')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">6</button>
+                <button onclick="app.dial('7')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">7</button>
+                <button onclick="app.dial('8')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">8</button>
+                <button onclick="app.dial('9')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">9</button>
+                <button class="h-16 rounded-full text-2xl opacity-0">*</button>
+                <button onclick="app.dial('0')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">0</button>
+                <button onclick="app.backspace()" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">⌫</button>
             </div>
-            <div class="dialpad-actions">
-                <button class="btn-close" onclick="closeDialpad()">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Call Type Selector -->
-    <div class="call-type-selector" id="call-type-selector">
-        <h3>Call Type</h3>
-        <button class="call-type-btn call-type-audio" onclick="startCall('audio')">
-            <span>🎤</span> Audio Call
-        </button>
-        <button class="call-type-btn call-type-video" onclick="startCall('video')">
-            <span>📹</span> Video Call
-        </button>
-        <button class="call-type-btn call-type-cancel" onclick="closeCallTypeSelector()">
-            Cancel
-        </button>
-    </div>
-
-    <!-- Call Screen -->
-    <div class="call-screen" id="call-screen">
-        <div>
-            <div class="avatar-big" id="call-avatar">?</div>
-            <div class="name" id="call-name">Unknown</div>
-            <div class="pin" id="call-pin">------</div>
-            <div class="status" id="call-status">Calling...</div>
-            <div class="duration" id="call-duration">00:00</div>
-        </div>
-        <div id="video-container" class="video-container hidden">
-            <video id="remote-video" autoplay playsinline></video>
-            <video id="local-video" class="local-video" autoplay playsinline muted></video>
-        </div>
-        <div class="call-controls">
-            <button class="call-btn mute" id="mute-btn" onclick="toggleMute()">🎤</button>
-            <button class="call-btn hangup" onclick="hangup()">✕</button>
-        </div>
-    </div>
-
-    <!-- Incoming Call Screen -->
-    <div class="call-screen" id="incoming-screen">
-        <div>
-            <div class="avatar-big">📞</div>
-            <div class="name" id="incoming-name">Unknown</div>
-            <div class="pin" id="incoming-pin">------</div>
-            <div class="status">Incoming Call...</div>
-        </div>
-        <div class="call-controls">
-            <button class="call-btn hangup" onclick="rejectCall()">✕</button>
-            <button class="call-btn answer" onclick="answerCall()">✓</button>
-        </div>
-    </div>
-
-    <!-- Contact Form -->
-    <div class="contact-form-overlay" id="contact-form-overlay" onclick="closeContactFormIfOutside(event)">
-        <div class="contact-form" onclick="event.stopPropagation()">
-            <h3 id="contact-form-title">Add New Contact</h3>
-            <div class="form-group">
-                <label class="form-label">Name</label>
-                <input type="text" class="form-input" id="contact-name" placeholder="Enter name">
-            </div>
-            <div class="form-group">
-                <label class="form-label">PIN</label>
-                <input type="text" class="form-input" id="contact-pin" placeholder="6-digit PIN" maxlength="6">
-            </div>
-            <div class="form-actions">
-                <button class="btn-cancel" onclick="closeContactForm()">Cancel</button>
-                <button class="btn-save" onclick="saveContact()">Save</button>
+            <div class="flex gap-4">
+                <button onclick="app.startCall('audio')" class="flex-1 bg-green-600 text-white py-4 rounded-xl font-bold">Audio Call</button>
+                <button onclick="app.startCall('video')" class="flex-1 bg-red-600 text-white py-4 rounded-xl font-bold">Video Call</button>
+                <button onclick="ui.closeDialpad()" class="px-6 bg-gray-200 rounded-xl">✕</button>
             </div>
         </div>
     </div>
 
-    <!-- Audio elements for sounds -->
-    <audio id="dial-tone" preload="auto">
-        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ==">
-    </audio>
-    <audio id="ringtone" preload="auto" loop>
-        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ==">
-    </audio>
-    <audio id="call-end-tone" preload="auto">
-        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ==">
-    </audio>
-    <audio id="incoming-call-tone" preload="auto" loop>
-        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ==">
-    </audio>
+    <!-- Active Call Screen -->
+    <div id="screen-call" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-between p-12 text-white hidden">
+        <div class="text-center mt-12">
+            <div id="call-avatar" class="w-32 h-32 bg-red-600 rounded-full flex items-center justify-center text-5xl font-bold mx-auto mb-6">?</div>
+            <h2 id="call-name" class="text-2xl font-bold mb-1">Unknown</h2>
+            <p id="call-pin" class="text-gray-400 font-mono tracking-widest mb-4">------</p>
+            <div id="call-timer" class="text-green-400 font-mono text-xl">00:00</div>
+            <p id="call-status" class="text-sm text-gray-500 uppercase tracking-widest mt-2">Connecting...</p>
+        </div>
 
-    <!-- Remote audio -->
-    <audio id="remote-audio" autoplay playsinline></audio>
+        <!-- Video Feeds -->
+        <div id="video-ui" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden hidden">
+            <video id="remote-video" class="w-full h-full object-cover" autoplay playsinline></video>
+            <video id="local-video" class="absolute top-4 right-4 w-1/4 aspect-video bg-gray-800 rounded-lg border border-white/20 object-cover" autoplay playsinline muted></video>
+        </div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
-<script>
-// Configuration - IMPORTANT: Update this with your Hugging Face backend URL
-// Get your Hugging Face Space URL (like: https://yourusername-yourproject.hf.space)
-const API_URL = 'https://emltechstudio-inet.hf.space' 
-// For local testing, you can use:
-// const API_URL = 'http://localhost:7860';
+        <div class="flex gap-8 mb-8">
+            <button onclick="app.toggleMute()" id="btn-mute" class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl">🎤</button>
+            <button onclick="app.hangup()" class="w-20 h-20 rounded-full bg-red-600 flex items-center justify-center text-3xl shadow-xl">✕</button>
+            <button onclick="app.toggleSpeaker()" class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl">🔊</button>
+        </div>
+    </header>
 
-// For debugging, log the API URL
-console.log('API URL:', API_URL);
+    <!-- Audio elements -->
+    <audio id="remote-audio" autoplay></audio>
 
-const ICE_CONFIG = {
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
-        {
-            urls: 'turn:openrelay.metered.ca:80',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        },
-        {
-            urls: 'turn:openrelay.metered.ca:443',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        },
-        {
-            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        }
-    ]
-};
-
-// State Management
-class AppState {
-    constructor() {
-        this.myPin = localStorage.getItem('myPin');
-        this.pc = null;
-        this.localStream = null;
-        this.currentRoomCode = null;
-        this.pollingInterval = null;
-        this.heartbeatInterval = null;
-        this.dialpadNumber = '';
-        this.callType = 'audio';
-        this.contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
-        this.recentCalls = JSON.parse(localStorage.getItem('recentCalls') || '[]');
-        this.incomingCallCheckInterval = null;
-        this.callDurationInterval = null;
-        this.callStartTime = null;
-        this.isMuted = false;
-        this.isLocalMuted = false;
-        this.selectedPin = null;
-        this.editingContactId = null;
-    }
-}
-
-const state = new AppState();
-
-// Enhanced fetch function with better error handling
-async function apiFetch(endpoint, options = {}) {
-    const url = `${API_URL}${endpoint}`;
-    
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        },
-        mode: 'cors', // Important for CORS
-        credentials: 'omit'
-    };
-    
-    const finalOptions = { ...defaultOptions, ...options };
-    
-    try {
-        console.log(`API Request: ${url}`, finalOptions);
-        const response = await fetch(url, finalOptions);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`API Error ${response.status}:`, errorText);
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
-        
-        const data = await response.json();
-        console.log(`API Response from ${endpoint}:`, data);
-        return data;
-        
-    } catch (error) {
-        console.error(`Fetch error for ${url}:`, error);
-        throw error;
-    }
-}
-
-// Initialize App
-function initApp() {
-    console.log('Initializing app...');
-    
-    // First, check if backend is reachable
-    checkBackendHealth();
-    
-    if (state.myPin) {
-        document.getElementById('signup-screen').style.display = 'none';
-        document.getElementById('my-pin-display').textContent = state.myPin;
-        switchTab('recent');
-        renderRecentCalls();
-        renderContacts();
-        startIncomingCallCheck();
-        
-        // Check online status
-        updateOnlineStatus();
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-    }
-}
-
-// Check backend health
-async function checkBackendHealth() {
-    try {
-        const health = await apiFetch('/api/health');
-        console.log('Backend health check:', health);
-        if (health.status === 'ok') {
-            console.log('✅ Backend is reachable');
-        }
-    } catch (error) {
-        console.error('❌ Backend is not reachable:', error);
-        showToast('Warning: Cannot connect to server. Some features may not work.', 'warning');
-    }
-}
-
-// Signup Function - FIXED
-async function signup() {
-    const statusDiv = document.getElementById('signup-status');
-    statusDiv.textContent = 'Getting started...';
-
-    try {
-        statusDiv.textContent = 'Creating your PIN...';
-
-        // Generate PIN on server
-        const data = await apiFetch('/api/signup', {
-            method: 'POST',
-            body: JSON.stringify({ subscription: { endpoint: 'placeholder' } })
-        });
-
-        if (!data.success) {
-            throw new Error(data.error || 'Failed to create PIN');
-        }
-
-        state.myPin = data.pin;
-        localStorage.setItem('myPin', state.myPin);
-
-        document.getElementById('signup-screen').style.display = 'none';
-        document.getElementById('my-pin-display').textContent = state.myPin;
-        switchTab('recent');
-        startIncomingCallCheck();
-        
-        showToast(`Success! Your PIN is: ${state.myPin}`);
-        setTimeout(() => statusDiv.textContent = '', 3000);
-        
-    } catch (error) {
-        console.error('Signup error:', error);
-        statusDiv.textContent = 'Error: ' + error.message;
-        showToast('Error: ' + error.message, 'error');
-    }
-}
-
-// Make Call - FIXED
-async function makeCall(type) {
-    if (!state.dialpadNumber || state.dialpadNumber.length !== 6) {
-        showToast('Please enter a 6-digit PIN', 'error');
-        return;
-    }
-
-    if (state.dialpadNumber === state.myPin) {
-        showToast('Cannot call yourself', 'error');
-        return;
-    }
-
-    state.callType = type;
-    closeDialpad();
-    closeCallTypeSelector();
-
-    // Find contact name
-    const contact = state.contacts.find(c => c.pin === state.dialpadNumber);
-    const contactName = contact ? contact.name : 'Unknown';
-
-    // Update call screen
-    document.getElementById('call-avatar').textContent = state.dialpadNumber[0];
-    document.getElementById('call-name').textContent = contactName;
-    document.getElementById('call-pin').textContent = state.dialpadNumber;
-    document.getElementById('call-status').textContent = 'Calling...';
-    document.getElementById('call-duration').textContent = '00:00';
-    document.getElementById('call-screen').classList.add('show');
-
-    // Start ringtone
-    playSound('ringtone');
-
-    try {
-        // Get user media
-        const constraints = {
-            audio: true,
-            video: type === 'video'
-        };
-
-        state.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-
-        // Create peer connection
-        state.pc = new RTCPeerConnection(ICE_CONFIG);
-        
-        // Add local tracks
-        state.localStream.getTracks().forEach(track => state.pc.addTrack(track, state.localStream));
-
-        // Set up video if video call
-        if (type === 'video') {
-            document.getElementById('local-video').srcObject = state.localStream;
-            document.getElementById('video-container').classList.remove('hidden');
-        }
-
-        // Handle incoming tracks
-        state.pc.ontrack = (event) => {
-            console.log('Received remote track:', event.track.kind);
-            if (type === 'video') {
-                document.getElementById('remote-video').srcObject = event.streams[0];
-            } else {
-                document.getElementById('remote-audio').srcObject = event.streams[0];
-            }
-            document.getElementById('call-status').textContent = 'Connected';
-            stopSound('ringtone');
-            startCallTimer();
-        };
-
-        // Handle connection state changes
-        state.pc.oniceconnectionstatechange = () => {
-            console.log('ICE connection state:', state.pc.iceConnectionState);
-            if (state.pc.iceConnectionState === 'failed' || 
-                state.pc.iceConnectionState === 'disconnected') {
-                showToast('Connection lost');
-                hangup();
-            } else if (state.pc.iceConnectionState === 'connected') {
-                console.log('✅ WebRTC connection established!');
+    <script>
+        /**
+         * APPLICATION CONFIGURATION
+         */
+        const CONFIG = {
+            API_BASE: 'https://emltechstudio-inet.hf.space',
+            ICE_SERVERS: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
             }
         };
 
-        // Handle ICE candidates
-        state.pc.onicecandidate = (event) => {
-            if (event.candidate && state.currentRoomCode) {
-                console.log('Sending ICE candidate:', event.candidate);
-                apiFetch('/api/ice', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        room_code: state.currentRoomCode,
-                        candidate: event.candidate,
-                        sender_pin: state.myPin
-                    })
-                }).catch(error => {
-                    console.error('Failed to send ICE candidate:', error);
-                });
-            }
+        const state = {
+            myPin: localStorage.getItem('iNet_pin'),
+            contacts: JSON.parse(localStorage.getItem('iNet_contacts') || '[]'),
+            recent: JSON.parse(localStorage.getItem('iNet_recent') || '[]'),
+            currentCall: null,
+            pc: null,
+            localStream: null,
+            isMuted: false,
+            pollTimer: null,
+            dialString: ''
         };
 
-        // Handle negotiation needed
-        state.pc.onnegotiationneeded = async () => {
-            console.log('Negotiation needed');
-            try {
-                const offer = await state.pc.createOffer({
-                    offerToReceiveAudio: true,
-                    offerToReceiveVideo: type === 'video'
-                });
-                await state.pc.setLocalDescription(offer);
+        /**
+         * APP LOGIC
+         */
+        const app = {
+            async init() {
+                if (!state.myPin) {
+                    ui.showScreen('signup');
+                } else {
+                    ui.showScreen('recent');
+                    document.getElementById('display-my-pin').innerText = state.myPin;
+                    this.startCheckingForIncoming();
+                }
+                ui.renderRecent();
+                ui.renderContacts();
+            },
+
+            async signup() {
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE}/api/signup`, { method: 'POST' });
+                    const data = await res.json();
+                    if (data.success) {
+                        state.myPin = data.pin;
+                        localStorage.setItem('iNet_pin', data.pin);
+                        this.init();
+                    }
+                } catch (e) {
+                    alert('Server connection failed. Is the backend running?');
+                }
+            },
+
+            dial(val) {
+                if (state.dialString.length < 6) {
+                    state.dialString += val;
+                    ui.updateDialDisplay();
+                }
+            },
+
+            backspace() {
+                state.dialString = state.dialString.slice(0, -1);
+                ui.updateDialDisplay();
+            },
+
+            async startCall(type, targetPin = null) {
+                const pin = targetPin || state.dialString;
+                if (pin.length !== 6) return;
                 
-                // Send offer to backend
-                const response = await apiFetch('/api/call', {
+                ui.closeDialpad();
+                ui.showCallScreen(pin, type);
+                
+                try {
+                    // 1. Get Media
+                    state.localStream = await navigator.mediaDevices.getUserMedia({
+                        audio: true,
+                        video: type === 'video'
+                    });
+                    
+                    if (type === 'video') {
+                        document.getElementById('video-ui').classList.remove('hidden');
+                        document.getElementById('local-video').srcObject = state.localStream;
+                    }
+
+                    // 2. PeerConnection Setup
+                    state.pc = new RTCPeerConnection(CONFIG.ICE_SERVERS);
+                    state.localStream.getTracks().forEach(t => state.pc.addTrack(t, state.localStream));
+                    
+                    state.pc.ontrack = (e) => {
+                        if (type === 'video') document.getElementById('remote-video').srcObject = e.streams[0];
+                        else document.getElementById('remote-audio').srcObject = e.streams[0];
+                        document.getElementById('call-status').innerText = 'Connected';
+                    };
+
+                    // 3. Signaling - Create Offer
+                    const offer = await state.pc.createOffer();
+                    await state.pc.setLocalDescription(offer);
+
+                    // 4. Send to server
+                    const res = await fetch(`${CONFIG.API_BASE}/api/call`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            caller_pin: state.myPin,
+                            callee_pin: pin,
+                            offer: offer,
+                            call_type: type
+                        })
+                    });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        state.currentRoom = data.room_code;
+                        this.startPolling(data.room_code);
+                    } else {
+                        throw new Error(data.error);
+                    }
+
+                } catch (e) {
+                    console.error(e);
+                    this.hangup();
+                    alert('Call failed: ' + e.message);
+                }
+            },
+
+            async startPolling(roomCode) {
+                state.pollTimer = setInterval(async () => {
+                    const res = await fetch(`${CONFIG.API_BASE}/api/poll/${roomCode}/${state.myPin}`);
+                    const data = await res.json();
+                    
+                    if (data.hangup) this.hangup();
+
+                    if (data.signals) {
+                        for (let signal of data.signals) {
+                            if (signal.type === 'answer') {
+                                await state.pc.setRemoteDescription(new RTCSessionDescription(signal.data));
+                            } else if (signal.type === 'ice') {
+                                await state.pc.addIceCandidate(new RTCIceCandidate(signal.data));
+                            }
+                        }
+                    }
+                }, 2000);
+            },
+
+            startCheckingForIncoming() {
+                setInterval(async () => {
+                    if (state.currentRoom) return;
+                    try {
+                        const res = await fetch(`${CONFIG.API_BASE}/api/incoming/${state.myPin}`);
+                        const data = await res.json();
+                        if (data.incoming) {
+                            if (confirm(`Incoming ${data.call_type} call from ${data.caller_pin}. Accept?`)) {
+                                this.answerCall(data);
+                            } else {
+                                fetch(`${CONFIG.API_BASE}/api/decline`, {
+                                    method: 'POST',
+                                    headers: {'Content-Type':'application/json'},
+                                    body: JSON.stringify({room_code: data.room_code, pin: state.myPin})
+                                });
+                            }
+                        }
+                    } catch(e) {}
+                }, 4000);
+            },
+
+            async answerCall(callData) {
+                ui.showCallScreen(callData.caller_pin, callData.call_type);
+                state.currentRoom = callData.room_code;
+                
+                state.localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: callData.call_type === 'video'
+                });
+
+                state.pc = new RTCPeerConnection(CONFIG.ICE_SERVERS);
+                state.localStream.getTracks().forEach(t => state.pc.addTrack(t, state.localStream));
+                
+                state.pc.ontrack = (e) => {
+                    if (callData.call_type === 'video') {
+                        document.getElementById('video-ui').classList.remove('hidden');
+                        document.getElementById('remote-video').srcObject = e.streams[0];
+                    }
+                    document.getElementById('remote-audio').srcObject = e.streams[0];
+                };
+
+                await state.pc.setRemoteDescription(new RTCSessionDescription(callData.offer));
+                const answer = await state.pc.createAnswer();
+                await state.pc.setLocalDescription(answer);
+
+                await fetch(`${CONFIG.API_BASE}/api/answer`, {
                     method: 'POST',
+                    headers: {'Content-Type':'application/json'},
                     body: JSON.stringify({
-                        caller_pin: state.myPin,
-                        callee_pin: state.dialpadNumber,
-                        offer: offer,
-                        call_type: type
+                        room_code: callData.room_code,
+                        answer: answer,
+                        callee_pin: state.myPin
                     })
                 });
 
-                if (!response.success) {
-                    throw new Error(response.error || 'Call failed');
-                }
+                this.startPolling(callData.room_code);
+            },
 
-                state.currentRoomCode = response.room_code;
-                console.log('Call initiated, room code:', state.currentRoomCode);
-
-                // Add to recent calls
-                addRecentCall(state.dialpadNumber, 'outgoing', type);
-                startPolling();
-                startHeartbeat();
+            hangup() {
+                if (state.pollTimer) clearInterval(state.pollTimer);
+                if (state.pc) state.pc.close();
+                if (state.localStream) state.localStream.getTracks().forEach(t => t.stop());
                 
-            } catch (error) {
-                console.error('Negotiation error:', error);
-                showToast('Call setup failed: ' + error.message, 'error');
-                hangup();
-            }
-        };
-
-        // Create initial offer
-        const offer = await state.pc.createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: type === 'video'
-        });
-        await state.pc.setLocalDescription(offer);
-        
-        console.log('Sending initial offer...');
-        
-        // Send offer to backend
-        const response = await apiFetch('/api/call', {
-            method: 'POST',
-            body: JSON.stringify({
-                caller_pin: state.myPin,
-                callee_pin: state.dialpadNumber,
-                offer: offer,
-                call_type: type
-            })
-        });
-
-        if (!response.success) {
-            throw new Error(response.error || 'Call failed');
-        }
-
-        state.currentRoomCode = response.room_code;
-        console.log('Call initiated, room code:', state.currentRoomCode);
-
-        // Add to recent calls
-        addRecentCall(state.dialpadNumber, 'outgoing', type);
-        startPolling();
-        startHeartbeat();
-
-    } catch (error) {
-        console.error('Call error:', error);
-        showToast('Error making call: ' + error.message, 'error');
-        hangup();
-    }
-}
-
-// Polling for call updates - FIXED
-function startPolling() {
-    if (!state.currentRoomCode) return;
-
-    state.pollingInterval = setInterval(async () => {
-        try {
-            const data = await apiFetch(`/api/poll/${state.currentRoomCode}/${state.myPin}`);
-            
-            if (!data.success) {
-                console.error('Polling failed:', data.error);
-                return;
-            }
-
-            if (data.hangup) {
-                showToast('Call ended by other person');
-                hangup();
-                return;
-            }
-
-            // Process incoming signals
-            for (const signal of data.signals || []) {
-                console.log('Processing signal:', signal.type);
-                
-                if (signal.type === 'answer' && state.pc && state.pc.signalingState === 'have-local-offer') {
-                    console.log('Setting remote description (answer)');
-                    await state.pc.setRemoteDescription(new RTCSessionDescription(signal.data));
-                    document.getElementById('call-status').textContent = 'Connected';
-                    stopSound('ringtone');
-                    startCallTimer();
-                    
-                } else if (signal.type === 'offer' && state.pc) {
-                    console.log('Received offer during call');
-                    // Handle renegotiation if needed
-                    
-                } else if (signal.type === 'ice' && state.pc && state.pc.remoteDescription) {
-                    console.log('Adding ICE candidate');
-                    await state.pc.addIceCandidate(new RTCIceCandidate(signal.data));
-                }
-            }
-        } catch (error) {
-            console.error('Polling error:', error);
-        }
-    }, 2000); // Poll every 2 seconds
-}
-
-// Check for incoming calls - FIXED
-function startIncomingCallCheck() {
-    if (!state.myPin) return;
-
-    state.incomingCallCheckInterval = setInterval(async () => {
-        if (state.currentRoomCode) return;
-
-        try {
-            const data = await apiFetch(`/api/incoming/${state.myPin}`);
-            
-            if (!data.success) {
-                console.error('Incoming check failed:', data.error);
-                return;
-            }
-
-            if (data.incoming && !localStorage.getItem('incomingCall')) {
-                console.log('Incoming call detected:', data);
-                state.currentRoomCode = data.room_code;
-                localStorage.setItem('incomingCall', JSON.stringify(data));
-
-                // Find contact name
-                const contact = state.contacts.find(c => c.pin === data.caller_pin);
-                const contactName = contact ? contact.name : 'Unknown';
-
-                // Update incoming screen
-                document.getElementById('incoming-pin').textContent = data.caller_pin || 'Unknown';
-                document.getElementById('incoming-name').textContent = contactName;
-                document.getElementById('incoming-screen').classList.add('show');
-
-                // Play incoming call sound
-                playSound('incoming-call-tone');
-
-                // Show notification
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    new Notification('📞 Incoming Call', {
-                        body: `Call from ${contactName} (${data.caller_pin})`,
-                        icon: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'192\' height=\'192\'%3E%3Crect width=\'192\' height=\'192\' fill=\'%23dc3545\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-size=\'140\' font-family=\'system-ui\' fill=\'white\' text-anchor=\'middle\' dy=\'.35em\'%3Ei%3C/text%3E%3C/svg%3E',
-                        vibrate: [200, 100, 200, 100, 200],
-                        tag: 'incoming-call'
+                if (state.currentRoom) {
+                    fetch(`${CONFIG.API_BASE}/api/hangup`, {
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({room_code: state.currentRoom, pin: state.myPin})
                     });
                 }
+
+                state.pc = null;
+                state.localStream = null;
+                state.currentRoom = null;
+                ui.hideCallScreen();
             }
-        } catch (error) {
-            console.error('Incoming check error:', error);
-        }
-    }, 3000); // Check every 3 seconds
-}
-
-// Answer incoming call - FIXED
-async function answerCall() {
-    stopSound('incoming-call-tone');
-    
-    try {
-        const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
-        if (!incomingData) {
-            throw new Error('No incoming call data found');
-        }
-
-        state.callType = incomingData.call_type || 'audio';
-        state.currentRoomCode = incomingData.room_code;
-
-        // Find contact name
-        const contact = state.contacts.find(c => c.pin === incomingData.caller_pin);
-        const contactName = contact ? contact.name : 'Unknown';
-
-        // Get user media
-        state.localStream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: state.callType === 'video'
-        });
-
-        // Create peer connection
-        state.pc = new RTCPeerConnection(ICE_CONFIG);
-        state.localStream.getTracks().forEach(track => state.pc.addTrack(track, state.localStream));
-
-        // Handle incoming tracks
-        state.pc.ontrack = (event) => {
-            console.log('Received remote track:', event.track.kind);
-            if (state.callType === 'video') {
-                document.getElementById('remote-video').srcObject = event.streams[0];
-            } else {
-                document.getElementById('remote-audio').srcObject = event.streams[0];
-            }
-            document.getElementById('call-status').textContent = 'Connected';
-            startCallTimer();
         };
 
-        // Handle ICE candidates
-        state.pc.onicecandidate = (event) => {
-            if (event.candidate && state.currentRoomCode) {
-                console.log('Sending ICE candidate (answer):', event.candidate);
-                apiFetch('/api/ice', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        room_code: state.currentRoomCode,
-                        candidate: event.candidate,
-                        sender_pin: state.myPin
-                    })
-                }).catch(error => {
-                    console.error('Failed to send ICE candidate:', error);
+        /**
+         * UI CONTROLLER
+         */
+        const ui = {
+            showScreen(id) {
+                ['signup', 'recent', 'contacts'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
+                document.getElementById(`screen-${id}`).classList.remove('hidden');
+                
+                if (id !== 'signup') {
+                    document.getElementById('bottom-nav').classList.remove('hidden');
+                    document.getElementById('fab-dial').classList.remove('hidden');
+                }
+            },
+
+            switchTab(tab) {
+                this.showScreen(tab);
+                document.querySelectorAll('.nav-link').forEach(l => {
+                    l.classList.remove('text-red-600');
+                    if (l.dataset.tab === tab) l.classList.add('text-red-600');
                 });
+            },
+
+            openDialpad() {
+                state.dialString = '';
+                this.updateDialDisplay();
+                document.getElementById('overlay-dialpad').classList.remove('hidden');
+            },
+
+            closeDialpad() {
+                document.getElementById('overlay-dialpad').classList.add('hidden');
+            },
+
+            updateDialDisplay() {
+                document.getElementById('dial-display').innerText = state.dialString || '------';
+            },
+
+            showCallScreen(pin, type) {
+                const screen = document.getElementById('screen-call');
+                screen.classList.remove('hidden');
+                document.getElementById('call-pin').innerText = pin;
+                document.getElementById('call-avatar').innerText = pin[0];
+                document.getElementById('call-status').innerText = 'Dialing...';
+            },
+
+            hideCallScreen() {
+                document.getElementById('screen-call').classList.add('hidden');
+            },
+
+            renderRecent() {
+                const container = document.getElementById('recent-list');
+                const empty = document.getElementById('recent-empty');
+                if (state.recent.length === 0) {
+                    empty.classList.remove('hidden');
+                    container.innerHTML = '';
+                } else {
+                    empty.classList.add('hidden');
+                    container.innerHTML = state.recent.map(r => `
+                        <div class="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">${r.pin[0]}</div>
+                                <div>
+                                    <p class="font-bold">${r.pin}</p>
+                                    <p class="text-[10px] text-gray-400">${new Date(r.time).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs ${r.type === 'incoming' ? 'text-green-500' : 'text-blue-500'} uppercase">${r.type}</span>
+                        </div>
+                    `).join('');
+                }
+            },
+
+            renderContacts() {
+                const container = document.getElementById('contact-list');
+                container.innerHTML = state.contacts.map(c => `
+                    <div onclick="app.startCall('audio', '${c.pin}')" class="bg-white p-4 rounded-xl flex items-center justify-between active:bg-gray-50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center font-bold">${c.name[0]}</div>
+                            <div>
+                                <p class="font-bold">${c.name}</p>
+                                <p class="text-xs text-gray-400">${c.pin}</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-300">📞</div>
+                    </div>
+                `).join('');
+            },
+
+            showContactForm() {
+                const name = prompt('Contact Name:');
+                const pin = prompt('6-Digit PIN:');
+                if (name && pin && pin.length === 6) {
+                    state.contacts.push({ name, pin });
+                    localStorage.setItem('iNet_contacts', JSON.stringify(state.contacts));
+                    this.renderContacts();
+                }
             }
         };
 
-        // Set remote description from offer
-        console.log('Setting remote description from offer');
-        await state.pc.setRemoteDescription(new RTCSessionDescription(incomingData.offer));
-
-        // Create and send answer
-        const answer = await state.pc.createAnswer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: state.callType === 'video'
-        });
-        await state.pc.setLocalDescription(answer);
-
-        console.log('Sending answer to backend');
-        await apiFetch('/api/answer', {
-            method: 'POST',
-            body: JSON.stringify({
-                room_code: state.currentRoomCode,
-                answer: answer,
-                callee_pin: state.myPin
-            })
-        });
-
-        // Update UI
-        document.getElementById('incoming-screen').classList.remove('show');
-        document.getElementById('call-avatar').textContent = incomingData.caller_pin[0];
-        document.getElementById('call-name').textContent = contactName;
-        document.getElementById('call-pin').textContent = incomingData.caller_pin;
-        document.getElementById('call-status').textContent = 'Connected';
-        document.getElementById('call-screen').classList.add('show');
-
-        if (state.callType === 'video') {
-            document.getElementById('local-video').srcObject = state.localStream;
-            document.getElementById('video-container').classList.remove('hidden');
-        }
-
-        // Add to recent calls
-        addRecentCall(incomingData.caller_pin, 'incoming', state.callType);
-        startPolling();
-        startHeartbeat();
-        
-        localStorage.removeItem('incomingCall');
-        
-    } catch (error) {
-        console.error('Answer error:', error);
-        showToast('Error answering call: ' + error.message, 'error');
-        hangup();
-    }
-}
-
-// Heartbeat to keep call alive - FIXED
-function startHeartbeat() {
-    if (!state.currentRoomCode) return;
-
-    state.heartbeatInterval = setInterval(async () => {
-        try {
-            // You can extend call expiration by updating it
-            // For now, just keep polling active
-            console.log('Heartbeat for room:', state.currentRoomCode);
-        } catch (error) {
-            console.error('Heartbeat error:', error);
-        }
-    }, 10000); // Send heartbeat every 10 seconds
-}
-
-// Hangup call - FIXED
-async function hangup() {
-    stopSound('ringtone');
-    stopSound('incoming-call-tone');
-    playSound('call-end-tone');
-    
-    if (state.currentRoomCode) {
-        try {
-            await apiFetch('/api/hangup', {
-                method: 'POST',
-                body: JSON.stringify({
-                    room_code: state.currentRoomCode,
-                    pin: state.myPin
-                })
-            });
-        } catch (error) {
-            console.error('Hangup API error:', error);
-        }
-    }
-
-    // Clean up peer connection
-    if (state.pc) {
-        state.pc.close();
-        state.pc = null;
-    }
-
-    // Stop local stream
-    if (state.localStream) {
-        state.localStream.getTracks().forEach(track => track.stop());
-        state.localStream = null;
-    }
-
-    // Clear intervals
-    if (state.pollingInterval) clearInterval(state.pollingInterval);
-    if (state.heartbeatInterval) clearInterval(state.heartbeatInterval);
-    if (state.callDurationInterval) clearInterval(state.callDurationInterval);
-
-    // Reset state
-    state.currentRoomCode = null;
-    state.callStartTime = null;
-    state.isMuted = false;
-    state.isLocalMuted = false;
-
-    // Update UI
-    document.getElementById('call-screen').classList.remove('show');
-    document.getElementById('video-container').classList.add('hidden');
-    document.getElementById('incoming-screen').classList.remove('show');
-    document.getElementById('mute-btn').classList.remove('active');
-    
-    // Clear incoming call data
-    localStorage.removeItem('incomingCall');
-}
-
-// ... (rest of the functions remain the same as in your previous frontend)
-
-// Initialize on load
-window.addEventListener('load', initApp);
-
-// Debug info
-console.log('Frontend initialized');
-console.log('Current PIN:', state.myPin);
-console.log('API URL:', API_URL);
-
+        // Start
+        app.init();
     </script>
 </body>
-    </html>
+</html>
+
