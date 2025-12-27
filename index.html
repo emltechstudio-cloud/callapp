@@ -18,6 +18,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
         
         /* Header */
@@ -47,6 +48,18 @@
             font-weight: 500;
             flex: 1;
             margin-left: 12px;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .header-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
         }
         
         /* Main Content */
@@ -117,6 +130,25 @@
             display: block;
         }
         
+        /* Search Bar */
+        .search-bar {
+            background: white;
+            padding: 15px;
+            margin: -20px -20px 20px -20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: #dc3545;
+        }
+        
         /* Recent Calls */
         .empty-state {
             text-align: center;
@@ -158,19 +190,33 @@
         .call-item .info {
             flex: 1;
         }
-        .call-item .pin {
+        .call-item .name {
             font-size: 18px;
             font-weight: 500;
             color: #1c1c1e;
         }
-        .call-item .time {
+        .call-item .pin {
             font-size: 14px;
             color: #999;
             margin-top: 3px;
         }
+        .call-item .time {
+            font-size: 14px;
+            color: #999;
+        }
         .call-item .icon {
             color: #dc3545;
             font-size: 20px;
+            margin-left: 10px;
+        }
+        .call-duration {
+            font-size: 12px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 5px;
+            display: inline-block;
         }
         
         /* Contacts */
@@ -232,6 +278,21 @@
             font-size: 14px;
             color: #999;
             margin-top: 3px;
+        }
+        .contact-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .contact-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            color: #666;
+        }
+        .contact-btn:hover {
+            color: #dc3545;
         }
         
         /* Bottom Navigation */
@@ -321,6 +382,7 @@
             letter-spacing: 5px;
             color: #1c1c1e;
             min-height: 60px;
+            word-break: break-all;
         }
         .dialpad-grid {
             display: grid;
@@ -370,6 +432,67 @@
             background: #6c757d;
             color: white;
         }
+        .paste-btn {
+            background: #17a2b8;
+            color: white;
+            margin-top: 10px;
+            padding: 10px;
+        }
+        
+        /* Call Type Selector */
+        .call-type-selector {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 300px;
+            text-align: center;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .call-type-selector.show {
+            display: block;
+        }
+        .call-type-selector h3 {
+            margin-bottom: 20px;
+            color: #1c1c1e;
+        }
+        .call-type-btn {
+            width: 100%;
+            padding: 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        .call-type-audio {
+            background: #28a745;
+            color: white;
+        }
+        .call-type-video {
+            background: #dc3545;
+            color: white;
+        }
+        .call-type-cancel {
+            background: #6c757d;
+            color: white;
+            margin-top: 20px;
+        }
+        .call-type-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
         
         /* Call Screen */
         .call-screen {
@@ -402,16 +525,27 @@
             font-weight: 500;
             margin-bottom: 30px;
         }
-        .call-screen .pin {
-            font-size: 32px;
+        .call-screen .name {
+            font-size: 24px;
             color: white;
-            letter-spacing: 5px;
+            margin-bottom: 10px;
+        }
+        .call-screen .pin {
+            font-size: 18px;
+            color: #999;
+            letter-spacing: 3px;
             margin-bottom: 10px;
         }
         .call-screen .status {
             font-size: 18px;
             color: #999;
             margin-bottom: 40px;
+        }
+        .call-screen .duration {
+            font-size: 24px;
+            color: #28a745;
+            margin-top: 10px;
+            font-family: monospace;
         }
         .call-controls {
             display: flex;
@@ -425,6 +559,9 @@
             font-size: 30px;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .call-btn.hangup {
             background: #dc3545;
@@ -433,6 +570,14 @@
         .call-btn.answer {
             background: #28a745;
             color: white;
+        }
+        .call-btn.mute {
+            background: #6c757d;
+            color: white;
+        }
+        .call-btn.active {
+            background: #ffc107;
+            color: #000;
         }
         
         /* Video Container */
@@ -461,6 +606,75 @@
             border: 2px solid white;
         }
         
+        /* Contact Form Overlay */
+        .contact-form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .contact-form-overlay.show {
+            display: flex;
+        }
+        .contact-form {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+        }
+        .contact-form h3 {
+            margin-bottom: 20px;
+            color: #1c1c1e;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: #dc3545;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .form-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-save {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        
         /* Hidden elements */
         audio {
             display: none;
@@ -468,7 +682,33 @@
         .hidden {
             display: none !important;
         }
-
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 3000;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+        .toast.error {
+            background: #dc3545;
+        }
+        .toast.warning {
+            background: #ffc107;
+            color: #000;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
         /* Loading Spinner */
         .spinner {
             border: 3px solid rgba(255,255,255,0.3);
@@ -483,13 +723,38 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Offline Indicator */
+        .offline-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ffc107;
+            color: #000;
+            text-align: center;
+            padding: 10px;
+            z-index: 4000;
+            display: none;
+        }
+        .offline-indicator.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
+    <!-- Offline Indicator -->
+    <div class="offline-indicator" id="offline-indicator">
+        ⚠️ You are offline. Some features may not work.
+    </div>
+
     <!-- Header -->
     <div class="header">
         <div class="logo">i</div>
         <h1 id="header-title">iNet</h1>
+        <div class="header-actions">
+            <button class="header-btn" onclick="showContactForm()" title="Add Contact">➕</button>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -505,6 +770,9 @@
 
         <!-- Recent Calls Tab -->
         <div id="recent-tab" class="tab-content">
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search calls..." oninput="searchCalls(this.value)">
+            </div>
             <div id="recent-calls-list"></div>
             <div id="recent-empty" class="empty-state">
                 <div class="icon">📞</div>
@@ -518,12 +786,16 @@
             <div class="my-pin-card">
                 <div class="label">My PIN</div>
                 <div class="pin" id="my-pin-display">------</div>
+                <div style="font-size: 12px; opacity: 0.8; margin-top: 10px;">Tap to copy</div>
+            </div>
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search contacts..." oninput="searchContacts(this.value)">
             </div>
             <div id="contacts-list"></div>
             <div id="contacts-empty" class="empty-state">
                 <div class="icon">👥</div>
                 <h3>No Contacts Yet</h3>
-                <p>Add contacts from recent calls</p>
+                <p>Add contacts by tapping the + button</p>
             </div>
         </div>
 
@@ -574,6 +846,7 @@
                 <button class="dialpad-btn" onclick="dialpadInput('0')">0</button>
                 <button class="dialpad-btn" onclick="dialpadBackspace()">⌫</button>
             </div>
+            <button class="paste-btn" onclick="pasteFromClipboard()">📋 Paste PIN</button>
             <div class="dialpad-actions">
                 <button class="btn-audio" onclick="makeCall('audio')">🎤 Audio</button>
                 <button class="btn-video" onclick="makeCall('video')">📹 Video</button>
@@ -584,18 +857,35 @@
         </div>
     </div>
 
+    <!-- Call Type Selector -->
+    <div class="call-type-selector" id="call-type-selector">
+        <h3>Call Type</h3>
+        <button class="call-type-btn call-type-audio" onclick="startCall('audio')">
+            <span>🎤</span> Audio Call
+        </button>
+        <button class="call-type-btn call-type-video" onclick="startCall('video')">
+            <span>📹</span> Video Call
+        </button>
+        <button class="call-type-btn call-type-cancel" onclick="closeCallTypeSelector()">
+            Cancel
+        </button>
+    </div>
+
     <!-- Call Screen -->
     <div class="call-screen" id="call-screen">
         <div>
             <div class="avatar-big" id="call-avatar">?</div>
+            <div class="name" id="call-name">Unknown</div>
             <div class="pin" id="call-pin">------</div>
             <div class="status" id="call-status">Calling...</div>
+            <div class="duration" id="call-duration">00:00</div>
         </div>
         <div id="video-container" class="video-container hidden">
             <video id="remote-video" autoplay playsinline></video>
             <video id="local-video" class="local-video" autoplay playsinline muted></video>
         </div>
         <div class="call-controls">
+            <button class="call-btn mute" id="mute-btn" onclick="toggleMute()">🎤</button>
             <button class="call-btn hangup" onclick="hangup()">✕</button>
         </div>
     </div>
@@ -604,6 +894,7 @@
     <div class="call-screen" id="incoming-screen">
         <div>
             <div class="avatar-big">📞</div>
+            <div class="name" id="incoming-name">Unknown</div>
             <div class="pin" id="incoming-pin">------</div>
             <div class="status">Incoming Call...</div>
         </div>
@@ -613,7 +904,44 @@
         </div>
     </div>
 
+    <!-- Contact Form -->
+    <div class="contact-form-overlay" id="contact-form-overlay" onclick="closeContactFormIfOutside(event)">
+        <div class="contact-form" onclick="event.stopPropagation()">
+            <h3 id="contact-form-title">Add New Contact</h3>
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="contact-name" placeholder="Enter name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">PIN</label>
+                <input type="text" class="form-input" id="contact-pin" placeholder="6-digit PIN" maxlength="6">
+            </div>
+            <div class="form-actions">
+                <button class="btn-cancel" onclick="closeContactForm()">Cancel</button>
+                <button class="btn-save" onclick="saveContact()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio elements for sounds -->
+    <audio id="dial-tone" preload="auto">
+        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ==">
+    </audio>
+    <audio id="ringtone" preload="auto" loop>
+        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ==">
+    </audio>
+    <audio id="call-end-tone" preload="auto">
+        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ==">
+    </audio>
+    <audio id="incoming-call-tone" preload="auto" loop>
+        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ==">
+    </audio>
+
+    <!-- Remote audio -->
     <audio id="remote-audio" autoplay playsinline></audio>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
 
     <script>
         // Configuration
@@ -639,10 +967,41 @@
                 this.contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
                 this.recentCalls = JSON.parse(localStorage.getItem('recentCalls') || '[]');
                 this.incomingCallCheckInterval = null;
+                this.callDurationInterval = null;
+                this.callStartTime = null;
+                this.isMuted = false;
+                this.isLocalMuted = false;
+                this.selectedPin = null;
+                this.editingContactId = null;
             }
         }
 
         const state = new AppState();
+
+        // Sound Functions
+        function playSound(soundId) {
+            try {
+                const sound = document.getElementById(soundId);
+                if (sound) {
+                    sound.currentTime = 0;
+                    sound.play().catch(e => console.log('Sound play failed:', e));
+                }
+            } catch (e) {
+                console.log('Sound error:', e);
+            }
+        }
+
+        function stopSound(soundId) {
+            try {
+                const sound = document.getElementById(soundId);
+                if (sound) {
+                    sound.pause();
+                    sound.currentTime = 0;
+                }
+            } catch (e) {
+                console.log('Sound stop error:', e);
+            }
+        }
 
         // Initialize App
         function initApp() {
@@ -653,6 +1012,20 @@
                 renderRecentCalls();
                 renderContacts();
                 startIncomingCallCheck();
+                
+                // Check online status
+                updateOnlineStatus();
+                window.addEventListener('online', updateOnlineStatus);
+                window.addEventListener('offline', updateOnlineStatus);
+            }
+        }
+
+        function updateOnlineStatus() {
+            const indicator = document.getElementById('offline-indicator');
+            if (!navigator.onLine) {
+                indicator.classList.add('show');
+            } else {
+                indicator.classList.remove('show');
             }
         }
 
@@ -660,8 +1033,27 @@
         function registerServiceWorker() {
             if ('serviceWorker' in navigator) {
                 const swCode = `
-                    self.addEventListener('install', () => self.skipWaiting());
-                    self.addEventListener('activate', () => self.clients.claim());
+                    self.addEventListener('install', (event) => {
+                        event.waitUntil(self.skipWaiting());
+                        console.log('Service Worker installing...');
+                    });
+                    
+                    self.addEventListener('activate', (event) => {
+                        event.waitUntil(self.clients.claim());
+                        console.log('Service Worker activated.');
+                    });
+                    
+                    self.addEventListener('fetch', (event) => {
+                        // Cache-first strategy for static assets
+                        if (event.request.url.includes('/static/')) {
+                            event.respondWith(
+                                caches.match(event.request).then(response => {
+                                    return response || fetch(event.request);
+                                })
+                            );
+                        }
+                    });
+                    
                     self.addEventListener('push', (e) => {
                         let data = { caller_pin: 'Unknown' };
                         try { data = e.data.json(); } catch(err) {}
@@ -669,7 +1061,7 @@
                             self.registration.showNotification('📞 Incoming Call', {
                                 body: 'Call from PIN: ' + data.caller_pin,
                                 icon: 'data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'192\\' height=\\'192\\'%3E%3Crect width=\\'192\\' height=\\'192\\' fill=\\'%23dc3545\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' font-size=\\'140\\' font-family=\\'system-ui\\' fill=\\'white\\' text-anchor=\\'middle\\' dy=\\'.35em\\'%3Ei%3C/text%3E%3C/svg%3E',
-                                vibrate: [200, 100, 200],
+                                vibrate: [200, 100, 200, 100, 200],
                                 tag: 'incoming-call',
                                 requireInteraction: true,
                                 actions: [
@@ -679,6 +1071,7 @@
                             })
                         );
                     });
+                    
                     self.addEventListener('notificationclick', (event) => {
                         event.notification.close();
                         event.waitUntil(
@@ -689,13 +1082,17 @@
                                         clientList[0].postMessage({
                                             action: event.action === 'answer' ? 'answerCall' : 'rejectCall'
                                         });
+                                    } else {
+                                        clients.openWindow('/');
                                     }
                                 })
                         );
                     });
                 `;
                 const blob = new Blob([swCode], { type: 'application/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob));
+                navigator.serviceWorker.register(URL.createObjectURL(blob))
+                    .then(registration => console.log('SW registered:', registration))
+                    .catch(error => console.log('SW registration failed:', error));
             }
         }
 
@@ -705,10 +1102,6 @@
             statusDiv.textContent = 'Getting permissions...';
 
             try {
-                // Request media permissions
-                await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-                    .then(stream => stream.getTracks().forEach(track => track.stop()));
-
                 // Request notification permissions
                 if ('Notification' in window && Notification.permission === 'default') {
                     await Notification.requestPermission();
@@ -726,9 +1119,16 @@
                     body: JSON.stringify({ subscription: { endpoint: 'placeholder' } })
                 });
 
-                if (!response.ok) throw new Error('Failed to create PIN');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
 
                 const data = await response.json();
+                if (!data.pin) {
+                    throw new Error('No PIN received from server');
+                }
+
                 state.myPin = data.pin;
                 localStorage.setItem('myPin', state.myPin);
 
@@ -737,17 +1137,17 @@
                 switchTab('recent');
                 startIncomingCallCheck();
                 
-                statusDiv.textContent = 'Success! Your PIN is: ' + state.myPin;
+                showToast('Success! Your PIN is: ' + state.myPin);
                 setTimeout(() => statusDiv.textContent = '', 3000);
             } catch (error) {
-                statusDiv.textContent = 'Error: ' + error.message;
                 console.error('Signup error:', error);
+                statusDiv.textContent = 'Error: ' + error.message;
+                showToast('Error: ' + error.message, 'error');
             }
         }
 
         // Tab Management
         function switchTab(tab) {
-            // Update tab visibility
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
@@ -756,13 +1156,25 @@
                 tab === 'recent' ? 0 : tab === 'contacts' ? 1 : 2
             ].classList.add('active');
 
-            // Update header title
-            const titles = {
-                'recent': 'Recent Calls',
-                'contacts': 'Contacts',
-                'messages': 'Messages'
-            };
-            document.getElementById('header-title').textContent = titles[tab];
+            document.getElementById('header-title').textContent = 
+                tab === 'recent' ? 'Recent Calls' : tab === 'contacts' ? 'Contacts' : 'Messages';
+        }
+
+        // Search Functions
+        function searchCalls(query) {
+            const items = document.querySelectorAll('.call-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query.toLowerCase()) ? 'flex' : 'none';
+            });
+        }
+
+        function searchContacts(query) {
+            const items = document.querySelectorAll('.contact-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query.toLowerCase()) ? 'flex' : 'none';
+            });
         }
 
         // Dialpad Functions
@@ -770,10 +1182,12 @@
             state.dialpadNumber = '';
             updateDialpadDisplay();
             document.getElementById('dialpad-overlay').classList.add('show');
+            playSound('dial-tone');
         }
 
         function closeDialpad() {
             document.getElementById('dialpad-overlay').classList.remove('show');
+            stopSound('dial-tone');
         }
 
         function closeDialpadIfOutside(event) {
@@ -786,39 +1200,98 @@
             if (state.dialpadNumber.length < 6) {
                 state.dialpadNumber += num;
                 updateDialpadDisplay();
+                playSound('dial-tone');
             }
         }
 
         function dialpadBackspace() {
-            state.dialpadNumber = state.dialpadNumber.slice(0, -1);
-            updateDialpadDisplay();
+            if (state.dialpadNumber.length > 0) {
+                state.dialpadNumber = state.dialpadNumber.slice(0, -1);
+                updateDialpadDisplay();
+                playSound('dial-tone');
+            }
         }
 
         function updateDialpadDisplay() {
             document.getElementById('dialpad-display').textContent = state.dialpadNumber;
         }
 
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (/^\d{6}$/.test(text)) {
+                    state.dialpadNumber = text;
+                    updateDialpadDisplay();
+                    showToast('PIN pasted from clipboard');
+                } else {
+                    showToast('Clipboard does not contain a valid 6-digit PIN', 'error');
+                }
+            } catch (error) {
+                showToast('Cannot access clipboard', 'error');
+            }
+        }
+
+        // Call Type Selector
+        function showCallTypeSelector(pin) {
+            state.selectedPin = pin;
+            document.getElementById('call-type-selector').classList.add('show');
+        }
+
+        function closeCallTypeSelector() {
+            document.getElementById('call-type-selector').classList.remove('show');
+            state.selectedPin = null;
+        }
+
+        // Start call from recent/contacts
+        function startCallFromItem(pin, name) {
+            state.selectedPin = pin;
+            showCallTypeSelector(pin);
+        }
+
+        function startCall(type) {
+            closeCallTypeSelector();
+            state.dialpadNumber = state.selectedPin;
+            makeCall(type);
+        }
+
         // Call Functions
         async function makeCall(type) {
-            if (state.dialpadNumber.length !== 6) {
-                alert('Please enter a 6-digit PIN');
+            if (!state.dialpadNumber || state.dialpadNumber.length !== 6) {
+                showToast('Please enter a 6-digit PIN', 'error');
                 return;
             }
 
             if (state.dialpadNumber === state.myPin) {
-                alert('Cannot call yourself');
+                showToast('Cannot call yourself', 'error');
                 return;
             }
 
             state.callType = type;
             closeDialpad();
 
+            // Find contact name
+            const contact = state.contacts.find(c => c.pin === state.dialpadNumber);
+            const contactName = contact ? contact.name : 'Unknown';
+
+            // Update call screen
+            document.getElementById('call-avatar').textContent = state.dialpadNumber[0];
+            document.getElementById('call-name').textContent = contactName;
+            document.getElementById('call-pin').textContent = state.dialpadNumber;
+            document.getElementById('call-status').textContent = 'Calling...';
+            document.getElementById('call-duration').textContent = '00:00';
+            document.getElementById('call-screen').classList.add('show');
+
+            // Start ringtone
+            playSound('ringtone');
+
             try {
                 // Get user media
-                state.localStream = await navigator.mediaDevices.getUserMedia({
+                const constraints = {
                     audio: true,
                     video: type === 'video'
-                });
+                };
+
+                state.localStream = await navigator.mediaDevices.getUserMedia(constraints);
 
                 // Create peer connection
                 state.pc = new RTCPeerConnection(ICE_CONFIG);
@@ -840,13 +1313,15 @@
                         document.getElementById('remote-audio').srcObject = event.streams[0];
                     }
                     document.getElementById('call-status').textContent = 'Connected';
+                    stopSound('ringtone');
+                    startCallTimer();
                 };
 
                 // Handle connection state changes
                 state.pc.oniceconnectionstatechange = () => {
                     if (state.pc.iceConnectionState === 'failed' || 
                         state.pc.iceConnectionState === 'disconnected') {
-                        alert('Connection lost');
+                        showToast('Connection lost');
                         hangup();
                     }
                 };
@@ -892,18 +1367,12 @@
                 const data = await response.json();
                 state.currentRoomCode = data.room_code;
 
-                // Update call screen
-                document.getElementById('call-avatar').textContent = state.dialpadNumber[0];
-                document.getElementById('call-pin').textContent = state.dialpadNumber;
-                document.getElementById('call-status').textContent = 'Calling...';
-                document.getElementById('call-screen').classList.add('show');
-
                 // Add to recent calls
                 addRecentCall(state.dialpadNumber, 'outgoing', type);
                 startPolling();
                 startHeartbeat();
             } catch (error) {
-                alert('Error making call: ' + error.message);
+                showToast('Error making call: ' + error.message, 'error');
                 console.error('Call error:', error);
                 hangup();
             }
@@ -911,6 +1380,8 @@
 
         // Answer incoming call
         async function answerCall() {
+            stopSound('incoming-call-tone');
+            
             try {
                 const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
                 if (!incomingData) {
@@ -919,6 +1390,10 @@
 
                 state.callType = incomingData.call_type || 'audio';
                 state.currentRoomCode = incomingData.room_code;
+
+                // Find contact name
+                const contact = state.contacts.find(c => c.pin === incomingData.caller_pin);
+                const contactName = contact ? contact.name : 'Unknown';
 
                 // Get user media
                 state.localStream = await navigator.mediaDevices.getUserMedia({
@@ -938,6 +1413,7 @@
                         document.getElementById('remote-audio').srcObject = event.streams[0];
                     }
                     document.getElementById('call-status').textContent = 'Connected';
+                    startCallTimer();
                 };
 
                 // Send ICE candidates
@@ -979,6 +1455,7 @@
                 document.getElementById('incoming-screen').classList.remove('show');
                 const callerPin = incomingData.caller_pin || 'Unknown';
                 document.getElementById('call-avatar').textContent = callerPin[0];
+                document.getElementById('call-name').textContent = contactName;
                 document.getElementById('call-pin').textContent = callerPin;
                 document.getElementById('call-status').textContent = 'Connected';
                 document.getElementById('call-screen').classList.add('show');
@@ -995,7 +1472,7 @@
                 
                 localStorage.removeItem('incomingCall');
             } catch (error) {
-                alert('Error answering call: ' + error.message);
+                showToast('Error answering call: ' + error.message, 'error');
                 console.error('Answer error:', error);
                 hangup();
             }
@@ -1003,6 +1480,8 @@
 
         // Reject call
         async function rejectCall() {
+            stopSound('incoming-call-tone');
+            
             try {
                 const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
                 if (incomingData?.room_code) {
@@ -1021,11 +1500,16 @@
             
             localStorage.removeItem('incomingCall');
             document.getElementById('incoming-screen').classList.remove('show');
+            playSound('call-end-tone');
             state.currentRoomCode = null;
         }
 
         // Hangup call
         function hangup() {
+            stopSound('ringtone');
+            stopSound('incoming-call-tone');
+            playSound('call-end-tone');
+            
             if (state.currentRoomCode) {
                 fetch(`${API_URL}/api/hangup`, {
                     method: 'POST',
@@ -1052,14 +1536,54 @@
             // Clear intervals
             if (state.pollingInterval) clearInterval(state.pollingInterval);
             if (state.heartbeatInterval) clearInterval(state.heartbeatInterval);
+            if (state.callDurationInterval) clearInterval(state.callDurationInterval);
 
             // Reset state
             state.currentRoomCode = null;
+            state.callStartTime = null;
+            state.isMuted = false;
+            state.isLocalMuted = false;
 
             // Update UI
             document.getElementById('call-screen').classList.remove('show');
             document.getElementById('video-container').classList.add('hidden');
             document.getElementById('incoming-screen').classList.remove('show');
+            document.getElementById('mute-btn').classList.remove('active');
+        }
+
+        // Call timer
+        function startCallTimer() {
+            state.callStartTime = Date.now();
+            state.callDurationInterval = setInterval(() => {
+                const duration = Math.floor((Date.now() - state.callStartTime) / 1000);
+                const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
+                const seconds = (duration % 60).toString().padStart(2, '0');
+                document.getElementById('call-duration').textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        // Mute toggle
+        function toggleMute() {
+            if (!state.localStream) return;
+            
+            const audioTracks = state.localStream.getAudioTracks();
+            if (audioTracks.length > 0) {
+                state.isLocalMuted = !state.isLocalMuted;
+                audioTracks.forEach(track => {
+                    track.enabled = !state.isLocalMuted;
+                });
+                
+                const muteBtn = document.getElementById('mute-btn');
+                if (state.isLocalMuted) {
+                    muteBtn.innerHTML = '🔇';
+                    muteBtn.classList.add('active');
+                    showToast('Microphone muted');
+                } else {
+                    muteBtn.innerHTML = '🎤';
+                    muteBtn.classList.remove('active');
+                    showToast('Microphone unmuted');
+                }
+            }
         }
 
         // Polling for call updates
@@ -1074,7 +1598,7 @@
                     const data = await response.json();
 
                     if (data.hangup) {
-                        alert('Call ended by other person');
+                        showToast('Call ended by other person');
                         hangup();
                         return;
                     }
@@ -1082,6 +1606,9 @@
                     for (const signal of data.signals || []) {
                         if (signal.type === 'answer' && state.pc) {
                             await state.pc.setRemoteDescription(signal.data);
+                            document.getElementById('call-status').textContent = 'Connected';
+                            stopSound('ringtone');
+                            startCallTimer();
                         } else if (signal.type === 'ice' && state.pc) {
                             await state.pc.addIceCandidate(signal.data);
                         }
@@ -1129,15 +1656,24 @@
                         state.currentRoomCode = data.room_code;
                         localStorage.setItem('incomingCall', JSON.stringify(data));
 
+                        // Find contact name
+                        const contact = state.contacts.find(c => c.pin === data.caller_pin);
+                        const contactName = contact ? contact.name : 'Unknown';
+
+                        // Update incoming screen
                         document.getElementById('incoming-pin').textContent = data.caller_pin || 'Unknown';
+                        document.getElementById('incoming-name').textContent = contactName;
                         document.getElementById('incoming-screen').classList.add('show');
+
+                        // Play incoming call sound
+                        playSound('incoming-call-tone');
 
                         // Show notification
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('📞 Incoming Call', {
-                                body: `Call from PIN: ${data.caller_pin}`,
+                                body: `Call from ${contactName} (${data.caller_pin})`,
                                 icon: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'192\' height=\'192\'%3E%3Crect width=\'192\' height=\'192\' fill=\'%23dc3545\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-size=\'140\' font-family=\'system-ui\' fill=\'white\' text-anchor=\'middle\' dy=\'.35em\'%3Ei%3C/text%3E%3C/svg%3E',
-                                vibrate: [200, 100, 200],
+                                vibrate: [200, 100, 200, 100, 200],
                                 tag: 'incoming-call'
                             });
                         }
@@ -1149,16 +1685,19 @@
         }
 
         // Recent Calls Management
-        function addRecentCall(pin, direction, type = 'audio') {
+        function addRecentCall(pin, direction, type = 'audio', duration = 0) {
+            const contact = state.contacts.find(c => c.pin === pin);
             const call = {
                 pin: pin,
+                name: contact ? contact.name : null,
                 direction: direction,
                 type: type,
+                duration: duration,
                 timestamp: Date.now()
             };
             state.recentCalls.unshift(call);
-            if (state.recentCalls.length > 50) {
-                state.recentCalls = state.recentCalls.slice(0, 50);
+            if (state.recentCalls.length > 100) {
+                state.recentCalls = state.recentCalls.slice(0, 100);
             }
             localStorage.setItem('recentCalls', JSON.stringify(state.recentCalls));
             renderRecentCalls();
@@ -1175,18 +1714,23 @@
             }
 
             empty.style.display = 'none';
-            list.innerHTML = state.recentCalls.map(call => {
+            list.innerHTML = state.recentCalls.map((call, index) => {
                 const date = new Date(call.timestamp);
                 const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
                 const icon = call.direction === 'incoming' ? '📲' : '📞';
                 const typeIcon = call.type === 'video' ? '📹' : '🎤';
+                const name = call.name || `PIN: ${call.pin}`;
+                const durationStr = call.duration > 0 ? formatDuration(call.duration) : '';
                 
                 return `
-                    <div class="call-item" onclick="dialpadNumber='${call.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${call.pin}';">
+                    <div class="call-item" onclick="startCallFromItem('${call.pin}', '${name.replace(/'/g, "\\'")}')">
                         <div class="avatar">${call.pin[0]}</div>
                         <div class="info">
+                            <div class="name">${name}</div>
                             <div class="pin">${call.pin} ${typeIcon}</div>
-                            <div class="time">${timeStr} • ${call.direction}</div>
+                            <div class="time">${timeStr} • ${dateStr} • ${call.direction}</div>
+                            ${durationStr ? `<div class="call-duration">${durationStr}</div>` : ''}
                         </div>
                         <div class="icon">${icon}</div>
                     </div>
@@ -1194,12 +1738,83 @@
             }).join('');
         }
 
+        function formatDuration(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+
         // Contacts Management
-        function addContact(pin, name) {
-            if (!state.contacts.find(c => c.pin === pin)) {
-                state.contacts.push({ pin, name });
+        function showContactForm(pin = '', contact = null) {
+            state.editingContactId = contact ? contact.id : null;
+            document.getElementById('contact-form-title').textContent = 
+                contact ? 'Edit Contact' : 'Add New Contact';
+            document.getElementById('contact-name').value = contact ? contact.name : '';
+            document.getElementById('contact-pin').value = contact ? contact.pin : pin;
+            document.getElementById('contact-form-overlay').classList.add('show');
+        }
+
+        function closeContactForm() {
+            document.getElementById('contact-form-overlay').classList.remove('show');
+            document.getElementById('contact-name').value = '';
+            document.getElementById('contact-pin').value = '';
+            state.editingContactId = null;
+        }
+
+        function closeContactFormIfOutside(event) {
+            if (event.target.id === 'contact-form-overlay') {
+                closeContactForm();
+            }
+        }
+
+        function saveContact() {
+            const name = document.getElementById('contact-name').value.trim();
+            const pin = document.getElementById('contact-pin').value.trim();
+            
+            if (!name) {
+                showToast('Please enter a name', 'error');
+                return;
+            }
+            
+            if (!/^\d{6}$/.test(pin)) {
+                showToast('PIN must be 6 digits', 'error');
+                return;
+            }
+            
+            if (pin === state.myPin) {
+                showToast('Cannot add yourself as contact', 'error');
+                return;
+            }
+            
+            if (state.editingContactId !== null) {
+                // Edit existing contact
+                state.contacts[state.editingContactId] = { name, pin };
+            } else {
+                // Check for duplicate
+                if (state.contacts.find(c => c.pin === pin)) {
+                    showToast('Contact with this PIN already exists', 'error');
+                    return;
+                }
+                state.contacts.push({ name, pin });
+            }
+            
+            localStorage.setItem('contacts', JSON.stringify(state.contacts));
+            renderContacts();
+            closeContactForm();
+            showToast(state.editingContactId !== null ? 'Contact updated' : 'Contact added');
+        }
+
+        function editContact(index) {
+            const contact = state.contacts[index];
+            showContactForm('', { ...contact, id: index });
+        }
+
+        function deleteContact(index) {
+            if (confirm('Delete this contact?')) {
+                state.contacts.splice(index, 1);
                 localStorage.setItem('contacts', JSON.stringify(state.contacts));
                 renderContacts();
+                showToast('Contact deleted');
             }
         }
 
@@ -1214,17 +1829,34 @@
             }
 
             empty.style.display = 'none';
-            list.innerHTML = state.contacts.map(contact => {
+            list.innerHTML = state.contacts.map((contact, index) => {
                 return `
-                    <div class="contact-item" onclick="dialpadNumber='${contact.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${contact.pin}';">
+                    <div class="contact-item">
                         <div class="avatar">${contact.name[0].toUpperCase()}</div>
                         <div class="info">
                             <div class="name">${contact.name}</div>
                             <div class="pin">${contact.pin}</div>
                         </div>
+                        <div class="contact-actions">
+                            <button class="contact-btn" onclick="event.stopPropagation(); startCallFromItem('${contact.pin}', '${contact.name.replace(/'/g, "\\'")}')" title="Call">📞</button>
+                            <button class="contact-btn" onclick="event.stopPropagation(); editContact(${index})" title="Edit">✏️</button>
+                            <button class="contact-btn" onclick="event.stopPropagation(); deleteContact(${index})" title="Delete">🗑️</button>
+                        </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
         }
 
         // Initialize on load
@@ -1233,8 +1865,7 @@
         // Handle page visibility
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && state.currentRoomCode) {
-                // Page is hidden, ensure call continues
-                console.log('Page hidden, call active');
+                console.log('Call active, page hidden');
             }
         });
 
@@ -1251,11 +1882,31 @@
         document.getElementById('my-pin-display').addEventListener('click', function() {
             if (state.myPin) {
                 navigator.clipboard.writeText(state.myPin).then(() => {
-                    alert('PIN copied to clipboard!');
+                    showToast('PIN copied to clipboard!');
                 }).catch(err => {
                     console.error('Copy failed:', err);
                 });
             }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9' && !e.target.matches('input, textarea')) {
+                dialpadInput(e.key);
+            } else if (e.key === 'Backspace' && !e.target.matches('input, textarea')) {
+                dialpadBackspace();
+            } else if (e.key === 'Escape') {
+                closeDialpad();
+                closeCallTypeSelector();
+                closeContactForm();
+            }
+        });
+
+        // Install PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            // You can store the event and show a custom install button
+            showToast('iNet can be installed as an app!', 'warning');
         });
     </script>
 </body>
