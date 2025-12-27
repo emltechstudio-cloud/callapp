@@ -246,10 +246,20 @@
             statusDiv.innerHTML = '<div class="status info">Creating your PIN...</div>';
             
             try {
+                // Request microphone permission upfront
+                statusDiv.innerHTML = '<div class="status info">Requesting microphone access...</div>';
+                await navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        // Got permission, stop the stream immediately
+                        stream.getTracks().forEach(track => track.stop());
+                    });
+
                 // Request notification permission
                 if ('Notification' in window) {
                     await Notification.requestPermission();
                 }
+
+                statusDiv.innerHTML = '<div class="status info">Creating your PIN...</div>';
 
                 // Get push subscription (simplified - full VAPID setup needed for production)
                 let subscription = null;
@@ -390,7 +400,22 @@
             }
         }
 
-        function rejectCall() {
+        async function rejectCall() {
+            // Clear the incoming call from backend so it stops showing
+            try {
+                await fetch(`${API_URL}/api/decline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_code: currentRoomCode,
+                        pin: myPin
+                    })
+                });
+            } catch (error) {
+                console.error('Error declining call:', error);
+            }
+            
+            localStorage.removeItem('incomingCall');
             showScreen('home-screen');
             currentRoomCode = null;
         }
@@ -463,4 +488,4 @@
         }
     </script>
 </body>
-                            </html> 
+</html>
