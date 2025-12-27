@@ -3,355 +3,764 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#075e54">
-    <title>Call App</title>
-    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#dc3545">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="iNet">
+    <title>iNet</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%23dc3545'/%3E%3Ctext x='50%25' y='50%25' font-size='24' font-family='system-ui' fill='white' text-anchor='middle' dy='.35em'%3Ei%3C/text%3E%3C/svg%3E">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            background: #fff;
+            height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
+            padding: 15px 20px;
+            color: white;
+            display: flex;
             align-items: center;
-            padding: 20px;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
-        h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
-        .pin-display {
-            font-size: 48px;
-            font-weight: bold;
-            color: #667eea;
-            margin: 20px 0;
-            letter-spacing: 8px;
-        }
-        input {
-            width: 100%;
-            padding: 15px;
+        .header .logo {
+            width: 35px;
+            height: 35px;
+            background: #dc3545;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 24px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
+            font-weight: 300;
+            color: white;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+            flex: 1;
+            margin-left: 12px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        /* Signup Screen */
+        .signup-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px 20px;
+            background: white;
+        }
+        .signup-screen .logo-big {
+            width: 120px;
+            height: 120px;
+            background: #dc3545;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(220,53,69,0.3);
+        }
+        .signup-screen h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #1c1c1e;
+        }
+        .signup-screen p {
+            color: #666;
             text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .btn-signup {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 16px 50px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(220,53,69,0.3);
+            transition: all 0.3s;
+        }
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220,53,69,0.4);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            min-height: calc(100vh - 130px);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Recent Calls */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .empty-state .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        .call-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .call-item .avatar {
+            width: 50px;
+            height: 50px;
+            background: #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 500;
+            margin-right: 15px;
+        }
+        .call-item .info {
+            flex: 1;
+        }
+        .call-item .pin {
+            font-size: 18px;
+            font-weight: 500;
+            color: #1c1c1e;
+        }
+        .call-item .time {
+            font-size: 14px;
+            color: #999;
+            margin-top: 3px;
+        }
+        .call-item .icon {
+            color: #dc3545;
+            font-size: 20px;
+        }
+        
+        /* Contacts */
+        .my-pin-card {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(220,53,69,0.3);
+        }
+        .my-pin-card .label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .my-pin-card .pin {
+            font-size: 36px;
+            font-weight: 600;
+            letter-spacing: 4px;
+        }
+        .contact-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .contact-item .avatar {
+            width: 50px;
+            height: 50px;
+            background: #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 500;
+            margin-right: 15px;
+        }
+        .contact-item .info {
+            flex: 1;
+        }
+        .contact-item .name {
+            font-size: 18px;
+            font-weight: 500;
+            color: #1c1c1e;
+        }
+        .contact-item .pin {
+            font-size: 14px;
+            color: #999;
+            margin-top: 3px;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            color: #999;
+        }
+        .nav-item.active {
+            color: #dc3545;
+        }
+        .nav-item .icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        .nav-item .label {
+            font-size: 11px;
+        }
+        
+        /* Floating Call Button */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 4px 15px rgba(220,53,69,0.4);
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        .fab:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Dialpad Overlay */
+        .dialpad-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .dialpad-overlay.show {
+            display: flex;
+        }
+        .dialpad {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px 20px;
+            position: absolute;
+            bottom: 0;
+        }
+        .dialpad-display {
+            font-size: 36px;
+            text-align: center;
+            padding: 20px;
             letter-spacing: 5px;
+            color: #1c1c1e;
+            min-height: 60px;
+        }
+        .dialpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             margin: 20px 0;
         }
-        button {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
+        .dialpad-btn {
+            aspect-ratio: 1;
             border: none;
-            border-radius: 10px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            font-size: 28px;
             cursor: pointer;
-            transition: all 0.3s;
-            margin: 10px 0;
+            transition: all 0.2s;
+            color: #1c1c1e;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .dialpad-btn:hover {
+            background: #e9ecef;
+        }
+        .dialpad-btn:active {
+            transform: scale(0.95);
+        }
+        .dialpad-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .dialpad-actions button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-audio {
+            background: #28a745;
             color: white;
         }
-        .btn-success {
-            background: #25d366;
-            color: white;
-        }
-        .btn-danger {
+        .btn-video {
             background: #dc3545;
             color: white;
         }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .btn-close {
+            background: #6c757d;
+            color: white;
         }
-        .screen { display: none; }
-        .screen.active { display: block; }
-        .status {
-            margin: 15px 0;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
+        
+        /* Call Screen */
+        .call-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 20px 40px;
+            z-index: 2000;
         }
-        .status.info { background: #d1ecf1; color: #0c5460; }
-        .status.success { background: #d4edda; color: #155724; }
-        .status.error { background: #f8d7da; color: #721c24; }
-        .calling-animation {
-            width: 100px;
-            height: 100px;
-            margin: 20px auto;
-            border: 5px solid #667eea;
+        .call-screen.show {
+            display: flex;
+        }
+        .call-screen .avatar-big {
+            width: 150px;
+            height: 150px;
+            background: #dc3545;
             border-radius: 50%;
-            animation: pulse 1.5s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 60px;
+            font-weight: 500;
+            margin-bottom: 30px;
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
+        .call-screen .pin {
+            font-size: 32px;
+            color: white;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
         }
-        .config-screen {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
+        .call-screen .status {
+            font-size: 18px;
+            color: #999;
+            margin-bottom: 40px;
+        }
+        .call-controls {
+            display: flex;
+            gap: 20px;
+        }
+        .call-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .call-btn.hangup {
+            background: #dc3545;
+            color: white;
+        }
+        .call-btn.answer {
+            background: #28a745;
+            color: white;
+        }
+        
+        /* Video Container */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
             margin: 20px 0;
         }
-        .config-screen input {
-            font-size: 14px;
-            letter-spacing: normal;
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        .small-text {
-            font-size: 12px;
-            color: #666;
-            margin-top: 10px;
+        .video-container .local-video {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 120px;
+            height: 90px;
+            border-radius: 10px;
+            border: 2px solid white;
+        }
+        
+        /* Hidden elements */
+        audio {
+            display: none;
+        }
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Config Screen (First Time Setup) -->
-        <div id="config-screen" class="screen">
-            <h1>⚙️ Setup</h1>
-            <p style="color: #666; margin: 20px 0;">
-                Enter your backend server URL
-            </p>
-            <div class="config-screen">
-                <input 
-                    type="url" 
-                    id="backend-url" 
-                    placeholder="https://your-space.hf.space"
-                    style="margin: 10px 0;"
-                >
-                <p class="small-text">
-                    Get this from your Hugging Face Space URL
-                </p>
-            </div>
-            <button class="btn-primary" onclick="saveBackendUrl()">
-                Save & Continue
-            </button>
-        </div>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">i</div>
+        <h1 id="header-title">iNet</h1>
+    </div>
 
+    <!-- Main Content -->
+    <div class="main-content">
         <!-- Signup Screen -->
-        <div id="signup-screen" class="screen">
-            <h1>📞 Call App</h1>
-            <p style="color: #666; margin: 20px 0;">
-                Get your unique PIN and start calling anyone, anywhere!
-            </p>
-            <button class="btn-primary" onclick="signup()">
-                Get My PIN
-            </button>
-            <div id="signup-status"></div>
-            <p class="small-text" style="margin-top: 20px;">
-                <a href="#" onclick="showScreen('config-screen'); return false;">Change Server</a>
-            </p>
+        <div id="signup-screen" class="signup-screen">
+            <div class="logo-big">i</div>
+            <h2>Welcome to iNet</h2>
+            <p>Call anyone, anywhere with just a PIN.<br>No phone number required.</p>
+            <button class="btn-signup" onclick="signup()">Get Started</button>
+            <div id="signup-status" style="margin-top: 20px; color: #dc3545;"></div>
         </div>
 
-        <!-- Home Screen -->
-        <div id="home-screen" class="screen">
-            <h1>Your PIN</h1>
-            <div class="pin-display" id="my-pin"></div>
-            <p style="color: #666; margin-bottom: 20px;">Share this with friends to receive calls</p>
-            
-            <input type="tel" id="dial-pin" placeholder="Enter PIN to call" maxlength="6">
-            <button class="btn-success" onclick="makeCall()">
-                📞 Call
-            </button>
-            
-            <div id="home-status"></div>
+        <!-- Recent Calls Tab -->
+        <div id="recent-tab" class="tab-content">
+            <div id="recent-calls-list"></div>
+            <div id="recent-empty" class="empty-state">
+                <div class="icon">📞</div>
+                <h3>No Recent Calls</h3>
+                <p>Your call history will appear here</p>
+            </div>
         </div>
 
-        <!-- Calling Screen -->
-        <div id="calling-screen" class="screen">
-            <h1>Calling...</h1>
-            <div class="calling-animation"></div>
-            <div class="pin-display" id="calling-pin"></div>
-            <button class="btn-danger" onclick="hangup()">
-                End Call
-            </button>
+        <!-- Contacts Tab -->
+        <div id="contacts-tab" class="tab-content">
+            <div class="my-pin-card">
+                <div class="label">My PIN</div>
+                <div class="pin" id="my-pin-display">------</div>
+            </div>
+            <div id="contacts-list"></div>
+            <div id="contacts-empty" class="empty-state">
+                <div class="icon">👥</div>
+                <h3>No Contacts Yet</h3>
+                <p>Add contacts from recent calls</p>
+            </div>
         </div>
 
-        <!-- In Call Screen -->
-        <div id="incall-screen" class="screen">
-            <h1>🔊 In Call</h1>
-            <div class="pin-display" id="incall-pin"></div>
-            <p style="color: #25d366; font-size: 18px; margin: 20px 0;">Connected</p>
-            <button class="btn-danger" onclick="hangup()">
-                End Call
-            </button>
-        </div>
-
-        <!-- Incoming Call Screen -->
-        <div id="incoming-screen" class="screen">
-            <h1>📞 Incoming Call</h1>
-            <div class="calling-animation"></div>
-            <div class="pin-display" id="incoming-pin"></div>
-            <button class="btn-success" onclick="answerCall()">
-                Answer
-            </button>
-            <button class="btn-danger" onclick="rejectCall()">
-                Decline
-            </button>
+        <!-- Messages Tab -->
+        <div id="messages-tab" class="tab-content">
+            <div class="empty-state">
+                <div class="icon">💬</div>
+                <h3>Messages</h3>
+                <p>Coming soon...</p>
+            </div>
         </div>
     </div>
 
-    <audio id="remote-audio" autoplay></audio>
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('recent')">
+            <div class="icon">🕒</div>
+            <div class="label">Recent</div>
+        </button>
+        <button class="nav-item" onclick="switchTab('contacts')">
+            <div class="icon">👤</div>
+            <div class="label">Contacts</div>
+        </button>
+        <button class="nav-item" onclick="switchTab('messages')">
+            <div class="icon">💬</div>
+            <div class="label">Messages</div>
+        </button>
+    </div>
+
+    <!-- Floating Call Button -->
+    <button class="fab" onclick="openDialpad()">📞</button>
+
+    <!-- Dialpad Overlay -->
+    <div class="dialpad-overlay" id="dialpad-overlay" onclick="closeDialpadIfOutside(event)">
+        <div class="dialpad" onclick="event.stopPropagation()">
+            <div class="dialpad-display" id="dialpad-display"></div>
+            <div class="dialpad-grid">
+                <button class="dialpad-btn" onclick="dialpadInput('1')">1</button>
+                <button class="dialpad-btn" onclick="dialpadInput('2')">2</button>
+                <button class="dialpad-btn" onclick="dialpadInput('3')">3</button>
+                <button class="dialpad-btn" onclick="dialpadInput('4')">4</button>
+                <button class="dialpad-btn" onclick="dialpadInput('5')">5</button>
+                <button class="dialpad-btn" onclick="dialpadInput('6')">6</button>
+                <button class="dialpad-btn" onclick="dialpadInput('7')">7</button>
+                <button class="dialpad-btn" onclick="dialpadInput('8')">8</button>
+                <button class="dialpad-btn" onclick="dialpadInput('9')">9</button>
+                <button class="dialpad-btn" onclick="dialpadInput('*')">*</button>
+                <button class="dialpad-btn" onclick="dialpadInput('0')">0</button>
+                <button class="dialpad-btn" onclick="dialpadBackspace()">⌫</button>
+            </div>
+            <div class="dialpad-actions">
+                <button class="btn-audio" onclick="makeCall('audio')">🎤 Audio</button>
+                <button class="btn-video" onclick="makeCall('video')">📹 Video</button>
+            </div>
+            <div class="dialpad-actions">
+                <button class="btn-close" onclick="closeDialpad()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call Screen -->
+    <div class="call-screen" id="call-screen">
+        <div>
+            <div class="avatar-big" id="call-avatar">?</div>
+            <div class="pin" id="call-pin">------</div>
+            <div class="status" id="call-status">Calling...</div>
+        </div>
+        <div id="video-container" class="video-container hidden">
+            <video id="remote-video" autoplay playsinline></video>
+            <video id="local-video" class="local-video" autoplay playsinline muted></video>
+        </div>
+        <div class="call-controls">
+            <button class="call-btn hangup" onclick="hangup()">✕</button>
+        </div>
+    </div>
+
+    <!-- Incoming Call Screen -->
+    <div class="call-screen" id="incoming-screen">
+        <div>
+            <div class="avatar-big">📞</div>
+            <div class="pin" id="incoming-pin">------</div>
+            <div class="status">Incoming Call...</div>
+        </div>
+        <div class="call-controls">
+            <button class="call-btn hangup" onclick="rejectCall()">✕</button>
+            <button class="call-btn answer" onclick="answerCall()">✓</button>
+        </div>
+    </div>
+
+    <audio id="remote-audio" autoplay playsinline></audio>
 
     <script>
-        let API_URL = localStorage.getItem('backendUrl') || '';
-        const ICE_CONFIG = { 
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', () => self.skipWaiting());
+                self.addEventListener('activate', () => self.clients.claim());
+                self.addEventListener('push', (e) => {
+                    let data = { caller_pin: 'Unknown' };
+                    try { data = e.data.json(); } catch(err) {}
+                    e.waitUntil(
+                        self.registration.showNotification('📞 Incoming Call', {
+                            body: 'Call from PIN: ' + data.caller_pin,
+                            icon: 'data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'192\\' height=\\'192\\'%3E%3Crect width=\\'192\\' height=\\'192\\' fill=\\'%23dc3545\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' font-size=\\'140\\' font-family=\\'system-ui\\' fill=\\'white\\' text-anchor=\\'middle\\' dy=\\'.35em\\'%3Ei%3C/text%3E%3C/svg%3E',
+                            vibrate: [200, 100, 200],
+                            tag: 'incoming-call',
+                            requireInteraction: true
+                        })
+                    );
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+
+        // Constants
+        const API_URL = 'https://emltechstudio-inet.hf.space';
+        const ICE_CONFIG = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' }
-            ],
-            iceCandidatePoolSize: 10
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+            ]
         };
-        
+
+        // State
         let myPin = localStorage.getItem('myPin');
         let pc = null;
         let localStream = null;
         let currentRoomCode = null;
         let pollingInterval = null;
+        let heartbeatInterval = null;
+        let dialpadNumber = '';
+        let callType = 'audio';
+        let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+        let recentCalls = JSON.parse(localStorage.getItem('recentCalls') || '[]');
 
         // Initialize
-        if (!API_URL) {
-            showScreen('config-screen');
-        } else if (myPin) {
-            showScreen('home-screen');
-            document.getElementById('my-pin').textContent = myPin;
+        if (myPin) {
+            document.getElementById('signup-screen').style.display = 'none';
+            document.getElementById('my-pin-display').textContent = myPin;
+            switchTab('recent');
+            renderRecentCalls();
+            renderContacts();
             startIncomingCallCheck();
-        } else {
-            showScreen('signup-screen');
         }
 
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('SW registered'))
-                .catch(err => console.log('SW error:', err));
-        }
-
-        function saveBackendUrl() {
-            const url = document.getElementById('backend-url').value.trim();
-            if (!url) {
-                alert('Please enter a valid URL');
-                return;
-            }
-            // Remove trailing slash
-            API_URL = url.replace(/\/$/, '');
-            localStorage.setItem('backendUrl', API_URL);
-            showScreen('signup-screen');
-        }
-
+        // Signup
         async function signup() {
             const statusDiv = document.getElementById('signup-status');
-            statusDiv.innerHTML = '<div class="status info">Creating your PIN...</div>';
-            
-            try {
-                // Request microphone permission upfront
-                statusDiv.innerHTML = '<div class="status info">Requesting microphone access...</div>';
-                await navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        // Got permission, stop the stream immediately
-                        stream.getTracks().forEach(track => track.stop());
-                    });
+            statusDiv.textContent = 'Getting permissions...';
 
-                // Request notification permission
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+                    .then(stream => stream.getTracks().forEach(track => track.stop()));
+
                 if ('Notification' in window) {
                     await Notification.requestPermission();
                 }
 
-                statusDiv.innerHTML = '<div class="status info">Creating your PIN...</div>';
-
-                // Get push subscription (simplified - full VAPID setup needed for production)
-                let subscription = null;
-                if ('serviceWorker' in navigator && 'PushManager' in window) {
-                    const registration = await navigator.serviceWorker.ready;
-                    subscription = { endpoint: 'placeholder' };
-                }
+                statusDiv.textContent = 'Creating your PIN...';
 
                 const response = await fetch(`${API_URL}/api/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subscription })
+                    body: JSON.stringify({ subscription: { endpoint: 'placeholder' } })
                 });
-
-                if (!response.ok) {
-                    throw new Error('Server error: ' + response.status);
-                }
 
                 const data = await response.json();
                 myPin = data.pin;
                 localStorage.setItem('myPin', myPin);
-                
-                document.getElementById('my-pin').textContent = myPin;
-                showScreen('home-screen');
+
+                document.getElementById('signup-screen').style.display = 'none';
+                document.getElementById('my-pin-display').textContent = myPin;
+                switchTab('recent');
                 startIncomingCallCheck();
             } catch (error) {
-                statusDiv.innerHTML = `<div class="status error">Error: ${error.message}<br>Check if backend URL is correct.</div>`;
+                statusDiv.textContent = 'Error: ' + error.message;
             }
         }
 
-        async function makeCall() {
-            const calleePin = document.getElementById('dial-pin').value;
-            if (calleePin.length !== 6) {
-                alert('Please enter a valid 6-digit PIN');
+        // Tab Switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            document.querySelectorAll('.nav-item')[
+                tab === 'recent' ? 0 : tab === 'contacts' ? 1 : 2
+            ].classList.add('active');
+
+            document.getElementById('header-title').textContent = 
+                tab === 'recent' ? 'Recent' : tab === 'contacts' ? 'Contacts' : 'Messages';
+        }
+
+        // Dialpad
+        function openDialpad() {
+            dialpadNumber = '';
+            document.getElementById('dialpad-display').textContent = '';
+            document.getElementById('dialpad-overlay').classList.add('show');
+        }
+
+        function closeDialpad() {
+            document.getElementById('dialpad-overlay').classList.remove('show');
+        }
+
+        function closeDialpadIfOutside(event) {
+            if (event.target.id === 'dialpad-overlay') {
+                closeDialpad();
+            }
+        }
+
+        function dialpadInput(num) {
+            if (dialpadNumber.length < 6) {
+                dialpadNumber += num;
+                document.getElementById('dialpad-display').textContent = dialpadNumber;
+            }
+        }
+
+        function dialpadBackspace() {
+            dialpadNumber = dialpadNumber.slice(0, -1);
+            document.getElementById('dialpad-display').textContent = dialpadNumber;
+        }
+
+        // Make Call
+        async function makeCall(type) {
+            if (dialpadNumber.length !== 6) {
+                alert('Please enter a 6-digit PIN');
                 return;
             }
 
-            try {
-                // Get fresh media stream with specific constraints for compatibility
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    }
-                });
-                
-                pc = new RTCPeerConnection(ICE_CONFIG);
-                
-                // Add tracks
-                localStream.getTracks().forEach(track => {
-                    pc.addTrack(track, localStream);
-                });
-                
-                // Handle remote track
-                pc.ontrack = (event) => {
-                    console.log('Got remote track:', event.track.kind);
-                    const remoteAudio = document.getElementById('remote-audio');
-                    remoteAudio.srcObject = event.streams[0];
-                    
-                    // Force play on mobile browsers
-                    remoteAudio.play().catch(e => console.error('Play error:', e));
-                    
-                    showScreen('incall-screen');
-                    document.getElementById('incall-pin').textContent = calleePin;
-                };
+            callType = type;
+            closeDialpad();
 
-                // Handle connection state changes
-                pc.onconnectionstatechange = () => {
-                    console.log('Connection state:', pc.connectionState);
-                    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-                        hangup();
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: type === 'video'
+                });
+
+                pc = new RTCPeerConnection(ICE_CONFIG);
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+                if (type === 'video') {
+                    document.getElementById('local-video').srcObject = localStream;
+                    document.getElementById('video-container').classList.remove('hidden');
+                }
+
+                pc.ontrack = (event) => {
+                    if (type === 'video') {
+                        document.getElementById('remote-video').srcObject = event.streams[0];
+                    } else {
+                        document.getElementById('remote-audio').srcObject = event.streams[0];
                     }
+                    document.getElementById('call-status').textContent = 'Connected';
                 };
 
                 pc.oniceconnectionstatechange = () => {
-                    console.log('ICE connection state:', pc.iceConnectionState);
-                    if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+                    if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+                        alert('Connection lost');
                         hangup();
                     }
                 };
 
-                // Handle ICE candidates
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         fetch(`${API_URL}/api/ice`, {
@@ -366,9 +775,7 @@
                     }
                 };
 
-                const offer = await pc.createOffer({
-                    offerToReceiveAudio: true
-                });
+                const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: type === 'video' });
                 await pc.setLocalDescription(offer);
 
                 const response = await fetch(`${API_URL}/api/call`, {
@@ -376,7 +783,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         caller_pin: myPin,
-                        callee_pin: calleePin,
+                        callee_pin: dialpadNumber,
                         offer: offer
                     })
                 });
@@ -384,63 +791,35 @@
                 const data = await response.json();
                 currentRoomCode = data.room_code;
 
-                showScreen('calling-screen');
-                document.getElementById('calling-pin').textContent = calleePin;
+                document.getElementById('call-avatar').textContent = dialpadNumber[0];
+                document.getElementById('call-pin').textContent = dialpadNumber;
+                document.getElementById('call-status').textContent = 'Calling...';
+                document.getElementById('call-screen').classList.add('show');
 
+                addRecentCall(dialpadNumber, 'outgoing');
                 startPolling();
                 startHeartbeat();
             } catch (error) {
-                alert('Error making call: ' + error.message);
-                console.error('Make call error:', error);
+                alert('Error: ' + error.message);
             }
         }
 
+        // Answer Call
         async function answerCall() {
             try {
-                // Get fresh media stream with specific constraints
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    }
-                });
-                
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callType === 'video' });
+
                 pc = new RTCPeerConnection(ICE_CONFIG);
-                
-                // Add tracks
-                localStream.getTracks().forEach(track => {
-                    pc.addTrack(track, localStream);
-                });
-                
-                // Handle remote track
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
                 pc.ontrack = (event) => {
-                    console.log('Got remote track:', event.track.kind);
-                    const remoteAudio = document.getElementById('remote-audio');
-                    remoteAudio.srcObject = event.streams[0];
-                    
-                    // Force play on mobile browsers
-                    remoteAudio.play().catch(e => console.error('Play error:', e));
-                    
-                    showScreen('incall-screen');
-                };
-
-                // Handle connection state changes
-                pc.onconnectionstatechange = () => {
-                    console.log('Connection state:', pc.connectionState);
-                    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-                        hangup();
+                    if (callType === 'video') {
+                        document.getElementById('remote-video').srcObject = event.streams[0];
+                    } else {
+                        document.getElementById('remote-audio').srcObject = event.streams[0];
                     }
                 };
 
-                pc.oniceconnectionstatechange = () => {
-                    console.log('ICE connection state:', pc.iceConnectionState);
-                    if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
-                        hangup();
-                    }
-                };
-
-                // Handle ICE candidates
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         fetch(`${API_URL}/api/ice`, {
@@ -455,13 +834,10 @@
                     }
                 };
 
-                // Get offer from incoming call data
                 const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
                 await pc.setRemoteDescription(incomingData.offer);
 
-                const answer = await pc.createAnswer({
-                    offerToReceiveAudio: true
-                });
+                const answer = await pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: callType === 'video' });
                 await pc.setLocalDescription(answer);
 
                 await fetch(`${API_URL}/api/answer`, {
@@ -474,19 +850,27 @@
                     })
                 });
 
-                const callerPin = currentRoomCode.split('-')[0];
-                document.getElementById('incall-pin').textContent = callerPin;
+                document.getElementById('incoming-screen').classList.remove('show');
+                document.getElementById('call-avatar').textContent = currentRoomCode.split('-')[0][0];
+                document.getElementById('call-pin').textContent = currentRoomCode.split('-')[0];
+                document.getElementById('call-status').textContent = 'Connected';
+                document.getElementById('call-screen').classList.add('show');
 
+                if (callType === 'video') {
+                    document.getElementById('local-video').srcObject = localStream;
+                    document.getElementById('video-container').classList.remove('hidden');
+                }
+
+                addRecentCall(currentRoomCode.split('-')[0], 'incoming');
                 startPolling();
                 startHeartbeat();
             } catch (error) {
                 alert('Error answering call: ' + error.message);
-                console.error('Answer call error:', error);
             }
         }
 
+        // Reject Call
         async function rejectCall() {
-            // Clear the incoming call from backend so it stops showing
             try {
                 await fetch(`${API_URL}/api/decline`, {
                     method: 'POST',
@@ -497,18 +881,68 @@
                     })
                 });
             } catch (error) {
-                console.error('Error declining call:', error);
+                console.error('Error declining:', error);
             }
             
             localStorage.removeItem('incomingCall');
-            showScreen('home-screen');
+            document.getElementById('incoming-screen').classList.remove('show');
             currentRoomCode = null;
         }
 
-        let heartbeatInterval = null;
+        // Hangup
+        function hangup() {
+            if (currentRoomCode) {
+                fetch(`${API_URL}/api/hangup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_code: currentRoomCode,
+                        pin: myPin
+                    })
+                });
+            }
+
+            if (pc) pc.close();
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (pollingInterval) clearInterval(pollingInterval);
+            if (heartbeatInterval) clearInterval(heartbeatInterval);
+
+            pc = null;
+            localStream = null;
+            currentRoomCode = null;
+
+            document.getElementById('call-screen').classList.remove('show');
+            document.getElementById('video-container').classList.add('hidden');
+        }
+
+        // Polling & Heartbeat
+        function startPolling() {
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_URL}/api/poll/${currentRoomCode}/${myPin}`);
+                    const data = await response.json();
+
+                    if (data.hangup) {
+                        alert('Call ended by other person');
+                        hangup();
+                        return;
+                    }
+
+                    for (const signal of data.signals) {
+                        if (signal.type === 'answer') {
+                            await pc.setRemoteDescription(signal.data);
+                            document.getElementById('call-status').textContent = 'Connected';
+                        } else if (signal.type === 'ice') {
+                            await pc.addIceCandidate(signal.data);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 1000);
+        }
 
         function startHeartbeat() {
-            // Send heartbeat every 2 seconds to let other person know we're still connected
             heartbeatInterval = setInterval(async () => {
                 try {
                     await fetch(`${API_URL}/api/heartbeat`, {
@@ -525,8 +959,159 @@
             }, 2000);
         }
 
+        // Incoming Call Check
+        function startIncomingCallCheck() {
+            setInterval(async () => {
+                if (currentRoomCode) return;
+
+                try {
+                    const response = await fetch(`${API_URL}/api/incoming/${myPin}`);
+                    const data = await response.json();
+
+                    if (data.incoming) {
+                        currentRoomCode = data.room_code;
+                        localStorage.setItem('incomingCall', JSON.stringify(data));
+
+                        document.getElementById('incoming-pin').textContent = data.caller_pin;
+                        document.getElementById('incoming-screen').classList.add('show');
+
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('📞 Incoming Call', {
+                                body: `Call from PIN: ${data.caller_pin}`,
+                                vibrate: [200, 100, 200]
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Check incoming error:', error);
+                }
+            }, 2000);
+        }
+
+        // Recent Calls
+        function addRecentCall(pin, direction) {
+            const call = {
+                pin: pin,
+                direction: direction,
+                timestamp: Date.now()
+            };
+            recentCalls.unshift(call);
+            if (recentCalls.length > 50) recentCalls = recentCalls.slice(0, 50);
+            localStorage.setItem('recentCalls', JSON.stringify(recentCalls));
+            renderRecentCalls();
+        }
+
+        function renderRecentCalls() {
+            const list = document.getElementById('recent-calls-list');
+            const empty = document.getElementById('recent-empty');
+
+            if (recentCalls.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            list.innerHTML = recentCalls.map(call => {
+                const date = new Date(call.timestamp);
+                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const icon = call.direction === 'incoming' ? '📲' : '📞';
+                
+                return `
+                    <div class="call-item" onclick="dialpadNumber='${call.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${call.pin}';">
+                        <div class="avatar">${call.pin[0]}</div>
+                        <div class="info">
+                            <div class="pin">${call.pin}</div>
+                            <div class="time">${timeStr}</div>
+                        </div>
+                        <div class="icon">${icon}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Contacts
+        function addContact(pin, name) {
+            contacts.push({ pin, name });
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+            renderContacts();
+        }
+
+        function renderContacts() {
+            const list = document.getElementById('contacts-list');
+            const empty = document.getElementById('contacts-empty');
+
+            if (contacts.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            list.innerHTML = contacts.map(contact => {
+                return `
+                    <div class="contact-item" onclick="dialpadNumber='${contact.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${contact.pin}';">
+                        <div class="avatar">${contact.name[0].toUpperCase()}</div>
+                        <div class="info">
+                            <div class="name">${contact.name}</div>
+                            <div class="pin">${contact.pin}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_code: currentRoomCode,
+                        answer: answer,
+                        callee_pin: myPin
+                    })
+                });
+
+                document.getElementById('incoming-screen').classList.remove('show');
+                document.getElementById('call-avatar').textContent = currentRoomCode.split('-')[0][0];
+                document.getElementById('call-pin').textContent = currentRoomCode.split('-')[0];
+                document.getElementById('call-status').textContent = 'Connected';
+                document.getElementById('call-screen').classList.add('show');
+
+                if (callType === 'video') {
+                    document.getElementById('local-video').srcObject = localStream;
+                    document.getElementById('video-container').classList.remove('hidden');
+                }
+
+                addRecentCall(currentRoomCode.split('-')[0], 'incoming');
+                startPolling();
+                startHeartbeat();
+            } catch (error) {
+                alert('Error answering call: ' + error.message);
+            }
+        }
+
+        // Reject Call
+        async function rejectCall() {
+            try {
+                await fetch(`${API_URL}/api/decline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_code: currentRoomCode,
+                        pin: myPin
+                    })
+                });
+            } catch (error) {
+                console.error('Error declining:', error);
+            }
+            
+            localStorage.removeItem('incomingCall');
+            document.getElementById('incoming-screen').classList.remove('show');
+            currentRoomCode = null;
+        }
+
+        // Hangup
         function hangup() {
-            // Notify backend that we're hanging up
             if (currentRoomCode) {
                 fetch(`${API_URL}/api/hangup`, {
                     method: 'POST',
@@ -542,21 +1127,22 @@
             if (localStream) localStream.getTracks().forEach(track => track.stop());
             if (pollingInterval) clearInterval(pollingInterval);
             if (heartbeatInterval) clearInterval(heartbeatInterval);
-            
+
             pc = null;
             localStream = null;
             currentRoomCode = null;
-            
-            showScreen('home-screen');
+
+            document.getElementById('call-screen').classList.remove('show');
+            document.getElementById('video-container').classList.add('hidden');
         }
 
+        // Polling & Heartbeat
         function startPolling() {
             pollingInterval = setInterval(async () => {
                 try {
                     const response = await fetch(`${API_URL}/api/poll/${currentRoomCode}/${myPin}`);
                     const data = await response.json();
 
-                    // Check if other person hung up
                     if (data.hangup) {
                         alert('Call ended by other person');
                         hangup();
@@ -566,7 +1152,7 @@
                     for (const signal of data.signals) {
                         if (signal.type === 'answer') {
                             await pc.setRemoteDescription(signal.data);
-                            showScreen('incall-screen');
+                            document.getElementById('call-status').textContent = 'Connected';
                         } else if (signal.type === 'ice') {
                             await pc.addIceCandidate(signal.data);
                         }
@@ -577,9 +1163,27 @@
             }, 1000);
         }
 
+        function startHeartbeat() {
+            heartbeatInterval = setInterval(async () => {
+                try {
+                    await fetch(`${API_URL}/api/heartbeat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            room_code: currentRoomCode,
+                            pin: myPin
+                        })
+                    });
+                } catch (error) {
+                    console.error('Heartbeat error:', error);
+                }
+            }, 2000);
+        }
+
+        // Incoming Call Check
         function startIncomingCallCheck() {
             setInterval(async () => {
-                if (currentRoomCode) return; // Already in a call
+                if (currentRoomCode) return;
 
                 try {
                     const response = await fetch(`${API_URL}/api/incoming/${myPin}`);
@@ -588,15 +1192,13 @@
                     if (data.incoming) {
                         currentRoomCode = data.room_code;
                         localStorage.setItem('incomingCall', JSON.stringify(data));
-                        
+
                         document.getElementById('incoming-pin').textContent = data.caller_pin;
-                        showScreen('incoming-screen');
-                        
-                        // Try to show notification
+                        document.getElementById('incoming-screen').classList.add('show');
+
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('📞 Incoming Call', {
                                 body: `Call from PIN: ${data.caller_pin}`,
-                                icon: './icon-192.png',
                                 vibrate: [200, 100, 200]
                             });
                         }
@@ -607,10 +1209,78 @@
             }, 2000);
         }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+        // Recent Calls
+        function addRecentCall(pin, direction) {
+            const call = {
+                pin: pin,
+                direction: direction,
+                timestamp: Date.now()
+            };
+            recentCalls.unshift(call);
+            if (recentCalls.length > 50) recentCalls = recentCalls.slice(0, 50);
+            localStorage.setItem('recentCalls', JSON.stringify(recentCalls));
+            renderRecentCalls();
+        }
+
+        function renderRecentCalls() {
+            const list = document.getElementById('recent-calls-list');
+            const empty = document.getElementById('recent-empty');
+
+            if (recentCalls.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            list.innerHTML = recentCalls.map(call => {
+                const date = new Date(call.timestamp);
+                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const icon = call.direction === 'incoming' ? '📲' : '📞';
+                
+                return `
+                    <div class="call-item" onclick="dialpadNumber='${call.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${call.pin}';">
+                        <div class="avatar">${call.pin[0]}</div>
+                        <div class="info">
+                            <div class="pin">${call.pin}</div>
+                            <div class="time">${timeStr}</div>
+                        </div>
+                        <div class="icon">${icon}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Contacts
+        function addContact(pin, name) {
+            contacts.push({ pin, name });
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+            renderContacts();
+        }
+
+        function renderContacts() {
+            const list = document.getElementById('contacts-list');
+            const empty = document.getElementById('contacts-empty');
+
+            if (contacts.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            list.innerHTML = contacts.map(contact => {
+                return `
+                    <div class="contact-item" onclick="dialpadNumber='${contact.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${contact.pin}';">
+                        <div class="avatar">${contact.name[0].toUpperCase()}</div>
+                        <div class="info">
+                            <div class="name">${contact.name}</div>
+                            <div class="pin">${contact.pin}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
     </script>
 </body>
-    </html>
+</html>
