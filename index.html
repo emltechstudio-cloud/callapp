@@ -2,464 +2,459 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#dc3545">
-    <title>iNet | Secure PIN Calling</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>iNet Pro | Secure</title>
+    
+    <link rel="manifest" href='data:application/json,{"name":"iNet Pro","short_name":"iNet","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#dc3545","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3059/3059518.png","sizes":"512x512","type":"image/png"}]}'>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .dialpad-btn:active { transform: scale(0.92); background-color: #f3f4f6; }
-        .glass-morphism { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-        .pulse { animation: pulse-red 2s infinite; }
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-        }
+        :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
+        * { -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
+        body { background-color: #0f172a; color: white; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; height: 100vh; overflow: hidden; }
+        
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .dialpad-grid button { position: relative; overflow: hidden; transition: all 0.1s ease; }
+        .dialpad-grid button:active { background: #334155; transform: scale(0.95); }
+        
+        @keyframes ring-pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); } 70% { box-shadow: 0 0 0 30px rgba(220, 53, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); } }
+        .active-ring { animation: ring-pulse 1.5s infinite; }
+        
+        .video-container video { object-fit: cover; width: 100%; height: 100%; border-radius: 2rem; }
+        .mirror { transform: scaleX(-1); }
+        
+        .tab-active { color: #ef4444; position: relative; }
+        .tab-active::after { content: ''; position: absolute; bottom: -8px; width: 4px; height: 4px; border-radius: 50%; background: #ef4444; }
+        
+        .call-btn-gradient { background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%); }
     </style>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col overflow-hidden">
-
-    <!-- Connection Status -->
-    <div id="status-bar" class="bg-red-500 text-white text-xs text-center py-1 hidden">Connecting to server...</div>
+<body class="flex flex-col">
 
     <!-- Header -->
-    <header class="bg-slate-900 text-white p-4 flex justify-between items-center shrink-0">
+    <header class="p-6 pt-[calc(1.5rem+var(--sat))] flex justify-between items-center z-20 shrink-0">
         <div class="flex items-center gap-3">
-            <div class="bg-red-600 w-8 h-8 rounded-lg flex items-center justify-center font-bold">i</div>
-            <h1 class="text-lg font-semibold" id="app-title">iNet</h1>
+            <div class="bg-red-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-red-900/40">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3m0 0c.305 0 .605.023.899.066m1.025 10.076a10.003 10.003 0 01-12.24 11.233M12 3a10.003 10.003 0 0112.24 11.233m-1.53-2.034a10.003 10.003 0 00-1.222-9.202" /></svg>
+            </div>
+            <div>
+                <h1 class="font-black text-xl tracking-tight">iNet <span class="text-red-500 text-xs font-bold px-1.5 py-0.5 bg-red-500/10 rounded ml-1">PRO</span></h1>
+                <p class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">End-to-End Secure</p>
+            </div>
         </div>
-        <button onclick="ui.showContactForm()" class="text-xl">＋</button>
+        <button onclick="ui.showAddContact()" class="w-12 h-12 glass-panel rounded-2xl flex items-center justify-center active:scale-90 transition-transform">
+            <span class="text-2xl font-light">＋</span>
+        </button>
     </header>
 
-    <!-- Main Screens -->
-    <main class="flex-1 overflow-y-auto pb-24">
-        
-        <!-- Signup Screen -->
-        <section id="screen-signup" class="h-full flex flex-col items-center justify-center p-8 text-center hidden">
-            <div class="bg-red-600 w-24 h-24 rounded-3xl flex items-center justify-center text-white text-6xl font-light mb-8 shadow-xl">i</div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome to iNet</h2>
-            <p class="text-gray-500 mb-8">Call anyone with a 6-digit PIN. No phone number or account required.</p>
-            <button onclick="app.signup()" class="bg-red-600 text-white px-12 py-4 rounded-full font-bold text-lg shadow-lg active:scale-95 transition-transform">Get My PIN</button>
+    <main class="flex-1 overflow-y-auto px-6 pb-32">
+        <!-- Signup/Setup -->
+        <section id="screen-signup" class="h-full flex flex-col items-center justify-center text-center hidden">
+            <div class="mb-10 p-8 glass-panel rounded-[3rem] active-ring">
+                <svg class="w-20 h-20 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </div>
+            <h2 class="text-3xl font-black mb-4">Initialize Line</h2>
+            <p class="text-slate-400 mb-10 max-w-[250px] mx-auto text-sm leading-relaxed">Secure your communications with a unique 6-digit cryptographic identifier.</p>
+            <button onclick="app.signup()" class="call-btn-gradient w-full py-5 rounded-3xl font-black text-lg shadow-xl shadow-red-900/20 active:scale-95 transition-all">GENERATE PIN</button>
         </section>
 
-        <!-- Recents Screen -->
-        <section id="screen-recent" class="p-4 space-y-3 hidden">
+        <!-- Contacts -->
+        <section id="screen-contacts" class="space-y-6 hidden pt-4">
+            <div class="p-8 glass-panel rounded-[2.5rem] relative overflow-hidden">
+                <div class="absolute right-0 top-0 p-4 opacity-10">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                </div>
+                <p class="text-[10px] text-red-500 font-black tracking-[0.2em] mb-2 uppercase">My Secure ID</p>
+                <div class="text-5xl font-mono font-black tracking-tighter" id="display-my-pin">------</div>
+                <p class="mt-4 text-[10px] text-slate-500">Only share this with verified contacts.</p>
+            </div>
+            <div id="contact-list" class="space-y-3"></div>
+        </section>
+
+        <!-- Recents -->
+        <section id="screen-recent" class="hidden pt-4">
             <div id="recent-list" class="space-y-3"></div>
-            <div id="recent-empty" class="py-20 text-center text-gray-400">
-                <p class="text-5xl mb-4">🕒</p>
-                <p>No recent calls</p>
+            <div id="recent-empty" class="py-20 text-center opacity-30">
+                <p class="text-xs font-bold tracking-widest uppercase">No Encrypted Sessions</p>
             </div>
         </section>
-
-        <!-- Contacts Screen -->
-        <section id="screen-contacts" class="p-4 space-y-4 hidden">
-            <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-2xl p-6 text-white shadow-lg">
-                <p class="text-xs opacity-80 uppercase tracking-widest mb-1">My Personal PIN</p>
-                <div class="text-4xl font-mono font-bold tracking-tighter" id="display-my-pin">------</div>
-                <p class="text-[10px] mt-4 opacity-70">Share this PIN with friends so they can call you.</p>
-            </div>
-            <div id="contact-list" class="space-y-2"></div>
-        </section>
-
     </main>
 
-    <!-- Bottom Nav -->
-    <nav id="bottom-nav" class="fixed bottom-0 w-full bg-white border-t flex justify-around p-2 pb-6 glass-morphism hidden">
-        <button onclick="ui.switchTab('recent')" class="flex flex-col items-center gap-1 text-gray-400 nav-link active" data-tab="recent">
-            <span class="text-xl">🕒</span>
-            <span class="text-[10px]">Recent</span>
+    <!-- Navigation -->
+    <nav id="bottom-nav" class="fixed bottom-0 w-full glass-panel border-t-0 p-4 pb-[calc(1rem+var(--sab))] flex justify-around items-center z-30 hidden">
+        <button onclick="ui.switchTab('recent')" id="nav-recent" class="flex flex-col items-center gap-1 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span class="text-[10px] font-bold uppercase tracking-tighter">Sessions</span>
         </button>
-        <button onclick="ui.switchTab('contacts')" class="flex flex-col items-center gap-1 text-gray-400 nav-link" data-tab="contacts">
-            <span class="text-xl">👤</span>
-            <span class="text-[10px]">Contacts</span>
+        <div class="w-16"></div> <!-- Spacer for FAB -->
+        <button onclick="ui.switchTab('contacts')" id="nav-contacts" class="flex flex-col items-center gap-1 tab-active transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            <span class="text-[10px] font-bold uppercase tracking-tighter">Vault</span>
         </button>
     </nav>
 
-    <!-- Floating Dial Button -->
-    <button id="fab-dial" onclick="ui.openDialpad()" class="fixed bottom-20 right-6 w-14 h-14 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl z-40 hidden">📞</button>
+    <!-- Dial FAB -->
+    <button id="fab-dial" onclick="ui.openDialpad()" class="fixed bottom-[calc(2.5rem+var(--sab))] left-1/2 -translate-x-1/2 w-20 h-20 call-btn-gradient rounded-[2rem] shadow-2xl shadow-red-900/60 z-40 flex items-center justify-center active:scale-90 transition-all border-4 border-[#0f172a] hidden">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+    </button>
 
     <!-- Dialpad Overlay -->
-    <div id="overlay-dialpad" class="fixed inset-0 bg-black/60 z-50 flex flex-col justify-end hidden">
-        <div class="bg-white rounded-t-3xl p-6 animate-b-slide">
-            <div class="text-center mb-6">
-                <div class="text-4xl font-mono tracking-widest h-12 flex items-center justify-center" id="dial-display"></div>
+    <div id="overlay-dialpad" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col justify-end hidden p-6" onclick="if(event.target === this) ui.closeDialpad()">
+        <div class="w-full max-w-md mx-auto mb-10 text-center">
+            <div class="text-6xl font-mono font-black tracking-[0.2em] h-20 flex items-center justify-center text-white" id="dial-display"></div>
+            <div class="h-1 w-12 bg-red-500 mx-auto rounded-full mt-2 opacity-50"></div>
+        </div>
+        <div class="dialpad-grid grid grid-cols-3 gap-4 mb-10 w-full max-w-md mx-auto">
+            <button onclick="app.dial('1')" class="h-20 glass-panel rounded-3xl text-3xl font-light">1</button>
+            <button onclick="app.dial('2')" class="h-20 glass-panel rounded-3xl text-3xl font-light">2</button>
+            <button onclick="app.dial('3')" class="h-20 glass-panel rounded-3xl text-3xl font-light">3</button>
+            <button onclick="app.dial('4')" class="h-20 glass-panel rounded-3xl text-3xl font-light">4</button>
+            <button onclick="app.dial('5')" class="h-20 glass-panel rounded-3xl text-3xl font-light">5</button>
+            <button onclick="app.dial('6')" class="h-20 glass-panel rounded-3xl text-3xl font-light">6</button>
+            <button onclick="app.dial('7')" class="h-20 glass-panel rounded-3xl text-3xl font-light">7</button>
+            <button onclick="app.dial('8')" class="h-20 glass-panel rounded-3xl text-3xl font-light">8</button>
+            <button onclick="app.dial('9')" class="h-20 glass-panel rounded-3xl text-3xl font-light">9</button>
+            <button onclick="ui.closeDialpad()" class="h-20 flex items-center justify-center opacity-40 active:scale-90"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></button>
+            <button onclick="app.dial('0')" class="h-20 glass-panel rounded-3xl text-3xl font-light">0</button>
+            <button onclick="app.backspace()" class="h-20 flex items-center justify-center active:scale-90 text-red-500"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" /></svg></button>
+        </div>
+        <div class="flex gap-4 w-full max-w-md mx-auto pb-10">
+            <button onclick="app.startCall('audio')" class="flex-1 glass-panel py-6 rounded-3xl font-black text-xs tracking-widest uppercase hover:bg-slate-700">Audio Session</button>
+            <button onclick="app.startCall('video')" class="flex-1 call-btn-gradient py-6 rounded-3xl font-black text-xs tracking-widest uppercase shadow-xl shadow-red-900/40">Secure Video</button>
+        </div>
+    </div>
+
+    <!-- Incoming/Active Call UI -->
+    <div id="screen-call" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-between p-10 hidden">
+        <div class="mt-20 text-center z-10">
+            <div id="call-avatar" class="w-32 h-32 call-btn-gradient rounded-[3rem] flex items-center justify-center text-5xl font-black mx-auto mb-8 active-ring">?</div>
+            <h2 id="call-status" class="text-xs font-black tracking-[0.4em] uppercase text-red-500 mb-2">Establishing Link</h2>
+            <p id="call-id-display" class="text-4xl font-mono font-black tracking-tighter">------</p>
+        </div>
+
+        <!-- Video UI -->
+        <div id="video-ui" class="absolute inset-0 z-0 hidden">
+            <video id="remote-video" class="w-full h-full object-cover"></video>
+            <div class="absolute bottom-32 right-6 w-32 aspect-[9/16] glass-panel rounded-3xl overflow-hidden shadow-2xl">
+                <video id="local-video" class="w-full h-full object-cover mirror" muted></video>
             </div>
-            <div class="grid grid-cols-3 gap-4 mb-8">
-                <!-- Dialpad Buttons -->
-                <button onclick="app.dial('1')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">1</button>
-                <button onclick="app.dial('2')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">2</button>
-                <button onclick="app.dial('3')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">3</button>
-                <button onclick="app.dial('4')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">4</button>
-                <button onclick="app.dial('5')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">5</button>
-                <button onclick="app.dial('6')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">6</button>
-                <button onclick="app.dial('7')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">7</button>
-                <button onclick="app.dial('8')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">8</button>
-                <button onclick="app.dial('9')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">9</button>
-                <button class="h-16 rounded-full text-2xl opacity-0">*</button>
-                <button onclick="app.dial('0')" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">0</button>
-                <button onclick="app.backspace()" class="dialpad-btn h-16 rounded-full bg-gray-50 text-2xl">⌫</button>
+        </div>
+
+        <!-- Interaction Area -->
+        <div class="w-full max-w-sm z-10 mb-10">
+            <div id="incoming-actions" class="hidden grid grid-cols-2 gap-4">
+                <button onclick="app.acceptCall()" class="bg-emerald-500 text-slate-950 py-7 rounded-[2.5rem] font-black text-xl shadow-2xl shadow-emerald-900/40 active:scale-95 transition-all">ACCEPT</button>
+                <button onclick="app.hangup()" class="glass-panel text-white py-7 rounded-[2.5rem] font-black text-xl active:scale-95 transition-all">DECLINE</button>
             </div>
-            <div class="flex gap-4">
-                <button onclick="app.startCall('audio')" class="flex-1 bg-green-600 text-white py-4 rounded-xl font-bold">Audio Call</button>
-                <button onclick="app.startCall('video')" class="flex-1 bg-red-600 text-white py-4 rounded-xl font-bold">Video Call</button>
-                <button onclick="ui.closeDialpad()" class="px-6 bg-gray-200 rounded-xl">✕</button>
+            <div id="active-actions" class="flex justify-center">
+                <button onclick="app.hangup()" class="w-24 h-24 call-btn-gradient rounded-full flex items-center justify-center text-4xl shadow-2xl shadow-red-900/50 active:scale-75 transition-all">✕</button>
             </div>
         </div>
     </div>
 
-    <!-- Active Call Screen -->
-    <div id="screen-call" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-between p-12 text-white hidden">
-        <div class="text-center mt-12">
-            <div id="call-avatar" class="w-32 h-32 bg-red-600 rounded-full flex items-center justify-center text-5xl font-bold mx-auto mb-6">?</div>
-            <h2 id="call-name" class="text-2xl font-bold mb-1">Unknown</h2>
-            <p id="call-pin" class="text-gray-400 font-mono tracking-widest mb-4">------</p>
-            <div id="call-timer" class="text-green-400 font-mono text-xl">00:00</div>
-            <p id="call-status" class="text-sm text-gray-500 uppercase tracking-widest mt-2">Connecting...</p>
-        </div>
-
-        <!-- Video Feeds -->
-        <div id="video-ui" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden hidden">
-            <video id="remote-video" class="w-full h-full object-cover" autoplay playsinline></video>
-            <video id="local-video" class="absolute top-4 right-4 w-1/4 aspect-video bg-gray-800 rounded-lg border border-white/20 object-cover" autoplay playsinline muted></video>
-        </div>
-
-        <div class="flex gap-8 mb-8">
-            <button onclick="app.toggleMute()" id="btn-mute" class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl">🎤</button>
-            <button onclick="app.hangup()" class="w-20 h-20 rounded-full bg-red-600 flex items-center justify-center text-3xl shadow-xl">✕</button>
-            <button onclick="app.toggleSpeaker()" class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl">🔊</button>
-        </div>
-    </header>
-
-    <!-- Audio elements -->
-    <audio id="remote-audio" autoplay></audio>
-
     <script>
-        /**
-         * APPLICATION CONFIGURATION
-         */
-        const CONFIG = {
-            API_BASE: 'https://emltechstudio-inet.hf.space',
-            ICE_SERVERS: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
-                ]
+        const API_URL = 'https://emltechstudio-inet.hf.space';
+        const RTC_CONFIG = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
+
+        const state = {
+            myPin: localStorage.getItem('inet_v2_pin'),
+            contacts: JSON.parse(localStorage.getItem('inet_v2_contacts') || '[]'),
+            recent: JSON.parse(localStorage.getItem('inet_v2_recent') || '[]'),
+            pc: null,
+            localStream: null,
+            roomCode: null,
+            pollRef: null,
+            dialing: '',
+            audio: {
+                ring: null,
+                ctx: null
             }
         };
 
-        const state = {
-            myPin: localStorage.getItem('iNet_pin'),
-            contacts: JSON.parse(localStorage.getItem('iNet_contacts') || '[]'),
-            recent: JSON.parse(localStorage.getItem('iNet_recent') || '[]'),
-            currentCall: null,
-            pc: null,
-            localStream: null,
-            isMuted: false,
-            pollTimer: null,
-            dialString: ''
-        };
-
-        /**
-         * APP LOGIC
-         */
         const app = {
-            async init() {
+            async signup() {
+                try {
+                    const r = await fetch(`${API_URL}/api/signup`, { method: 'POST' });
+                    const d = await r.json();
+                    if (d.success) {
+                        state.myPin = d.pin;
+                        localStorage.setItem('inet_v2_pin', d.pin);
+                        this.init();
+                    }
+                } catch (e) { console.error('Sign up error', e); }
+            },
+
+            init() {
                 if (!state.myPin) {
                     ui.showScreen('signup');
                 } else {
-                    ui.showScreen('recent');
                     document.getElementById('display-my-pin').innerText = state.myPin;
-                    this.startCheckingForIncoming();
+                    ui.showScreen('contacts');
+                    this.startListener();
                 }
-                ui.renderRecent();
                 ui.renderContacts();
+                ui.renderRecent();
             },
 
-            async signup() {
-                try {
-                    const res = await fetch(`${CONFIG.API_BASE}/api/signup`, { method: 'POST' });
-                    const data = await res.json();
-                    if (data.success) {
-                        state.myPin = data.pin;
-                        localStorage.setItem('iNet_pin', data.pin);
-                        this.init();
-                    }
-                } catch (e) {
-                    alert('Server connection failed. Is the backend running?');
-                }
-            },
-
-            dial(val) {
-                if (state.dialString.length < 6) {
-                    state.dialString += val;
-                    ui.updateDialDisplay();
-                }
-            },
-
-            backspace() {
-                state.dialString = state.dialString.slice(0, -1);
-                ui.updateDialDisplay();
-            },
-
-            async startCall(type, targetPin = null) {
-                const pin = targetPin || state.dialString;
-                if (pin.length !== 6) return;
+            async startCall(type, manualPin = null) {
+                const target = manualPin || state.dialing;
+                if (target.length !== 6) return;
                 
                 ui.closeDialpad();
-                ui.showCallScreen(pin, type);
-                
+                ui.showCall(target, type);
+                this.playTone(440, 0.5); // Start dial tone
+
                 try {
-                    // 1. Get Media
                     state.localStream = await navigator.mediaDevices.getUserMedia({
                         audio: true,
-                        video: type === 'video'
+                        video: type === 'video' ? { facingMode: 'user' } : false
                     });
-                    
+
                     if (type === 'video') {
                         document.getElementById('video-ui').classList.remove('hidden');
                         document.getElementById('local-video').srcObject = state.localStream;
                     }
 
-                    // 2. PeerConnection Setup
-                    state.pc = new RTCPeerConnection(CONFIG.ICE_SERVERS);
+                    state.pc = new RTCPeerConnection(RTC_CONFIG);
                     state.localStream.getTracks().forEach(t => state.pc.addTrack(t, state.localStream));
                     
                     state.pc.ontrack = (e) => {
-                        if (type === 'video') document.getElementById('remote-video').srcObject = e.streams[0];
-                        else document.getElementById('remote-audio').srcObject = e.streams[0];
-                        document.getElementById('call-status').innerText = 'Connected';
+                        document.getElementById('remote-video').srcObject = e.streams[0];
+                        document.getElementById('call-status').innerText = 'SECURE LINK ACTIVE';
+                        this.stopTones();
                     };
 
-                    // 3. Signaling - Create Offer
+                    state.pc.onicecandidate = (e) => {
+                        if (e.candidate && state.roomCode) {
+                            this.signal({ type: 'ice', data: e.candidate });
+                        }
+                    };
+
                     const offer = await state.pc.createOffer();
                     await state.pc.setLocalDescription(offer);
 
-                    // 4. Send to server
-                    const res = await fetch(`${CONFIG.API_BASE}/api/call`, {
+                    const res = await fetch(`${API_URL}/api/call`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             caller_pin: state.myPin,
-                            callee_pin: pin,
+                            callee_pin: target,
                             offer: offer,
                             call_type: type
                         })
                     });
                     const data = await res.json();
-                    
                     if (data.success) {
-                        state.currentRoom = data.room_code;
+                        state.roomCode = data.room_code;
                         this.startPolling(data.room_code);
-                    } else {
-                        throw new Error(data.error);
+                        this.logCall(target, 'outgoing');
                     }
-
-                } catch (e) {
-                    console.error(e);
-                    this.hangup();
-                    alert('Call failed: ' + e.message);
-                }
+                } catch (e) { this.hangup(); }
             },
 
-            async startPolling(roomCode) {
-                state.pollTimer = setInterval(async () => {
-                    const res = await fetch(`${CONFIG.API_BASE}/api/poll/${roomCode}/${state.myPin}`);
-                    const data = await res.json();
-                    
-                    if (data.hangup) this.hangup();
-
-                    if (data.signals) {
-                        for (let signal of data.signals) {
-                            if (signal.type === 'answer') {
-                                await state.pc.setRemoteDescription(new RTCSessionDescription(signal.data));
-                            } else if (signal.type === 'ice') {
-                                await state.pc.addIceCandidate(new RTCIceCandidate(signal.data));
+            async startPolling(code) {
+                state.pollRef = setInterval(async () => {
+                    try {
+                        const r = await fetch(`${API_URL}/api/poll/${code}/${state.myPin}`);
+                        const d = await r.json();
+                        if (d.hangup) this.hangup();
+                        if (d.signals) {
+                            for (let s of d.signals) {
+                                if (s.type === 'answer') await state.pc.setRemoteDescription(new RTCSessionDescription(s.data));
+                                if (s.type === 'ice') await state.pc.addIceCandidate(new RTCIceCandidate(s.data));
                             }
                         }
-                    }
+                    } catch (e) {}
                 }, 2000);
             },
 
-            startCheckingForIncoming() {
+            startListener() {
                 setInterval(async () => {
-                    if (state.currentRoom) return;
+                    if (state.roomCode) return;
                     try {
-                        const res = await fetch(`${CONFIG.API_BASE}/api/incoming/${state.myPin}`);
-                        const data = await res.json();
-                        if (data.incoming) {
-                            if (confirm(`Incoming ${data.call_type} call from ${data.caller_pin}. Accept?`)) {
-                                this.answerCall(data);
-                            } else {
-                                fetch(`${CONFIG.API_BASE}/api/decline`, {
-                                    method: 'POST',
-                                    headers: {'Content-Type':'application/json'},
-                                    body: JSON.stringify({room_code: data.room_code, pin: state.myPin})
-                                });
-                            }
+                        const r = await fetch(`${API_URL}/api/incoming/${state.myPin}`);
+                        const d = await r.json();
+                        if (d.incoming) {
+                            window.incoming = d;
+                            ui.showCall(d.caller_pin, d.call_type);
+                            document.getElementById('incoming-actions').classList.remove('hidden');
+                            document.getElementById('active-actions').classList.add('hidden');
+                            document.getElementById('call-status').innerText = 'INCOMING ENCRYPTED CALL';
+                            this.startRinging();
                         }
-                    } catch(e) {}
-                }, 4000);
+                    } catch (e) {}
+                }, 3000);
             },
 
-            async answerCall(callData) {
-                ui.showCallScreen(callData.caller_pin, callData.call_type);
-                state.currentRoom = callData.room_code;
-                
-                state.localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: callData.call_type === 'video'
+            async acceptCall() {
+                const d = window.incoming;
+                state.roomCode = d.room_code;
+                this.stopRinging();
+                document.getElementById('incoming-actions').classList.add('hidden');
+                document.getElementById('active-actions').classList.remove('hidden');
+                this.logCall(d.caller_pin, 'incoming');
+
+                state.localStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: true, 
+                    video: d.call_type === 'video' 
                 });
 
-                state.pc = new RTCPeerConnection(CONFIG.ICE_SERVERS);
+                if (d.call_type === 'video') {
+                    document.getElementById('video-ui').classList.remove('hidden');
+                    document.getElementById('local-video').srcObject = state.localStream;
+                }
+
+                state.pc = new RTCPeerConnection(RTC_CONFIG);
                 state.localStream.getTracks().forEach(t => state.pc.addTrack(t, state.localStream));
-                
                 state.pc.ontrack = (e) => {
-                    if (callData.call_type === 'video') {
-                        document.getElementById('video-ui').classList.remove('hidden');
-                        document.getElementById('remote-video').srcObject = e.streams[0];
-                    }
-                    document.getElementById('remote-audio').srcObject = e.streams[0];
+                    document.getElementById('remote-video').srcObject = e.streams[0];
+                    document.getElementById('call-status').innerText = 'SECURE LINK ACTIVE';
                 };
 
-                await state.pc.setRemoteDescription(new RTCSessionDescription(callData.offer));
+                await state.pc.setRemoteDescription(new RTCSessionDescription(d.offer));
                 const answer = await state.pc.createAnswer();
                 await state.pc.setLocalDescription(answer);
 
-                await fetch(`${CONFIG.API_BASE}/api/answer`, {
+                await fetch(`${API_URL}/api/answer`, {
                     method: 'POST',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({
-                        room_code: callData.room_code,
-                        answer: answer,
-                        callee_pin: state.myPin
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ room_code: d.room_code, answer, callee_pin: state.myPin })
                 });
 
-                this.startPolling(callData.room_code);
+                this.startPolling(d.room_code);
+            },
+
+            async signal(signal) {
+                fetch(`${API_URL}/api/signal`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ room_code: state.roomCode, pin: state.myPin, signal })
+                });
             },
 
             hangup() {
-                if (state.pollTimer) clearInterval(state.pollTimer);
+                if (state.pollRef) clearInterval(state.pollRef);
                 if (state.pc) state.pc.close();
                 if (state.localStream) state.localStream.getTracks().forEach(t => t.stop());
-                
-                if (state.currentRoom) {
-                    fetch(`${CONFIG.API_BASE}/api/hangup`, {
+                if (state.roomCode) {
+                    fetch(`${API_URL}/api/hangup`, {
                         method: 'POST',
-                        headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify({room_code: state.currentRoom, pin: state.myPin})
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ room_code: state.roomCode, pin: state.myPin })
                     });
                 }
+                this.stopRinging();
+                this.stopTones();
+                location.reload();
+            },
 
-                state.pc = null;
-                state.localStream = null;
-                state.currentRoom = null;
-                ui.hideCallScreen();
-            }
+            dial(n) { if (state.dialing.length < 6) { state.dialing += n; ui.updateDial(); } },
+            backspace() { state.dialing = state.dialing.slice(0, -1); ui.updateDial(); },
+
+            logCall(pin, type) {
+                state.recent.unshift({ pin, type, time: Date.now() });
+                state.recent = state.recent.slice(0, 20);
+                localStorage.setItem('inet_v2_recent', JSON.stringify(state.recent));
+                ui.renderRecent();
+            },
+
+            // Audio Utility
+            startRinging() {
+                if ("vibrate" in navigator) navigator.vibrate([400, 200, 400, 200, 400]);
+                this.playTone(660, 0.5);
+                state.audio.ring = setInterval(() => this.playTone(660, 0.5), 1500);
+            },
+            stopRinging() { clearInterval(state.audio.ring); if ("vibrate" in navigator) navigator.vibrate(0); },
+            playTone(freq, dur) {
+                if (!state.audio.ctx) state.audio.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = state.audio.ctx.createOscillator();
+                const g = state.audio.ctx.createGain();
+                osc.connect(g); g.connect(state.audio.ctx.destination);
+                osc.frequency.value = freq;
+                g.gain.setValueAtTime(0.1, state.audio.ctx.currentTime);
+                osc.start(); osc.stop(state.audio.ctx.currentTime + dur);
+            },
+            stopTones() { /* Logic to stop ongoing oscillation if needed */ }
         };
 
-        /**
-         * UI CONTROLLER
-         */
         const ui = {
             showScreen(id) {
-                ['signup', 'recent', 'contacts'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
+                document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
                 document.getElementById(`screen-${id}`).classList.remove('hidden');
-                
                 if (id !== 'signup') {
                     document.getElementById('bottom-nav').classList.remove('hidden');
                     document.getElementById('fab-dial').classList.remove('hidden');
                 }
             },
-
-            switchTab(tab) {
-                this.showScreen(tab);
-                document.querySelectorAll('.nav-link').forEach(l => {
-                    l.classList.remove('text-red-600');
-                    if (l.dataset.tab === tab) l.classList.add('text-red-600');
-                });
+            switchTab(t) {
+                this.showScreen(t);
+                document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active'));
+                document.getElementById(`nav-${t}`).classList.add('tab-active');
             },
-
-            openDialpad() {
-                state.dialString = '';
-                this.updateDialDisplay();
-                document.getElementById('overlay-dialpad').classList.remove('hidden');
-            },
-
-            closeDialpad() {
-                document.getElementById('overlay-dialpad').classList.add('hidden');
-            },
-
-            updateDialDisplay() {
-                document.getElementById('dial-display').innerText = state.dialString || '------';
-            },
-
-            showCallScreen(pin, type) {
-                const screen = document.getElementById('screen-call');
-                screen.classList.remove('hidden');
-                document.getElementById('call-pin').innerText = pin;
+            openDialpad() { state.dialing = ''; this.updateDial(); document.getElementById('overlay-dialpad').classList.remove('hidden'); },
+            closeDialpad() { document.getElementById('overlay-dialpad').classList.add('hidden'); },
+            updateDial() { document.getElementById('dial-display').innerText = state.dialing || '------'; },
+            showCall(pin, type) {
+                const s = document.getElementById('screen-call');
+                s.classList.remove('hidden');
+                document.getElementById('call-id-display').innerText = pin;
                 document.getElementById('call-avatar').innerText = pin[0];
-                document.getElementById('call-status').innerText = 'Dialing...';
             },
-
-            hideCallScreen() {
-                document.getElementById('screen-call').classList.add('hidden');
-            },
-
-            renderRecent() {
-                const container = document.getElementById('recent-list');
-                const empty = document.getElementById('recent-empty');
-                if (state.recent.length === 0) {
-                    empty.classList.remove('hidden');
-                    container.innerHTML = '';
-                } else {
-                    empty.classList.add('hidden');
-                    container.innerHTML = state.recent.map(r => `
-                        <div class="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">${r.pin[0]}</div>
-                                <div>
-                                    <p class="font-bold">${r.pin}</p>
-                                    <p class="text-[10px] text-gray-400">${new Date(r.time).toLocaleString()}</p>
-                                </div>
+            renderContacts() {
+                const l = document.getElementById('contact-list');
+                l.innerHTML = state.contacts.map(c => `
+                    <div onclick="app.startCall('audio', '${c.pin}')" class="p-5 glass-panel rounded-3xl flex items-center justify-between active:scale-95 transition-transform">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center font-black italic text-red-500">${c.name[0]}</div>
+                            <div>
+                                <p class="font-black">${c.name}</p>
+                                <p class="text-[10px] font-mono text-slate-500 tracking-widest">${c.pin}</p>
                             </div>
-                            <span class="text-xs ${r.type === 'incoming' ? 'text-green-500' : 'text-blue-500'} uppercase">${r.type}</span>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500">📞</div>
+                    </div>
+                `).join('');
+            },
+            renderRecent() {
+                const l = document.getElementById('recent-list');
+                const e = document.getElementById('recent-empty');
+                if (state.recent.length === 0) { e.classList.remove('hidden'); l.innerHTML = ''; }
+                else {
+                    e.classList.add('hidden');
+                    l.innerHTML = state.recent.map(r => `
+                        <div class="p-4 glass-panel rounded-2xl flex items-center justify-between opacity-80">
+                            <div class="flex items-center gap-3">
+                                <div class="text-xs font-mono text-red-500">${r.type === 'incoming' ? '↙' : '↗'}</div>
+                                <div class="font-bold text-sm">${r.pin}</div>
+                            </div>
+                            <div class="text-[9px] text-slate-500 uppercase font-black">${new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                         </div>
                     `).join('');
                 }
             },
-
-            renderContacts() {
-                const container = document.getElementById('contact-list');
-                container.innerHTML = state.contacts.map(c => `
-                    <div onclick="app.startCall('audio', '${c.pin}')" class="bg-white p-4 rounded-xl flex items-center justify-between active:bg-gray-50">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center font-bold">${c.name[0]}</div>
-                            <div>
-                                <p class="font-bold">${c.name}</p>
-                                <p class="text-xs text-gray-400">${c.pin}</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-300">📞</div>
-                    </div>
-                `).join('');
-            },
-
-            showContactForm() {
-                const name = prompt('Contact Name:');
-                const pin = prompt('6-Digit PIN:');
-                if (name && pin && pin.length === 6) {
-                    state.contacts.push({ name, pin });
-                    localStorage.setItem('iNet_contacts', JSON.stringify(state.contacts));
+            showAddContact() {
+                const n = prompt("Identity Name:");
+                const p = prompt("6-Digit ID:");
+                if (n && p?.length === 6) {
+                    state.contacts.push({ name: n, pin: p });
+                    localStorage.setItem('inet_v2_contacts', JSON.stringify(state.contacts));
                     this.renderContacts();
                 }
             }
         };
 
-        // Start
         app.init();
+        
+        // Prevent accidental reloads on swipe
+        window.addEventListener('beforeunload', (e) => {
+            if (state.roomCode) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
     </script>
 </body>
 </html>
