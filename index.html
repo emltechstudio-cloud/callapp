@@ -203,7 +203,16 @@
 
     <script>
         let API_URL = localStorage.getItem('backendUrl') || '';
-        const ICE_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        const ICE_CONFIG = { 
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' }
+            ],
+            iceCandidatePoolSize: 10
+        };
         
         let myPin = localStorage.getItem('myPin');
         let pc = null;
@@ -298,17 +307,51 @@
             }
 
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Get fresh media stream with specific constraints for compatibility
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
                 
                 pc = new RTCPeerConnection(ICE_CONFIG);
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
                 
+                // Add tracks
+                localStream.getTracks().forEach(track => {
+                    pc.addTrack(track, localStream);
+                });
+                
+                // Handle remote track
                 pc.ontrack = (event) => {
-                    document.getElementById('remote-audio').srcObject = event.streams[0];
+                    console.log('Got remote track:', event.track.kind);
+                    const remoteAudio = document.getElementById('remote-audio');
+                    remoteAudio.srcObject = event.streams[0];
+                    
+                    // Force play on mobile browsers
+                    remoteAudio.play().catch(e => console.error('Play error:', e));
+                    
                     showScreen('incall-screen');
                     document.getElementById('incall-pin').textContent = calleePin;
                 };
 
+                // Handle connection state changes
+                pc.onconnectionstatechange = () => {
+                    console.log('Connection state:', pc.connectionState);
+                    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+                        hangup();
+                    }
+                };
+
+                pc.oniceconnectionstatechange = () => {
+                    console.log('ICE connection state:', pc.iceConnectionState);
+                    if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+                        hangup();
+                    }
+                };
+
+                // Handle ICE candidates
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         fetch(`${API_URL}/api/ice`, {
@@ -323,7 +366,9 @@
                     }
                 };
 
-                const offer = await pc.createOffer();
+                const offer = await pc.createOffer({
+                    offerToReceiveAudio: true
+                });
                 await pc.setLocalDescription(offer);
 
                 const response = await fetch(`${API_URL}/api/call`, {
@@ -343,23 +388,59 @@
                 document.getElementById('calling-pin').textContent = calleePin;
 
                 startPolling();
+                startHeartbeat();
             } catch (error) {
                 alert('Error making call: ' + error.message);
+                console.error('Make call error:', error);
             }
         }
 
         async function answerCall() {
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Get fresh media stream with specific constraints
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
                 
                 pc = new RTCPeerConnection(ICE_CONFIG);
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
                 
+                // Add tracks
+                localStream.getTracks().forEach(track => {
+                    pc.addTrack(track, localStream);
+                });
+                
+                // Handle remote track
                 pc.ontrack = (event) => {
-                    document.getElementById('remote-audio').srcObject = event.streams[0];
+                    console.log('Got remote track:', event.track.kind);
+                    const remoteAudio = document.getElementById('remote-audio');
+                    remoteAudio.srcObject = event.streams[0];
+                    
+                    // Force play on mobile browsers
+                    remoteAudio.play().catch(e => console.error('Play error:', e));
+                    
                     showScreen('incall-screen');
                 };
 
+                // Handle connection state changes
+                pc.onconnectionstatechange = () => {
+                    console.log('Connection state:', pc.connectionState);
+                    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+                        hangup();
+                    }
+                };
+
+                pc.oniceconnectionstatechange = () => {
+                    console.log('ICE connection state:', pc.iceConnectionState);
+                    if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+                        hangup();
+                    }
+                };
+
+                // Handle ICE candidates
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         fetch(`${API_URL}/api/ice`, {
@@ -378,7 +459,9 @@
                 const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
                 await pc.setRemoteDescription(incomingData.offer);
 
-                const answer = await pc.createAnswer();
+                const answer = await pc.createAnswer({
+                    offerToReceiveAudio: true
+                });
                 await pc.setLocalDescription(answer);
 
                 await fetch(`${API_URL}/api/answer`, {
@@ -395,8 +478,10 @@
                 document.getElementById('incall-pin').textContent = callerPin;
 
                 startPolling();
+                startHeartbeat();
             } catch (error) {
                 alert('Error answering call: ' + error.message);
+                console.error('Answer call error:', error);
             }
         }
 
@@ -420,10 +505,43 @@
             currentRoomCode = null;
         }
 
+        let heartbeatInterval = null;
+
+        function startHeartbeat() {
+            // Send heartbeat every 2 seconds to let other person know we're still connected
+            heartbeatInterval = setInterval(async () => {
+                try {
+                    await fetch(`${API_URL}/api/heartbeat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            room_code: currentRoomCode,
+                            pin: myPin
+                        })
+                    });
+                } catch (error) {
+                    console.error('Heartbeat error:', error);
+                }
+            }, 2000);
+        }
+
         function hangup() {
+            // Notify backend that we're hanging up
+            if (currentRoomCode) {
+                fetch(`${API_URL}/api/hangup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_code: currentRoomCode,
+                        pin: myPin
+                    })
+                });
+            }
+
             if (pc) pc.close();
             if (localStream) localStream.getTracks().forEach(track => track.stop());
             if (pollingInterval) clearInterval(pollingInterval);
+            if (heartbeatInterval) clearInterval(heartbeatInterval);
             
             pc = null;
             localStream = null;
@@ -437,6 +555,13 @@
                 try {
                     const response = await fetch(`${API_URL}/api/poll/${currentRoomCode}/${myPin}`);
                     const data = await response.json();
+
+                    // Check if other person hung up
+                    if (data.hangup) {
+                        alert('Call ended by other person');
+                        hangup();
+                        return;
+                    }
 
                     for (const signal of data.signals) {
                         if (signal.type === 'answer') {
@@ -488,4 +613,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
