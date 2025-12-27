@@ -2,170 +2,465 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Voice Call MVP - Manual</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#075e54">
+    <title>Call App</title>
+    <link rel="manifest" href="./manifest.json">
     <style>
-        body { margin:0; padding:0; height:100vh; background:#000; color:#fff; font-family:system-ui; display:flex; flex-direction:column; }
-        .header { background:#075e54; padding:20px; text-align:center; font-size:22px; }
-        .main { flex:1; padding:20px; text-align:center; }
-        textarea { width:90%; height:150px; margin:20px 0; padding:10px; font-size:16px; }
-        button { background:#25d366; color:white; border:none; padding:15px 30px; font-size:20px; border-radius:50px; margin:10px; }
-        #status { margin:20px; font-size:18px; }
-        audio { display:none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
+        .pin-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+            letter-spacing: 8px;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 24px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            letter-spacing: 5px;
+            margin: 20px 0;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 0;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-success {
+            background: #25d366;
+            color: white;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .calling-animation {
+            width: 100px;
+            height: 100px;
+            margin: 20px auto;
+            border: 5px solid #667eea;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+        .config-screen {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .config-screen input {
+            font-size: 14px;
+            letter-spacing: normal;
+        }
+        .small-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">Voice Call MVP (Manual Copy-Paste)</div>
-    <div class="main">
-        <button id="start">Start (Get Mic)</button>
-        <div id="role"></div>
-        <textarea id="signal" placeholder="Paste signal here"></textarea>
-        <button id="send">Create & Copy Signal</button>
-        <button id="receive">Connect with Signal</button>
-        <div id="status">Ready</div>
-    </div>
+    <div class="container">
+        <!-- Config Screen (First Time Setup) -->
+        <div id="config-screen" class="screen">
+            <h1>⚙️ Setup</h1>
+            <p style="color: #666; margin: 20px 0;">
+                Enter your backend server URL
+            </p>
+            <div class="config-screen">
+                <input 
+                    type="url" 
+                    id="backend-url" 
+                    placeholder="https://your-space.hf.space"
+                    style="margin: 10px 0;"
+                >
+                <p class="small-text">
+                    Get this from your Hugging Face Space URL
+                </p>
+            </div>
+            <button class="btn-primary" onclick="saveBackendUrl()">
+                Save & Continue
+            </button>
+        </div>
 
-    <audio id="remote" autoplay></audio>
+        <!-- Signup Screen -->
+        <div id="signup-screen" class="screen">
+            <h1>📞 Call App</h1>
+            <p style="color: #666; margin: 20px 0;">
+                Get your unique PIN and start calling anyone, anywhere!
+            </p>
+            <button class="btn-primary" onclick="signup()">
+                Get My PIN
+            </button>
+            <div id="signup-status"></div>
+            <p class="small-text" style="margin-top: 20px;">
+                <a href="#" onclick="showScreen('config-screen'); return false;">Change Server</a>
+            </p>
+        </div>
 
-    <script>
-        const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-        let pc = null;
-        let localStream = null;
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen">
+            <h1>Your PIN</h1>
+            <div class="pin-display" id="my-pin"></div>
+            <p style="color: #666; margin-bottom: 20px;">Share this with friends to receive calls</p>
+            
+            <input type="tel" id="dial-pin" placeholder="Enter PIN to call" maxlength="6">
+            <button class="btn-success" onclick="makeCall()">
+                📞 Call
+            </button>
+            
+            <div id="home-status"></div>
+        </div>
 
-        document.getElementById('start').onclick = async () => {
-            localStream = await navigator.mediaDevices.getUserMedia({audio: true});
-            document.getElementById('status').textContent = 'Mic ready – choose role';
-            document.getElementById('role').innerHTML = `
-                <p>Be Caller: <button id="caller">Create Offer</button></p>
-                <p>Be Callee: Wait for offer, then <button id="callee">Create Answer</button></p>
-            `;
+        <!-- Calling Screen -->
+        <div id="calling-screen" class="screen">
+            <h1>Calling...</h1>
+            <div class="calling-animation"></div>
+            <div class="pin-display" id="calling-pin"></div>
+            <button class="btn-danger" onclick="hangup()">
+                End Call
+            </button>
+        </div>
 
-            document.getElementById('caller').onclick = async () => {
-                pc = new RTCPeerConnection(config);
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-                setupEvents();
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                document.getElementById('signal').value = JSON.stringify(offer);
-                document.getElementById('status').textContent = 'Copy this offer → send to friend';
-            };
+        <!-- In Call Screen -->
+        <div id="incall-screen" class="screen">
+            <h1>🔊 In Call</h1>
+            <div class="pin-display" id="incall-pin"></div>
+            <p style="color: #25d366; font-size: 18px; margin: 20px 0;">Connected</p>
+            <button class="btn-danger" onclick="hangup()">
+                End Call
+            </button>
+        </div>
 
-            document.getElementById('callee').onclick = async () => {
-                const offerText = document.getElementById('signal').value;
-                if (!offerText) return alert('Paste offer first');
-                const offer = JSON.parse(offerText);
-                pc = new RTCPeerConnection(config);
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-                setupEvents();
-                await pc.setRemoteDescription(offer);
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-                document.getElementById('signal').value = JSON.stringify(answer);
-                document.getElementById('status').textContent = 'Copy this answer → send back to caller';
-            };
-        };
-
-        document.getElementById('send').onclick = () => {
-            document.getElementById('signal').select();
-            document.execCommand('copy');
-            document.getElementById('status').textContent = 'Copied! Send to friend';
-        };
-
-        document.getElementById('receive').onclick = async () => {
-            const signalText = document.getElementById('signal').value;
-            if (!signalText || !pc) return alert('Start and create signal first');
-            const signal = JSON.parse(signalText);
-            if (signal.type === 'answer') {
-                await pc.setRemoteDescription(signal);
-                document.getElementById('status').textContent = 'Connected!';
-            }
-        };
-
-        function setupEvents() {
-            pc.onicecandidate = e => {
-                if (e.candidate) {
-                    // In full version, send candidate automatically – here manual for simplicity
-                    console.log('New ICE:', e.candidate);
-                }
-            };
-            pc.ontrack = e => {
-                document.getElementById('remote').srcObject = e.streams[0];
-                document.getElementById('status').textContent = 'Connected – talk!';
-            };
-        }
-    </script>
-</body>
-</html>        <h2>Incoming Call</h2>
-        <div class="btns">
-            <button id="decline">✖</button>
-            <button id="accept">✔</button>
+        <!-- Incoming Call Screen -->
+        <div id="incoming-screen" class="screen">
+            <h1>📞 Incoming Call</h1>
+            <div class="calling-animation"></div>
+            <div class="pin-display" id="incoming-pin"></div>
+            <button class="btn-success" onclick="answerCall()">
+                Answer
+            </button>
+            <button class="btn-danger" onclick="rejectCall()">
+                Decline
+            </button>
         </div>
     </div>
 
     <audio id="remote-audio" autoplay></audio>
-    <audio id="ringtone" src="https://assets.mixkit.co/sfx/preview/mixkit-classic-telephone-ring-1114.mp3" loop></audio>
 
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script>
-        function generateCode() {
-            return Math.floor(100000 + Math.random() * 900000).toString();
+        let API_URL = localStorage.getItem('backendUrl') || '';
+        const ICE_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        
+        let myPin = localStorage.getItem('myPin');
+        let pc = null;
+        let localStream = null;
+        let currentRoomCode = null;
+        let pollingInterval = null;
+
+        // Initialize
+        if (!API_URL) {
+            showScreen('config-screen');
+        } else if (myPin) {
+            showScreen('home-screen');
+            document.getElementById('my-pin').textContent = myPin;
+            startIncomingCallCheck();
+        } else {
+            showScreen('signup-screen');
         }
 
-        const myCode = generateCode();
-        document.getElementById('my-code').textContent = myCode;
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW error:', err));
+        }
 
-        const peer = new Peer(); // Auto-generates random ID
-        let currentCall = null;
+        function saveBackendUrl() {
+            const url = document.getElementById('backend-url').value.trim();
+            if (!url) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            // Remove trailing slash
+            API_URL = url.replace(/\/$/, '');
+            localStorage.setItem('backendUrl', API_URL);
+            showScreen('signup-screen');
+        }
 
-        peer.on('open', () => console.log('Ready'));
+        async function signup() {
+            const statusDiv = document.getElementById('signup-status');
+            statusDiv.innerHTML = '<div class="status info">Creating your PIN...</div>';
+            
+            try {
+                // Request notification permission
+                if ('Notification' in window) {
+                    await Notification.requestPermission();
+                }
 
-        // Incoming call
-        peer.on('call', incomingCall => {
-            currentCall = incomingCall;
-            document.getElementById('incoming').style.display = 'flex';
-            document.getElementById('ringtone').play();
+                // Get push subscription (simplified - full VAPID setup needed for production)
+                let subscription = null;
+                if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    const registration = await navigator.serviceWorker.ready;
+                    subscription = { endpoint: 'placeholder' };
+                }
 
-            document.getElementById('decline').onclick = () => {
-                incomingCall.close();
-                hideIncoming();
-            };
-
-            document.getElementById('accept').onclick = () => {
-                hideIncoming();
-                navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-                    incomingCall.answer(stream);
-                    setupRemoteStream(incomingCall);
+                const response = await fetch(`${API_URL}/api/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscription })
                 });
-            };
-        });
 
-        function setupRemoteStream(call) {
-            call.on('stream', remoteStream => {
-                document.getElementById('remote-audio').srcObject = remoteStream;
-                document.getElementById('status').textContent = 'Connected!';
-            });
-            call.on('close', () => document.getElementById('status').textContent = 'Call ended');
+                if (!response.ok) {
+                    throw new Error('Server error: ' + response.status);
+                }
+
+                const data = await response.json();
+                myPin = data.pin;
+                localStorage.setItem('myPin', myPin);
+                
+                document.getElementById('my-pin').textContent = myPin;
+                showScreen('home-screen');
+                startIncomingCallCheck();
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">Error: ${error.message}<br>Check if backend URL is correct.</div>`;
+            }
         }
 
-        function hideIncoming() {
-            document.getElementById('incoming').style.display = 'none';
-            document.getElementById('ringtone').pause();
-            document.getElementById('ringtone').currentTime = 0;
-        }
-
-        document.getElementById('call-btn').onclick = () => {
-            const target = document.getElementById('target-code').value.trim();
-            if (target.length !== 6 || target === myCode) {
-                alert('Enter a valid different code');
+        async function makeCall() {
+            const calleePin = document.getElementById('dial-pin').value;
+            if (calleePin.length !== 6) {
+                alert('Please enter a valid 6-digit PIN');
                 return;
             }
 
-            navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-                const call = peer.call(target, stream); // Calls directly by code (we'll map code→peerID next)
-                setupRemoteStream(call);
-                document.getElementById('status').textContent = 'Calling...';
-            }).catch(() => alert('Allow microphone access'));
-        };
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                pc = new RTCPeerConnection(ICE_CONFIG);
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                
+                pc.ontrack = (event) => {
+                    document.getElementById('remote-audio').srcObject = event.streams[0];
+                    showScreen('incall-screen');
+                    document.getElementById('incall-pin').textContent = calleePin;
+                };
+
+                pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        fetch(`${API_URL}/api/ice`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                room_code: currentRoomCode,
+                                candidate: event.candidate,
+                                sender_pin: myPin
+                            })
+                        });
+                    }
+                };
+
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+
+                const response = await fetch(`${API_URL}/api/call`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        caller_pin: myPin,
+                        callee_pin: calleePin,
+                        offer: offer
+                    })
+                });
+
+                const data = await response.json();
+                currentRoomCode = data.room_code;
+
+                showScreen('calling-screen');
+                document.getElementById('calling-pin').textContent = calleePin;
+
+                startPolling();
+            } catch (error) {
+                alert('Error making call: ' + error.message);
+            }
+        }
+
+        async function answerCall() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                pc = new RTCPeerConnection(ICE_CONFIG);
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                
+                pc.ontrack = (event) => {
+                    document.getElementById('remote-audio').srcObject = event.streams[0];
+                    showScreen('incall-screen');
+                };
+
+                pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        fetch(`${API_URL}/api/ice`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                room_code: currentRoomCode,
+                                candidate: event.candidate,
+                                sender_pin: myPin
+                            })
+                        });
+                    }
+                };
+
+                // Get offer from incoming call data
+                const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
+                await pc.setRemoteDescription(incomingData.offer);
+
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+
+                await fetch(`${API_URL}/api/answer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_code: currentRoomCode,
+                        answer: answer,
+                        callee_pin: myPin
+                    })
+                });
+
+                const callerPin = currentRoomCode.split('-')[0];
+                document.getElementById('incall-pin').textContent = callerPin;
+
+                startPolling();
+            } catch (error) {
+                alert('Error answering call: ' + error.message);
+            }
+        }
+
+        function rejectCall() {
+            showScreen('home-screen');
+            currentRoomCode = null;
+        }
+
+        function hangup() {
+            if (pc) pc.close();
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (pollingInterval) clearInterval(pollingInterval);
+            
+            pc = null;
+            localStream = null;
+            currentRoomCode = null;
+            
+            showScreen('home-screen');
+        }
+
+        function startPolling() {
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_URL}/api/poll/${currentRoomCode}/${myPin}`);
+                    const data = await response.json();
+
+                    for (const signal of data.signals) {
+                        if (signal.type === 'answer') {
+                            await pc.setRemoteDescription(signal.data);
+                            showScreen('incall-screen');
+                        } else if (signal.type === 'ice') {
+                            await pc.addIceCandidate(signal.data);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 1000);
+        }
+
+        function startIncomingCallCheck() {
+            setInterval(async () => {
+                if (currentRoomCode) return; // Already in a call
+
+                try {
+                    const response = await fetch(`${API_URL}/api/incoming/${myPin}`);
+                    const data = await response.json();
+
+                    if (data.incoming) {
+                        currentRoomCode = data.room_code;
+                        localStorage.setItem('incomingCall', JSON.stringify(data));
+                        
+                        document.getElementById('incoming-pin').textContent = data.caller_pin;
+                        showScreen('incoming-screen');
+                        
+                        // Try to show notification
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('📞 Incoming Call', {
+                                body: `Call from PIN: ${data.caller_pin}`,
+                                icon: './icon-192.png',
+                                vibrate: [200, 100, 200]
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Check incoming error:', error);
+                }
+            }, 2000);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
     </script>
 </body>
-              </html>
+                            </html> 
