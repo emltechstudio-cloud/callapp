@@ -3,38 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Call MVP</title>
-    <meta name="theme-color" content="#075e54">
-    <link rel="manifest" href="manifest.json">
+    <title>Voice Call MVP - Manual</title>
     <style>
-        body { margin:0; padding:0; height:100vh; background:#0b141a; color:#fff; font-family:system-ui; display:flex; flex-direction:column; }
+        body { margin:0; padding:0; height:100vh; background:#000; color:#fff; font-family:system-ui; display:flex; flex-direction:column; }
         .header { background:#075e54; padding:20px; text-align:center; font-size:22px; }
-        .main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
-        #my-code { font-size:50px; letter-spacing:10px; background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; margin:30px 0; }
-        input { width:80%; max-width:320px; padding:16px; font-size:26px; text-align:center; border:none; border-radius:15px; margin:20px 0; }
-        button { background:#25d366; color:white; border:none; padding:16px 50px; font-size:22px; border-radius:50px; cursor:pointer; }
-        #incoming { position:fixed; top:0; left:0; width:100%; height:100%; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:100; }
-        #incoming h2 { font-size:34px; margin-bottom:80px; }
-        .btns { display:flex; gap:120px; }
-        .btns button { width:90px; height:90px; border-radius:50%; font-size:40px; border:none; cursor:pointer; }
-        #decline { background:red; }
-        #accept { background:green; }
-        #status { margin-top:30px; font-size:20px; }
+        .main { flex:1; padding:20px; text-align:center; }
+        textarea { width:90%; height:150px; margin:20px 0; padding:10px; font-size:16px; }
+        button { background:#25d366; color:white; border:none; padding:15px 30px; font-size:20px; border-radius:50px; margin:10px; }
+        #status { margin:20px; font-size:18px; }
         audio { display:none; }
     </style>
 </head>
 <body>
-    <div class="header">Voice Call MVP</div>
+    <div class="header">Voice Call MVP (Manual Copy-Paste)</div>
     <div class="main">
-        <div>Your Code:</div>
-        <div id="my-code">------</div>
-        <input type="text" id="target-code" placeholder="Enter 6-digit code" maxlength="6">
-        <button id="call-btn">Call</button>
-        <div id="status"></div>
+        <button id="start">Start (Get Mic)</button>
+        <div id="role"></div>
+        <textarea id="signal" placeholder="Paste signal here"></textarea>
+        <button id="send">Create & Copy Signal</button>
+        <button id="receive">Connect with Signal</button>
+        <div id="status">Ready</div>
     </div>
 
-    <div id="incoming">
-        <h2>Incoming Call</h2>
+    <audio id="remote" autoplay></audio>
+
+    <script>
+        const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        let pc = null;
+        let localStream = null;
+
+        document.getElementById('start').onclick = async () => {
+            localStream = await navigator.mediaDevices.getUserMedia({audio: true});
+            document.getElementById('status').textContent = 'Mic ready – choose role';
+            document.getElementById('role').innerHTML = `
+                <p>Be Caller: <button id="caller">Create Offer</button></p>
+                <p>Be Callee: Wait for offer, then <button id="callee">Create Answer</button></p>
+            `;
+
+            document.getElementById('caller').onclick = async () => {
+                pc = new RTCPeerConnection(config);
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                setupEvents();
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                document.getElementById('signal').value = JSON.stringify(offer);
+                document.getElementById('status').textContent = 'Copy this offer → send to friend';
+            };
+
+            document.getElementById('callee').onclick = async () => {
+                const offerText = document.getElementById('signal').value;
+                if (!offerText) return alert('Paste offer first');
+                const offer = JSON.parse(offerText);
+                pc = new RTCPeerConnection(config);
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                setupEvents();
+                await pc.setRemoteDescription(offer);
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                document.getElementById('signal').value = JSON.stringify(answer);
+                document.getElementById('status').textContent = 'Copy this answer → send back to caller';
+            };
+        };
+
+        document.getElementById('send').onclick = () => {
+            document.getElementById('signal').select();
+            document.execCommand('copy');
+            document.getElementById('status').textContent = 'Copied! Send to friend';
+        };
+
+        document.getElementById('receive').onclick = async () => {
+            const signalText = document.getElementById('signal').value;
+            if (!signalText || !pc) return alert('Start and create signal first');
+            const signal = JSON.parse(signalText);
+            if (signal.type === 'answer') {
+                await pc.setRemoteDescription(signal);
+                document.getElementById('status').textContent = 'Connected!';
+            }
+        };
+
+        function setupEvents() {
+            pc.onicecandidate = e => {
+                if (e.candidate) {
+                    // In full version, send candidate automatically – here manual for simplicity
+                    console.log('New ICE:', e.candidate);
+                }
+            };
+            pc.ontrack = e => {
+                document.getElementById('remote').srcObject = e.streams[0];
+                document.getElementById('status').textContent = 'Connected – talk!';
+            };
+        }
+    </script>
+</body>
+</html>        <h2>Incoming Call</h2>
         <div class="btns">
             <button id="decline">✖</button>
             <button id="accept">✔</button>
