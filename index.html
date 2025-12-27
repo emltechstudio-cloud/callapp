@@ -136,6 +136,11 @@
             display: flex;
             align-items: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .call-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .call-item .avatar {
             width: 50px;
@@ -186,6 +191,7 @@
             font-size: 36px;
             font-weight: 600;
             letter-spacing: 4px;
+            user-select: all;
         }
         .contact-item {
             background: white;
@@ -195,6 +201,11 @@
             display: flex;
             align-items: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .contact-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .contact-item .avatar {
             width: 50px;
@@ -457,6 +468,21 @@
         .hidden {
             display: none !important;
         }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -590,30 +616,7 @@
     <audio id="remote-audio" autoplay playsinline></audio>
 
     <script>
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', () => self.skipWaiting());
-                self.addEventListener('activate', () => self.clients.claim());
-                self.addEventListener('push', (e) => {
-                    let data = { caller_pin: 'Unknown' };
-                    try { data = e.data.json(); } catch(err) {}
-                    e.waitUntil(
-                        self.registration.showNotification('📞 Incoming Call', {
-                            body: 'Call from PIN: ' + data.caller_pin,
-                            icon: 'data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'192\\' height=\\'192\\'%3E%3Crect width=\\'192\\' height=\\'192\\' fill=\\'%23dc3545\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' font-size=\\'140\\' font-family=\\'system-ui\\' fill=\\'white\\' text-anchor=\\'middle\\' dy=\\'.35em\\'%3Ei%3C/text%3E%3C/svg%3E',
-                            vibrate: [200, 100, 200],
-                            tag: 'incoming-call',
-                            requireInteraction: true
-                        })
-                    );
-                });
-            `;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob));
-        }
-
-        // Constants
+        // Configuration
         const API_URL = 'https://emltechstudio-inet.hf.space';
         const ICE_CONFIG = {
             iceServers: [
@@ -622,64 +625,129 @@
             ]
         };
 
-        // State
-        let myPin = localStorage.getItem('myPin');
-        let pc = null;
-        let localStream = null;
-        let currentRoomCode = null;
-        let pollingInterval = null;
-        let heartbeatInterval = null;
-        let dialpadNumber = '';
-        let callType = 'audio';
-        let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
-        let recentCalls = JSON.parse(localStorage.getItem('recentCalls') || '[]');
-
-        // Initialize
-        if (myPin) {
-            document.getElementById('signup-screen').style.display = 'none';
-            document.getElementById('my-pin-display').textContent = myPin;
-            switchTab('recent');
-            renderRecentCalls();
-            renderContacts();
-            startIncomingCallCheck();
+        // State Management
+        class AppState {
+            constructor() {
+                this.myPin = localStorage.getItem('myPin');
+                this.pc = null;
+                this.localStream = null;
+                this.currentRoomCode = null;
+                this.pollingInterval = null;
+                this.heartbeatInterval = null;
+                this.dialpadNumber = '';
+                this.callType = 'audio';
+                this.contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+                this.recentCalls = JSON.parse(localStorage.getItem('recentCalls') || '[]');
+                this.incomingCallCheckInterval = null;
+            }
         }
 
-        // Signup
+        const state = new AppState();
+
+        // Initialize App
+        function initApp() {
+            if (state.myPin) {
+                document.getElementById('signup-screen').style.display = 'none';
+                document.getElementById('my-pin-display').textContent = state.myPin;
+                switchTab('recent');
+                renderRecentCalls();
+                renderContacts();
+                startIncomingCallCheck();
+            }
+        }
+
+        // Service Worker Registration
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', () => self.skipWaiting());
+                    self.addEventListener('activate', () => self.clients.claim());
+                    self.addEventListener('push', (e) => {
+                        let data = { caller_pin: 'Unknown' };
+                        try { data = e.data.json(); } catch(err) {}
+                        e.waitUntil(
+                            self.registration.showNotification('📞 Incoming Call', {
+                                body: 'Call from PIN: ' + data.caller_pin,
+                                icon: 'data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'192\\' height=\\'192\\'%3E%3Crect width=\\'192\\' height=\\'192\\' fill=\\'%23dc3545\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' font-size=\\'140\\' font-family=\\'system-ui\\' fill=\\'white\\' text-anchor=\\'middle\\' dy=\\'.35em\\'%3Ei%3C/text%3E%3C/svg%3E',
+                                vibrate: [200, 100, 200],
+                                tag: 'incoming-call',
+                                requireInteraction: true,
+                                actions: [
+                                    { action: 'answer', title: 'Answer' },
+                                    { action: 'reject', title: 'Reject' }
+                                ]
+                            })
+                        );
+                    });
+                    self.addEventListener('notificationclick', (event) => {
+                        event.notification.close();
+                        event.waitUntil(
+                            clients.matchAll({ type: 'window', includeUncontrolled: true })
+                                .then((clientList) => {
+                                    if (clientList.length > 0) {
+                                        clientList[0].focus();
+                                        clientList[0].postMessage({
+                                            action: event.action === 'answer' ? 'answerCall' : 'rejectCall'
+                                        });
+                                    }
+                                })
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob));
+            }
+        }
+
+        // Signup Function
         async function signup() {
             const statusDiv = document.getElementById('signup-status');
             statusDiv.textContent = 'Getting permissions...';
 
             try {
+                // Request media permissions
                 await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
                     .then(stream => stream.getTracks().forEach(track => track.stop()));
 
-                if ('Notification' in window) {
+                // Request notification permissions
+                if ('Notification' in window && Notification.permission === 'default') {
                     await Notification.requestPermission();
                 }
 
+                // Register service worker for push notifications
+                registerServiceWorker();
+
                 statusDiv.textContent = 'Creating your PIN...';
 
+                // Generate PIN on server
                 const response = await fetch(`${API_URL}/api/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ subscription: { endpoint: 'placeholder' } })
                 });
 
+                if (!response.ok) throw new Error('Failed to create PIN');
+
                 const data = await response.json();
-                myPin = data.pin;
-                localStorage.setItem('myPin', myPin);
+                state.myPin = data.pin;
+                localStorage.setItem('myPin', state.myPin);
 
                 document.getElementById('signup-screen').style.display = 'none';
-                document.getElementById('my-pin-display').textContent = myPin;
+                document.getElementById('my-pin-display').textContent = state.myPin;
                 switchTab('recent');
                 startIncomingCallCheck();
+                
+                statusDiv.textContent = 'Success! Your PIN is: ' + state.myPin;
+                setTimeout(() => statusDiv.textContent = '', 3000);
             } catch (error) {
                 statusDiv.textContent = 'Error: ' + error.message;
+                console.error('Signup error:', error);
             }
         }
 
-        // Tab Switching
+        // Tab Management
         function switchTab(tab) {
+            // Update tab visibility
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
@@ -688,14 +756,19 @@
                 tab === 'recent' ? 0 : tab === 'contacts' ? 1 : 2
             ].classList.add('active');
 
-            document.getElementById('header-title').textContent = 
-                tab === 'recent' ? 'Recent' : tab === 'contacts' ? 'Contacts' : 'Messages';
+            // Update header title
+            const titles = {
+                'recent': 'Recent Calls',
+                'contacts': 'Contacts',
+                'messages': 'Messages'
+            };
+            document.getElementById('header-title').textContent = titles[tab];
         }
 
-        // Dialpad
+        // Dialpad Functions
         function openDialpad() {
-            dialpadNumber = '';
-            document.getElementById('dialpad-display').textContent = '';
+            state.dialpadNumber = '';
+            updateDialpadDisplay();
             document.getElementById('dialpad-overlay').classList.add('show');
         }
 
@@ -710,42 +783,57 @@
         }
 
         function dialpadInput(num) {
-            if (dialpadNumber.length < 6) {
-                dialpadNumber += num;
-                document.getElementById('dialpad-display').textContent = dialpadNumber;
+            if (state.dialpadNumber.length < 6) {
+                state.dialpadNumber += num;
+                updateDialpadDisplay();
             }
         }
 
         function dialpadBackspace() {
-            dialpadNumber = dialpadNumber.slice(0, -1);
-            document.getElementById('dialpad-display').textContent = dialpadNumber;
+            state.dialpadNumber = state.dialpadNumber.slice(0, -1);
+            updateDialpadDisplay();
         }
 
-        // Make Call
+        function updateDialpadDisplay() {
+            document.getElementById('dialpad-display').textContent = state.dialpadNumber;
+        }
+
+        // Call Functions
         async function makeCall(type) {
-            if (dialpadNumber.length !== 6) {
+            if (state.dialpadNumber.length !== 6) {
                 alert('Please enter a 6-digit PIN');
                 return;
             }
 
-            callType = type;
+            if (state.dialpadNumber === state.myPin) {
+                alert('Cannot call yourself');
+                return;
+            }
+
+            state.callType = type;
             closeDialpad();
 
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({
+                // Get user media
+                state.localStream = await navigator.mediaDevices.getUserMedia({
                     audio: true,
                     video: type === 'video'
                 });
 
-                pc = new RTCPeerConnection(ICE_CONFIG);
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                // Create peer connection
+                state.pc = new RTCPeerConnection(ICE_CONFIG);
+                
+                // Add local tracks
+                state.localStream.getTracks().forEach(track => state.pc.addTrack(track, state.localStream));
 
+                // Set up video if video call
                 if (type === 'video') {
-                    document.getElementById('local-video').srcObject = localStream;
+                    document.getElementById('local-video').srcObject = state.localStream;
                     document.getElementById('video-container').classList.remove('hidden');
                 }
 
-                pc.ontrack = (event) => {
+                // Handle incoming tracks
+                state.pc.ontrack = (event) => {
                     if (type === 'video') {
                         document.getElementById('remote-video').srcObject = event.streams[0];
                     } else {
@@ -754,172 +842,235 @@
                     document.getElementById('call-status').textContent = 'Connected';
                 };
 
-                pc.oniceconnectionstatechange = () => {
-                    if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+                // Handle connection state changes
+                state.pc.oniceconnectionstatechange = () => {
+                    if (state.pc.iceConnectionState === 'failed' || 
+                        state.pc.iceConnectionState === 'disconnected') {
                         alert('Connection lost');
                         hangup();
                     }
                 };
 
-                pc.onicecandidate = (event) => {
-                    if (event.candidate) {
+                // Send ICE candidates
+                state.pc.onicecandidate = (event) => {
+                    if (event.candidate && state.currentRoomCode) {
                         fetch(`${API_URL}/api/ice`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                room_code: currentRoomCode,
+                                room_code: state.currentRoomCode,
                                 candidate: event.candidate,
-                                sender_pin: myPin
+                                sender_pin: state.myPin
                             })
-                        });
+                        }).catch(console.error);
                     }
                 };
 
-                const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: type === 'video' });
-                await pc.setLocalDescription(offer);
+                // Create and send offer
+                const offer = await state.pc.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: type === 'video'
+                });
+                await state.pc.setLocalDescription(offer);
 
                 const response = await fetch(`${API_URL}/api/call`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        caller_pin: myPin,
-                        callee_pin: dialpadNumber,
-                        offer: offer
+                        caller_pin: state.myPin,
+                        callee_pin: state.dialpadNumber,
+                        offer: offer,
+                        call_type: type
                     })
                 });
 
-                const data = await response.json();
-                currentRoomCode = data.room_code;
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Call failed');
+                }
 
-                document.getElementById('call-avatar').textContent = dialpadNumber[0];
-                document.getElementById('call-pin').textContent = dialpadNumber;
+                const data = await response.json();
+                state.currentRoomCode = data.room_code;
+
+                // Update call screen
+                document.getElementById('call-avatar').textContent = state.dialpadNumber[0];
+                document.getElementById('call-pin').textContent = state.dialpadNumber;
                 document.getElementById('call-status').textContent = 'Calling...';
                 document.getElementById('call-screen').classList.add('show');
 
-                addRecentCall(dialpadNumber, 'outgoing');
+                // Add to recent calls
+                addRecentCall(state.dialpadNumber, 'outgoing', type);
                 startPolling();
                 startHeartbeat();
             } catch (error) {
-                alert('Error: ' + error.message);
+                alert('Error making call: ' + error.message);
+                console.error('Call error:', error);
+                hangup();
             }
         }
 
-        // Answer Call
+        // Answer incoming call
         async function answerCall() {
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callType === 'video' });
+                const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
+                if (!incomingData) {
+                    throw new Error('No incoming call data found');
+                }
 
-                pc = new RTCPeerConnection(ICE_CONFIG);
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                state.callType = incomingData.call_type || 'audio';
+                state.currentRoomCode = incomingData.room_code;
 
-                pc.ontrack = (event) => {
-                    if (callType === 'video') {
+                // Get user media
+                state.localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: state.callType === 'video'
+                });
+
+                // Create peer connection
+                state.pc = new RTCPeerConnection(ICE_CONFIG);
+                state.localStream.getTracks().forEach(track => state.pc.addTrack(track, state.localStream));
+
+                // Handle incoming tracks
+                state.pc.ontrack = (event) => {
+                    if (state.callType === 'video') {
                         document.getElementById('remote-video').srcObject = event.streams[0];
                     } else {
                         document.getElementById('remote-audio').srcObject = event.streams[0];
                     }
+                    document.getElementById('call-status').textContent = 'Connected';
                 };
 
-                pc.onicecandidate = (event) => {
+                // Send ICE candidates
+                state.pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         fetch(`${API_URL}/api/ice`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                room_code: currentRoomCode,
+                                room_code: state.currentRoomCode,
                                 candidate: event.candidate,
-                                sender_pin: myPin
+                                sender_pin: state.myPin
                             })
-                        });
+                        }).catch(console.error);
                     }
                 };
 
-                const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
-                await pc.setRemoteDescription(incomingData.offer);
+                // Set remote description
+                await state.pc.setRemoteDescription(incomingData.offer);
 
-                const answer = await pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: callType === 'video' });
-                await pc.setLocalDescription(answer);
+                // Create and send answer
+                const answer = await state.pc.createAnswer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: state.callType === 'video'
+                });
+                await state.pc.setLocalDescription(answer);
 
                 await fetch(`${API_URL}/api/answer`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        room_code: currentRoomCode,
+                        room_code: state.currentRoomCode,
                         answer: answer,
-                        callee_pin: myPin
+                        callee_pin: state.myPin
                     })
                 });
 
+                // Update UI
                 document.getElementById('incoming-screen').classList.remove('show');
-                document.getElementById('call-avatar').textContent = currentRoomCode.split('-')[0][0];
-                document.getElementById('call-pin').textContent = currentRoomCode.split('-')[0];
+                const callerPin = incomingData.caller_pin || 'Unknown';
+                document.getElementById('call-avatar').textContent = callerPin[0];
+                document.getElementById('call-pin').textContent = callerPin;
                 document.getElementById('call-status').textContent = 'Connected';
                 document.getElementById('call-screen').classList.add('show');
 
-                if (callType === 'video') {
-                    document.getElementById('local-video').srcObject = localStream;
+                if (state.callType === 'video') {
+                    document.getElementById('local-video').srcObject = state.localStream;
                     document.getElementById('video-container').classList.remove('hidden');
                 }
 
-                addRecentCall(currentRoomCode.split('-')[0], 'incoming');
+                // Add to recent calls
+                addRecentCall(callerPin, 'incoming', state.callType);
                 startPolling();
                 startHeartbeat();
+                
+                localStorage.removeItem('incomingCall');
             } catch (error) {
                 alert('Error answering call: ' + error.message);
+                console.error('Answer error:', error);
+                hangup();
             }
         }
 
-        // Reject Call
+        // Reject call
         async function rejectCall() {
             try {
-                await fetch(`${API_URL}/api/decline`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        room_code: currentRoomCode,
-                        pin: myPin
-                    })
-                });
+                const incomingData = JSON.parse(localStorage.getItem('incomingCall'));
+                if (incomingData?.room_code) {
+                    await fetch(`${API_URL}/api/decline`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            room_code: incomingData.room_code,
+                            pin: state.myPin
+                        })
+                    });
+                }
             } catch (error) {
-                console.error('Error declining:', error);
+                console.error('Reject error:', error);
             }
             
             localStorage.removeItem('incomingCall');
             document.getElementById('incoming-screen').classList.remove('show');
-            currentRoomCode = null;
+            state.currentRoomCode = null;
         }
 
-        // Hangup
+        // Hangup call
         function hangup() {
-            if (currentRoomCode) {
+            if (state.currentRoomCode) {
                 fetch(`${API_URL}/api/hangup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        room_code: currentRoomCode,
-                        pin: myPin
+                        room_code: state.currentRoomCode,
+                        pin: state.myPin
                     })
-                });
+                }).catch(console.error);
             }
 
-            if (pc) pc.close();
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
-            if (pollingInterval) clearInterval(pollingInterval);
-            if (heartbeatInterval) clearInterval(heartbeatInterval);
+            // Clean up peer connection
+            if (state.pc) {
+                state.pc.close();
+                state.pc = null;
+            }
 
-            pc = null;
-            localStream = null;
-            currentRoomCode = null;
+            // Stop local stream
+            if (state.localStream) {
+                state.localStream.getTracks().forEach(track => track.stop());
+                state.localStream = null;
+            }
 
+            // Clear intervals
+            if (state.pollingInterval) clearInterval(state.pollingInterval);
+            if (state.heartbeatInterval) clearInterval(state.heartbeatInterval);
+
+            // Reset state
+            state.currentRoomCode = null;
+
+            // Update UI
             document.getElementById('call-screen').classList.remove('show');
             document.getElementById('video-container').classList.add('hidden');
+            document.getElementById('incoming-screen').classList.remove('show');
         }
 
-        // Polling & Heartbeat
+        // Polling for call updates
         function startPolling() {
-            pollingInterval = setInterval(async () => {
+            if (!state.currentRoomCode) return;
+
+            state.pollingInterval = setInterval(async () => {
                 try {
-                    const response = await fetch(`${API_URL}/api/poll/${currentRoomCode}/${myPin}`);
+                    const response = await fetch(`${API_URL}/api/poll/${state.currentRoomCode}/${state.myPin}`);
+                    if (!response.ok) return;
+
                     const data = await response.json();
 
                     if (data.hangup) {
@@ -928,12 +1079,11 @@
                         return;
                     }
 
-                    for (const signal of data.signals) {
-                        if (signal.type === 'answer') {
-                            await pc.setRemoteDescription(signal.data);
-                            document.getElementById('call-status').textContent = 'Connected';
-                        } else if (signal.type === 'ice') {
-                            await pc.addIceCandidate(signal.data);
+                    for (const signal of data.signals || []) {
+                        if (signal.type === 'answer' && state.pc) {
+                            await state.pc.setRemoteDescription(signal.data);
+                        } else if (signal.type === 'ice' && state.pc) {
+                            await state.pc.addIceCandidate(signal.data);
                         }
                     }
                 } catch (error) {
@@ -942,15 +1092,18 @@
             }, 1000);
         }
 
+        // Heartbeat to keep call alive
         function startHeartbeat() {
-            heartbeatInterval = setInterval(async () => {
+            if (!state.currentRoomCode) return;
+
+            state.heartbeatInterval = setInterval(async () => {
                 try {
                     await fetch(`${API_URL}/api/heartbeat`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            room_code: currentRoomCode,
-                            pin: myPin
+                            room_code: state.currentRoomCode,
+                            pin: state.myPin
                         })
                     });
                 } catch (error) {
@@ -959,45 +1112,55 @@
             }, 2000);
         }
 
-        // Incoming Call Check
+        // Check for incoming calls
         function startIncomingCallCheck() {
-            setInterval(async () => {
-                if (currentRoomCode) return;
+            if (!state.myPin) return;
+
+            state.incomingCallCheckInterval = setInterval(async () => {
+                if (state.currentRoomCode) return;
 
                 try {
-                    const response = await fetch(`${API_URL}/api/incoming/${myPin}`);
+                    const response = await fetch(`${API_URL}/api/incoming/${state.myPin}`);
+                    if (!response.ok) return;
+
                     const data = await response.json();
 
-                    if (data.incoming) {
-                        currentRoomCode = data.room_code;
+                    if (data.incoming && !localStorage.getItem('incomingCall')) {
+                        state.currentRoomCode = data.room_code;
                         localStorage.setItem('incomingCall', JSON.stringify(data));
 
-                        document.getElementById('incoming-pin').textContent = data.caller_pin;
+                        document.getElementById('incoming-pin').textContent = data.caller_pin || 'Unknown';
                         document.getElementById('incoming-screen').classList.add('show');
 
+                        // Show notification
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification('📞 Incoming Call', {
                                 body: `Call from PIN: ${data.caller_pin}`,
-                                vibrate: [200, 100, 200]
+                                icon: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'192\' height=\'192\'%3E%3Crect width=\'192\' height=\'192\' fill=\'%23dc3545\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-size=\'140\' font-family=\'system-ui\' fill=\'white\' text-anchor=\'middle\' dy=\'.35em\'%3Ei%3C/text%3E%3C/svg%3E',
+                                vibrate: [200, 100, 200],
+                                tag: 'incoming-call'
                             });
                         }
                     }
                 } catch (error) {
-                    console.error('Check incoming error:', error);
+                    console.error('Incoming check error:', error);
                 }
             }, 2000);
         }
 
-        // Recent Calls
-        function addRecentCall(pin, direction) {
+        // Recent Calls Management
+        function addRecentCall(pin, direction, type = 'audio') {
             const call = {
                 pin: pin,
                 direction: direction,
+                type: type,
                 timestamp: Date.now()
             };
-            recentCalls.unshift(call);
-            if (recentCalls.length > 50) recentCalls = recentCalls.slice(0, 50);
-            localStorage.setItem('recentCalls', JSON.stringify(recentCalls));
+            state.recentCalls.unshift(call);
+            if (state.recentCalls.length > 50) {
+                state.recentCalls = state.recentCalls.slice(0, 50);
+            }
+            localStorage.setItem('recentCalls', JSON.stringify(state.recentCalls));
             renderRecentCalls();
         }
 
@@ -1005,24 +1168,25 @@
             const list = document.getElementById('recent-calls-list');
             const empty = document.getElementById('recent-empty');
 
-            if (recentCalls.length === 0) {
+            if (state.recentCalls.length === 0) {
                 list.innerHTML = '';
                 empty.style.display = 'block';
                 return;
             }
 
             empty.style.display = 'none';
-            list.innerHTML = recentCalls.map(call => {
+            list.innerHTML = state.recentCalls.map(call => {
                 const date = new Date(call.timestamp);
                 const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const icon = call.direction === 'incoming' ? '📲' : '📞';
+                const typeIcon = call.type === 'video' ? '📹' : '🎤';
                 
                 return `
                     <div class="call-item" onclick="dialpadNumber='${call.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${call.pin}';">
                         <div class="avatar">${call.pin[0]}</div>
                         <div class="info">
-                            <div class="pin">${call.pin}</div>
-                            <div class="time">${timeStr}</div>
+                            <div class="pin">${call.pin} ${typeIcon}</div>
+                            <div class="time">${timeStr} • ${call.direction}</div>
                         </div>
                         <div class="icon">${icon}</div>
                     </div>
@@ -1030,25 +1194,27 @@
             }).join('');
         }
 
-        // Contacts
+        // Contacts Management
         function addContact(pin, name) {
-            contacts.push({ pin, name });
-            localStorage.setItem('contacts', JSON.stringify(contacts));
-            renderContacts();
+            if (!state.contacts.find(c => c.pin === pin)) {
+                state.contacts.push({ pin, name });
+                localStorage.setItem('contacts', JSON.stringify(state.contacts));
+                renderContacts();
+            }
         }
 
         function renderContacts() {
             const list = document.getElementById('contacts-list');
             const empty = document.getElementById('contacts-empty');
 
-            if (contacts.length === 0) {
+            if (state.contacts.length === 0) {
                 list.innerHTML = '';
                 empty.style.display = 'block';
                 return;
             }
 
             empty.style.display = 'none';
-            list.innerHTML = contacts.map(contact => {
+            list.innerHTML = state.contacts.map(contact => {
                 return `
                     <div class="contact-item" onclick="dialpadNumber='${contact.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${contact.pin}';">
                         <div class="avatar">${contact.name[0].toUpperCase()}</div>
@@ -1060,227 +1226,37 @@
                 `;
             }).join('');
         }
+
+        // Initialize on load
+        window.addEventListener('load', initApp);
+
+        // Handle page visibility
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && state.currentRoomCode) {
+                // Page is hidden, ensure call continues
+                console.log('Page hidden, call active');
+            }
+        });
+
+        // Handle beforeunload
+        window.addEventListener('beforeunload', (e) => {
+            if (state.currentRoomCode) {
+                hangup();
+                e.preventDefault();
+                e.returnValue = 'You have an active call. Are you sure you want to leave?';
+            }
+        });
+
+        // Copy PIN to clipboard
+        document.getElementById('my-pin-display').addEventListener('click', function() {
+            if (state.myPin) {
+                navigator.clipboard.writeText(state.myPin).then(() => {
+                    alert('PIN copied to clipboard!');
+                }).catch(err => {
+                    console.error('Copy failed:', err);
+                });
+            }
+        });
     </script>
 </body>
-</html>POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        room_code: currentRoomCode,
-                        answer: answer,
-                        callee_pin: myPin
-                    })
-                });
-
-                document.getElementById('incoming-screen').classList.remove('show');
-                document.getElementById('call-avatar').textContent = currentRoomCode.split('-')[0][0];
-                document.getElementById('call-pin').textContent = currentRoomCode.split('-')[0];
-                document.getElementById('call-status').textContent = 'Connected';
-                document.getElementById('call-screen').classList.add('show');
-
-                if (callType === 'video') {
-                    document.getElementById('local-video').srcObject = localStream;
-                    document.getElementById('video-container').classList.remove('hidden');
-                }
-
-                addRecentCall(currentRoomCode.split('-')[0], 'incoming');
-                startPolling();
-                startHeartbeat();
-            } catch (error) {
-                alert('Error answering call: ' + error.message);
-            }
-        }
-
-        // Reject Call
-        async function rejectCall() {
-            try {
-                await fetch(`${API_URL}/api/decline`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        room_code: currentRoomCode,
-                        pin: myPin
-                    })
-                });
-            } catch (error) {
-                console.error('Error declining:', error);
-            }
-            
-            localStorage.removeItem('incomingCall');
-            document.getElementById('incoming-screen').classList.remove('show');
-            currentRoomCode = null;
-        }
-
-        // Hangup
-        function hangup() {
-            if (currentRoomCode) {
-                fetch(`${API_URL}/api/hangup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        room_code: currentRoomCode,
-                        pin: myPin
-                    })
-                });
-            }
-
-            if (pc) pc.close();
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
-            if (pollingInterval) clearInterval(pollingInterval);
-            if (heartbeatInterval) clearInterval(heartbeatInterval);
-
-            pc = null;
-            localStream = null;
-            currentRoomCode = null;
-
-            document.getElementById('call-screen').classList.remove('show');
-            document.getElementById('video-container').classList.add('hidden');
-        }
-
-        // Polling & Heartbeat
-        function startPolling() {
-            pollingInterval = setInterval(async () => {
-                try {
-                    const response = await fetch(`${API_URL}/api/poll/${currentRoomCode}/${myPin}`);
-                    const data = await response.json();
-
-                    if (data.hangup) {
-                        alert('Call ended by other person');
-                        hangup();
-                        return;
-                    }
-
-                    for (const signal of data.signals) {
-                        if (signal.type === 'answer') {
-                            await pc.setRemoteDescription(signal.data);
-                            document.getElementById('call-status').textContent = 'Connected';
-                        } else if (signal.type === 'ice') {
-                            await pc.addIceCandidate(signal.data);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Polling error:', error);
-                }
-            }, 1000);
-        }
-
-        function startHeartbeat() {
-            heartbeatInterval = setInterval(async () => {
-                try {
-                    await fetch(`${API_URL}/api/heartbeat`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            room_code: currentRoomCode,
-                            pin: myPin
-                        })
-                    });
-                } catch (error) {
-                    console.error('Heartbeat error:', error);
-                }
-            }, 2000);
-        }
-
-        // Incoming Call Check
-        function startIncomingCallCheck() {
-            setInterval(async () => {
-                if (currentRoomCode) return;
-
-                try {
-                    const response = await fetch(`${API_URL}/api/incoming/${myPin}`);
-                    const data = await response.json();
-
-                    if (data.incoming) {
-                        currentRoomCode = data.room_code;
-                        localStorage.setItem('incomingCall', JSON.stringify(data));
-
-                        document.getElementById('incoming-pin').textContent = data.caller_pin;
-                        document.getElementById('incoming-screen').classList.add('show');
-
-                        if ('Notification' in window && Notification.permission === 'granted') {
-                            new Notification('📞 Incoming Call', {
-                                body: `Call from PIN: ${data.caller_pin}`,
-                                vibrate: [200, 100, 200]
-                            });
-                        }
-                    }
-                } catch (error) {
-                    console.error('Check incoming error:', error);
-                }
-            }, 2000);
-        }
-
-        // Recent Calls
-        function addRecentCall(pin, direction) {
-            const call = {
-                pin: pin,
-                direction: direction,
-                timestamp: Date.now()
-            };
-            recentCalls.unshift(call);
-            if (recentCalls.length > 50) recentCalls = recentCalls.slice(0, 50);
-            localStorage.setItem('recentCalls', JSON.stringify(recentCalls));
-            renderRecentCalls();
-        }
-
-        function renderRecentCalls() {
-            const list = document.getElementById('recent-calls-list');
-            const empty = document.getElementById('recent-empty');
-
-            if (recentCalls.length === 0) {
-                list.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-
-            empty.style.display = 'none';
-            list.innerHTML = recentCalls.map(call => {
-                const date = new Date(call.timestamp);
-                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const icon = call.direction === 'incoming' ? '📲' : '📞';
-                
-                return `
-                    <div class="call-item" onclick="dialpadNumber='${call.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${call.pin}';">
-                        <div class="avatar">${call.pin[0]}</div>
-                        <div class="info">
-                            <div class="pin">${call.pin}</div>
-                            <div class="time">${timeStr}</div>
-                        </div>
-                        <div class="icon">${icon}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Contacts
-        function addContact(pin, name) {
-            contacts.push({ pin, name });
-            localStorage.setItem('contacts', JSON.stringify(contacts));
-            renderContacts();
-        }
-
-        function renderContacts() {
-            const list = document.getElementById('contacts-list');
-            const empty = document.getElementById('contacts-empty');
-
-            if (contacts.length === 0) {
-                list.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-
-            empty.style.display = 'none';
-            list.innerHTML = contacts.map(contact => {
-                return `
-                    <div class="contact-item" onclick="dialpadNumber='${contact.pin}'; openDialpad(); document.getElementById('dialpad-display').textContent='${contact.pin}';">
-                        <div class="avatar">${contact.name[0].toUpperCase()}</div>
-                        <div class="info">
-                            <div class="name">${contact.name}</div>
-                            <div class="pin">${contact.pin}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-    </script>
-</body>
-</html>
+    </html>
