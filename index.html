@@ -2,460 +2,785 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>iNet Pro | Secure</title>
-    
-    <link rel="manifest" href='data:application/json,{"name":"iNet Pro","short_name":"iNet","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#dc3545","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3059/3059518.png","sizes":"512x512","type":"image/png"}]}'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#dc3545">
     <meta name="apple-mobile-web-app-capable" content="yes">
-
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="iNet">
+    <title>iNet</title>
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22iNet%22%2C%22short_name%22%3A%22iNet%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23dc3545%22%2C%22theme_color%22%3A%22%23dc3545%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520width%3D%27192%27%2520height%3D%27192%27%253E%253Crect%2520width%3D%27192%27%2520height%3D%27192%27%2520fill%3D%27%2523dc3545%27%2F%253E%253Ctext%2520x%3D%2750%2525%27%2520y%3D%2750%2525%27%2520font-size%3D%27140%27%2520font-family%3D%27system-ui%27%2520fill%3D%27white%27%2520text-anchor%3D%27middle%27%2520dy%3D%27.35em%27%253Ei%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%23dc3545'/%3E%3Ctext x='50%25' y='50%25' font-size='24' font-family='system-ui' fill='white' text-anchor='middle' dy='.35em'%3Ei%3C/text%3E%3C/svg%3E">
     <style>
-        :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
-        * { -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; }
-        body { background-color: #0f172a; color: white; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; height: 100vh; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
         
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-        .dialpad-grid button { position: relative; overflow: hidden; transition: all 0.1s ease; }
-        .dialpad-grid button:active { background: #334155; transform: scale(0.95); }
+        .header {
+            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
+            padding: 15px 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo {
+            width: 35px;
+            height: 35px;
+            background: #dc3545;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 300;
+        }
+        .header h1 { font-size: 20px; font-weight: 500; flex: 1; }
         
-        @keyframes ring-pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); } 70% { box-shadow: 0 0 0 30px rgba(220, 53, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); } }
-        .active-ring { animation: ring-pulse 1.5s infinite; }
+        .main { flex: 1; overflow-y: auto; background: #f8f9fa; }
         
-        .video-container video { object-fit: cover; width: 100%; height: 100%; border-radius: 2rem; }
-        .mirror { transform: scaleX(-1); }
+        .signup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px 20px;
+            background: white;
+        }
+        .signup .logo-big {
+            width: 120px;
+            height: 120px;
+            background: #dc3545;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(220,53,69,0.3);
+        }
+        .signup h2 { font-size: 28px; margin-bottom: 10px; }
+        .signup p { color: #666; text-align: center; margin-bottom: 30px; }
+        .btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 16px 50px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
         
-        .tab-active { color: #ef4444; position: relative; }
-        .tab-active::after { content: ''; position: absolute; bottom: -8px; width: 4px; height: 4px; border-radius: 50%; background: #ef4444; }
+        .tab { display: none; padding: 20px; }
+        .tab.active { display: block; }
         
-        .call-btn-gradient { background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%); }
+        .empty { text-align: center; padding: 60px 20px; color: #999; }
+        .empty .icon { font-size: 80px; margin-bottom: 20px; opacity: 0.3; }
+        
+        .card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .my-pin {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .my-pin .label { font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
+        .my-pin .pin { font-size: 36px; font-weight: 600; letter-spacing: 4px; }
+        
+        .call-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .call-item .avatar {
+            width: 50px;
+            height: 50px;
+            background: #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 500;
+            margin-right: 15px;
+        }
+        .call-item .info { flex: 1; }
+        .call-item .pin { font-size: 18px; font-weight: 500; }
+        .call-item .time { font-size: 14px; color: #999; margin-top: 3px; }
+        
+        .nav {
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            padding: 8px 0;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #999;
+        }
+        .nav-item.active { color: #dc3545; }
+        .nav-item .icon { font-size: 24px; margin-bottom: 4px; }
+        .nav-item .label { font-size: 11px; }
+        
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 4px 15px rgba(220,53,69,0.4);
+            cursor: pointer;
+            border: none;
+            z-index: 100;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .overlay.show { display: flex; }
+        
+        .dialpad {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px 20px;
+            position: absolute;
+            bottom: 0;
+        }
+        .dial-display {
+            font-size: 36px;
+            text-align: center;
+            padding: 20px;
+            letter-spacing: 5px;
+            min-height: 60px;
+        }
+        .dial-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .dial-btn {
+            aspect-ratio: 1;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .dial-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .dial-actions button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-audio { background: #28a745; color: white; }
+        .btn-video { background: #dc3545; color: white; }
+        .btn-close { background: #6c757d; color: white; }
+        
+        .call-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 20px 40px;
+            z-index: 2000;
+        }
+        .call-screen.show { display: flex; }
+        .call-screen .avatar-big {
+            width: 150px;
+            height: 150px;
+            background: #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 60px;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+        .call-screen .pin {
+            font-size: 32px;
+            color: white;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+        }
+        .call-screen .status {
+            font-size: 18px;
+            color: #999;
+            margin-bottom: 40px;
+        }
+        
+        .call-controls {
+            display: flex;
+            gap: 20px;
+        }
+        .call-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        .call-btn.hangup { background: #dc3545; color: white; }
+        .call-btn.answer { background: #28a745; color: white; }
+        
+        .video-box {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .video-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .video-box .local-vid {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 120px;
+            height: 90px;
+            border-radius: 10px;
+            border: 2px solid white;
+        }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="flex flex-col">
+<body>
+    <div class="header">
+        <div class="logo">i</div>
+        <h1 id="hdr">iNet</h1>
+    </div>
 
-    <!-- Header -->
-    <header class="p-6 pt-[calc(1.5rem+var(--sat))] flex justify-between items-center z-20 shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="bg-red-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-red-900/40">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3m0 0c.305 0 .605.023.899.066m1.025 10.076a10.003 10.003 0 01-12.24 11.233M12 3a10.003 10.003 0 0112.24 11.233m-1.53-2.034a10.003 10.003 0 00-1.222-9.202" /></svg>
-            </div>
-            <div>
-                <h1 class="font-black text-xl tracking-tight">iNet <span class="text-red-500 text-xs font-bold px-1.5 py-0.5 bg-red-500/10 rounded ml-1">PRO</span></h1>
-                <p class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">End-to-End Secure</p>
+    <div class="main">
+        <div id="signup" class="signup">
+            <div class="logo-big">i</div>
+            <h2>Welcome to iNet</h2>
+            <p>Call anyone with just a PIN.<br>No phone number needed.</p>
+            <button class="btn" onclick="doSignup()">Get Started</button>
+            <div id="signup-msg" style="margin-top: 20px; color: #dc3545;"></div>
+        </div>
+
+        <div id="recent" class="tab">
+            <div id="recent-list"></div>
+            <div id="recent-empty" class="empty">
+                <div class="icon">📞</div>
+                <h3>No Recent Calls</h3>
             </div>
         </div>
-        <button onclick="ui.showAddContact()" class="w-12 h-12 glass-panel rounded-2xl flex items-center justify-center active:scale-90 transition-transform">
-            <span class="text-2xl font-light">＋</span>
-        </button>
-    </header>
 
-    <main class="flex-1 overflow-y-auto px-6 pb-32">
-        <!-- Signup/Setup -->
-        <section id="screen-signup" class="h-full flex flex-col items-center justify-center text-center hidden">
-            <div class="mb-10 p-8 glass-panel rounded-[3rem] active-ring">
-                <svg class="w-20 h-20 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+        <div id="contacts" class="tab">
+            <div class="my-pin">
+                <div class="label">My PIN</div>
+                <div class="pin" id="my-pin">------</div>
             </div>
-            <h2 class="text-3xl font-black mb-4">Initialize Line</h2>
-            <p class="text-slate-400 mb-10 max-w-[250px] mx-auto text-sm leading-relaxed">Secure your communications with a unique 6-digit cryptographic identifier.</p>
-            <button onclick="app.signup()" class="call-btn-gradient w-full py-5 rounded-3xl font-black text-lg shadow-xl shadow-red-900/20 active:scale-95 transition-all">GENERATE PIN</button>
-        </section>
-
-        <!-- Contacts -->
-        <section id="screen-contacts" class="space-y-6 hidden pt-4">
-            <div class="p-8 glass-panel rounded-[2.5rem] relative overflow-hidden">
-                <div class="absolute right-0 top-0 p-4 opacity-10">
-                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                </div>
-                <p class="text-[10px] text-red-500 font-black tracking-[0.2em] mb-2 uppercase">My Secure ID</p>
-                <div class="text-5xl font-mono font-black tracking-tighter" id="display-my-pin">------</div>
-                <p class="mt-4 text-[10px] text-slate-500">Only share this with verified contacts.</p>
+            <div id="contacts-list"></div>
+            <div id="contacts-empty" class="empty">
+                <div class="icon">👥</div>
+                <h3>No Contacts</h3>
             </div>
-            <div id="contact-list" class="space-y-3"></div>
-        </section>
-
-        <!-- Recents -->
-        <section id="screen-recent" class="hidden pt-4">
-            <div id="recent-list" class="space-y-3"></div>
-            <div id="recent-empty" class="py-20 text-center opacity-30">
-                <p class="text-xs font-bold tracking-widest uppercase">No Encrypted Sessions</p>
-            </div>
-        </section>
-    </main>
-
-    <!-- Navigation -->
-    <nav id="bottom-nav" class="fixed bottom-0 w-full glass-panel border-t-0 p-4 pb-[calc(1rem+var(--sab))] flex justify-around items-center z-30 hidden">
-        <button onclick="ui.switchTab('recent')" id="nav-recent" class="flex flex-col items-center gap-1 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span class="text-[10px] font-bold uppercase tracking-tighter">Sessions</span>
-        </button>
-        <div class="w-16"></div> <!-- Spacer for FAB -->
-        <button onclick="ui.switchTab('contacts')" id="nav-contacts" class="flex flex-col items-center gap-1 tab-active transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-            <span class="text-[10px] font-bold uppercase tracking-tighter">Vault</span>
-        </button>
-    </nav>
-
-    <!-- Dial FAB -->
-    <button id="fab-dial" onclick="ui.openDialpad()" class="fixed bottom-[calc(2.5rem+var(--sab))] left-1/2 -translate-x-1/2 w-20 h-20 call-btn-gradient rounded-[2rem] shadow-2xl shadow-red-900/60 z-40 flex items-center justify-center active:scale-90 transition-all border-4 border-[#0f172a] hidden">
-        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-    </button>
-
-    <!-- Dialpad Overlay -->
-    <div id="overlay-dialpad" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col justify-end hidden p-6" onclick="if(event.target === this) ui.closeDialpad()">
-        <div class="w-full max-w-md mx-auto mb-10 text-center">
-            <div class="text-6xl font-mono font-black tracking-[0.2em] h-20 flex items-center justify-center text-white" id="dial-display"></div>
-            <div class="h-1 w-12 bg-red-500 mx-auto rounded-full mt-2 opacity-50"></div>
-        </div>
-        <div class="dialpad-grid grid grid-cols-3 gap-4 mb-10 w-full max-w-md mx-auto">
-            <button onclick="app.dial('1')" class="h-20 glass-panel rounded-3xl text-3xl font-light">1</button>
-            <button onclick="app.dial('2')" class="h-20 glass-panel rounded-3xl text-3xl font-light">2</button>
-            <button onclick="app.dial('3')" class="h-20 glass-panel rounded-3xl text-3xl font-light">3</button>
-            <button onclick="app.dial('4')" class="h-20 glass-panel rounded-3xl text-3xl font-light">4</button>
-            <button onclick="app.dial('5')" class="h-20 glass-panel rounded-3xl text-3xl font-light">5</button>
-            <button onclick="app.dial('6')" class="h-20 glass-panel rounded-3xl text-3xl font-light">6</button>
-            <button onclick="app.dial('7')" class="h-20 glass-panel rounded-3xl text-3xl font-light">7</button>
-            <button onclick="app.dial('8')" class="h-20 glass-panel rounded-3xl text-3xl font-light">8</button>
-            <button onclick="app.dial('9')" class="h-20 glass-panel rounded-3xl text-3xl font-light">9</button>
-            <button onclick="ui.closeDialpad()" class="h-20 flex items-center justify-center opacity-40 active:scale-90"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></button>
-            <button onclick="app.dial('0')" class="h-20 glass-panel rounded-3xl text-3xl font-light">0</button>
-            <button onclick="app.backspace()" class="h-20 flex items-center justify-center active:scale-90 text-red-500"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" /></svg></button>
-        </div>
-        <div class="flex gap-4 w-full max-w-md mx-auto pb-10">
-            <button onclick="app.startCall('audio')" class="flex-1 glass-panel py-6 rounded-3xl font-black text-xs tracking-widest uppercase hover:bg-slate-700">Audio Session</button>
-            <button onclick="app.startCall('video')" class="flex-1 call-btn-gradient py-6 rounded-3xl font-black text-xs tracking-widest uppercase shadow-xl shadow-red-900/40">Secure Video</button>
         </div>
     </div>
 
-    <!-- Incoming/Active Call UI -->
-    <div id="screen-call" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-between p-10 hidden">
-        <div class="mt-20 text-center z-10">
-            <div id="call-avatar" class="w-32 h-32 call-btn-gradient rounded-[3rem] flex items-center justify-center text-5xl font-black mx-auto mb-8 active-ring">?</div>
-            <h2 id="call-status" class="text-xs font-black tracking-[0.4em] uppercase text-red-500 mb-2">Establishing Link</h2>
-            <p id="call-id-display" class="text-4xl font-mono font-black tracking-tighter">------</p>
-        </div>
+    <div id="nav" class="nav hidden">
+        <button class="nav-item active" onclick="switchTab('recent')">
+            <div class="icon">🕒</div>
+            <div class="label">Recent</div>
+        </button>
+        <button class="nav-item" onclick="switchTab('contacts')">
+            <div class="icon">👤</div>
+            <div class="label">Contacts</div>
+        </button>
+    </div>
 
-        <!-- Video UI -->
-        <div id="video-ui" class="absolute inset-0 z-0 hidden">
-            <video id="remote-video" class="w-full h-full object-cover"></video>
-            <div class="absolute bottom-32 right-6 w-32 aspect-[9/16] glass-panel rounded-3xl overflow-hidden shadow-2xl">
-                <video id="local-video" class="w-full h-full object-cover mirror" muted></video>
-            </div>
-        </div>
+    <button id="fab" class="fab hidden" onclick="openDial()">📞</button>
 
-        <!-- Interaction Area -->
-        <div class="w-full max-w-sm z-10 mb-10">
-            <div id="incoming-actions" class="hidden grid grid-cols-2 gap-4">
-                <button onclick="app.acceptCall()" class="bg-emerald-500 text-slate-950 py-7 rounded-[2.5rem] font-black text-xl shadow-2xl shadow-emerald-900/40 active:scale-95 transition-all">ACCEPT</button>
-                <button onclick="app.hangup()" class="glass-panel text-white py-7 rounded-[2.5rem] font-black text-xl active:scale-95 transition-all">DECLINE</button>
+    <div id="dialpad" class="overlay" onclick="if(event.target===this) closeDial()">
+        <div class="dialpad" onclick="event.stopPropagation()">
+            <div class="dial-display" id="disp"></div>
+            <div class="dial-grid">
+                <button class="dial-btn" onclick="dial('1')">1</button>
+                <button class="dial-btn" onclick="dial('2')">2</button>
+                <button class="dial-btn" onclick="dial('3')">3</button>
+                <button class="dial-btn" onclick="dial('4')">4</button>
+                <button class="dial-btn" onclick="dial('5')">5</button>
+                <button class="dial-btn" onclick="dial('6')">6</button>
+                <button class="dial-btn" onclick="dial('7')">7</button>
+                <button class="dial-btn" onclick="dial('8')">8</button>
+                <button class="dial-btn" onclick="dial('9')">9</button>
+                <button class="dial-btn" onclick="dial('*')">*</button>
+                <button class="dial-btn" onclick="dial('0')">0</button>
+                <button class="dial-btn" onclick="backspace()">⌫</button>
             </div>
-            <div id="active-actions" class="flex justify-center">
-                <button onclick="app.hangup()" class="w-24 h-24 call-btn-gradient rounded-full flex items-center justify-center text-4xl shadow-2xl shadow-red-900/50 active:scale-75 transition-all">✕</button>
+            <div class="dial-actions">
+                <button class="btn-audio" onclick="call('audio')">🎤 Audio</button>
+                <button class="btn-video" onclick="call('video')">📹 Video</button>
+            </div>
+            <div class="dial-actions">
+                <button class="btn-close" onclick="closeDial()">Close</button>
             </div>
         </div>
     </div>
+
+    <div id="call" class="call-screen">
+        <div>
+            <div class="avatar-big" id="call-avatar">?</div>
+            <div class="pin" id="call-pin">------</div>
+            <div class="status" id="call-status">Calling...</div>
+        </div>
+        <div id="video-box" class="video-box hidden">
+            <video id="remote-vid" autoplay playsinline></video>
+            <video id="local-vid" class="local-vid" autoplay playsinline muted></video>
+        </div>
+        <div class="call-controls">
+            <button class="call-btn hangup" onclick="hangup()">✕</button>
+        </div>
+    </div>
+
+    <div id="incoming" class="call-screen">
+        <div>
+            <div class="avatar-big">📞</div>
+            <div class="pin" id="inc-pin">------</div>
+            <div class="status">Incoming Call...</div>
+        </div>
+        <div class="call-controls">
+            <button class="call-btn hangup" onclick="reject()">✕</button>
+            <button class="call-btn answer" onclick="answer()">✓</button>
+        </div>
+    </div>
+
+    <audio id="remote-audio" autoplay playsinline></audio>
 
     <script>
-        const API_URL = 'https://emltechstudio-inet.hf.space';
-        const RTC_CONFIG = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
+        const API = 'https://emltechstudio-inet.hf.space';
+        const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }] };
 
-        const state = {
-            myPin: localStorage.getItem('inet_v2_pin'),
-            contacts: JSON.parse(localStorage.getItem('inet_v2_contacts') || '[]'),
-            recent: JSON.parse(localStorage.getItem('inet_v2_recent') || '[]'),
-            pc: null,
-            localStream: null,
-            roomCode: null,
-            pollRef: null,
-            dialing: '',
-            audio: {
-                ring: null,
-                ctx: null
-            }
-        };
+        let myPin = localStorage.getItem('myPin');
+        let pc = null;
+        let stream = null;
+        let room = null;
+        let pollTimer = null;
+        let dialNum = '';
+        let callType = 'audio';
+        let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+        let recent = JSON.parse(localStorage.getItem('recent') || '[]');
+        let incomingData = null;
 
-        const app = {
-            async signup() {
-                try {
-                    const r = await fetch(`${API_URL}/api/signup`, { method: 'POST' });
-                    const d = await r.json();
-                    if (d.success) {
-                        state.myPin = d.pin;
-                        localStorage.setItem('inet_v2_pin', d.pin);
-                        this.init();
-                    }
-                } catch (e) { console.error('Sign up error', e); }
-            },
+        if (myPin) {
+            document.getElementById('signup').style.display = 'none';
+            document.getElementById('my-pin').textContent = myPin;
+            switchTab('recent');
+            renderRecent();
+            renderContacts();
+            startListen();
+        }
 
-            init() {
-                if (!state.myPin) {
-                    ui.showScreen('signup');
+        async function doSignup() {
+            const msg = document.getElementById('signup-msg');
+            msg.textContent = 'Creating PIN...';
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+                    .then(s => s.getTracks().forEach(t => t.stop()));
+                if ('Notification' in window) await Notification.requestPermission();
+
+                const r = await fetch(API + '/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscription: {} })
+                });
+                const d = await r.json();
+                if (d.success && d.pin) {
+                    myPin = d.pin;
+                    localStorage.setItem('myPin', myPin);
+                    document.getElementById('signup').style.display = 'none';
+                    document.getElementById('my-pin').textContent = myPin;
+                    switchTab('recent');
+                    startListen();
                 } else {
-                    document.getElementById('display-my-pin').innerText = state.myPin;
-                    ui.showScreen('contacts');
-                    this.startListener();
+                    msg.textContent = 'Error: ' + (d.error || 'Failed');
                 }
-                ui.renderContacts();
-                ui.renderRecent();
-            },
+            } catch (e) {
+                msg.textContent = 'Error: ' + e.message;
+            }
+        }
 
-            async startCall(type, manualPin = null) {
-                const target = manualPin || state.dialing;
-                if (target.length !== 6) return;
-                
-                ui.closeDialpad();
-                ui.showCall(target, type);
-                this.playTone(440, 0.5); // Start dial tone
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            document.querySelectorAll('.nav-item')[tab === 'recent' ? 0 : 1].classList.add('active');
+            document.getElementById('hdr').textContent = tab === 'recent' ? 'Recent' : 'Contacts';
+            document.getElementById('nav').classList.remove('hidden');
+            document.getElementById('fab').classList.remove('hidden');
+        }
 
-                try {
-                    state.localStream = await navigator.mediaDevices.getUserMedia({
-                        audio: true,
-                        video: type === 'video' ? { facingMode: 'user' } : false
-                    });
+        function openDial() {
+            dialNum = '';
+            document.getElementById('disp').textContent = '';
+            document.getElementById('dialpad').classList.add('show');
+        }
 
-                    if (type === 'video') {
-                        document.getElementById('video-ui').classList.remove('hidden');
-                        document.getElementById('local-video').srcObject = state.localStream;
-                    }
+        function closeDial() {
+            document.getElementById('dialpad').classList.remove('show');
+        }
 
-                    state.pc = new RTCPeerConnection(RTC_CONFIG);
-                    state.localStream.getTracks().forEach(t => state.pc.addTrack(t, state.localStream));
-                    
-                    state.pc.ontrack = (e) => {
-                        document.getElementById('remote-video').srcObject = e.streams[0];
-                        document.getElementById('call-status').innerText = 'SECURE LINK ACTIVE';
-                        this.stopTones();
-                    };
+        function dial(n) {
+            if (dialNum.length < 6) {
+                dialNum += n;
+                document.getElementById('disp').textContent = dialNum;
+            }
+        }
 
-                    state.pc.onicecandidate = (e) => {
-                        if (e.candidate && state.roomCode) {
-                            this.signal({ type: 'ice', data: e.candidate });
-                        }
-                    };
+        function backspace() {
+            dialNum = dialNum.slice(0, -1);
+            document.getElementById('disp').textContent = dialNum;
+        }
 
-                    const offer = await state.pc.createOffer();
-                    await state.pc.setLocalDescription(offer);
+        async function call(type) {
+            if (dialNum.length !== 6) {
+                alert('Enter 6-digit PIN');
+                return;
+            }
+            callType = type;
+            closeDial();
 
-                    const res = await fetch(`${API_URL}/api/call`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            caller_pin: state.myPin,
-                            callee_pin: target,
-                            offer: offer,
-                            call_type: type
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        state.roomCode = data.room_code;
-                        this.startPolling(data.room_code);
-                        this.logCall(target, 'outgoing');
-                    }
-                } catch (e) { this.hangup(); }
-            },
-
-            async startPolling(code) {
-                state.pollRef = setInterval(async () => {
-                    try {
-                        const r = await fetch(`${API_URL}/api/poll/${code}/${state.myPin}`);
-                        const d = await r.json();
-                        if (d.hangup) this.hangup();
-                        if (d.signals) {
-                            for (let s of d.signals) {
-                                if (s.type === 'answer') await state.pc.setRemoteDescription(new RTCSessionDescription(s.data));
-                                if (s.type === 'ice') await state.pc.addIceCandidate(new RTCIceCandidate(s.data));
-                            }
-                        }
-                    } catch (e) {}
-                }, 2000);
-            },
-
-            startListener() {
-                setInterval(async () => {
-                    if (state.roomCode) return;
-                    try {
-                        const r = await fetch(`${API_URL}/api/incoming/${state.myPin}`);
-                        const d = await r.json();
-                        if (d.incoming) {
-                            window.incoming = d;
-                            ui.showCall(d.caller_pin, d.call_type);
-                            document.getElementById('incoming-actions').classList.remove('hidden');
-                            document.getElementById('active-actions').classList.add('hidden');
-                            document.getElementById('call-status').innerText = 'INCOMING ENCRYPTED CALL';
-                            this.startRinging();
-                        }
-                    } catch (e) {}
-                }, 3000);
-            },
-
-            async acceptCall() {
-                const d = window.incoming;
-                state.roomCode = d.room_code;
-                this.stopRinging();
-                document.getElementById('incoming-actions').classList.add('hidden');
-                document.getElementById('active-actions').classList.remove('hidden');
-                this.logCall(d.caller_pin, 'incoming');
-
-                state.localStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: true, 
-                    video: d.call_type === 'video' 
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: type === 'video'
                 });
 
-                if (d.call_type === 'video') {
-                    document.getElementById('video-ui').classList.remove('hidden');
-                    document.getElementById('local-video').srcObject = state.localStream;
+                pc = new RTCPeerConnection(ICE);
+                stream.getTracks().forEach(t => pc.addTrack(t, stream));
+
+                if (type === 'video') {
+                    document.getElementById('local-vid').srcObject = stream;
+                    document.getElementById('video-box').classList.remove('hidden');
                 }
 
-                state.pc = new RTCPeerConnection(RTC_CONFIG);
-                state.localStream.getTracks().forEach(t => state.pc.addTrack(t, state.localStream));
-                state.pc.ontrack = (e) => {
-                    document.getElementById('remote-video').srcObject = e.streams[0];
-                    document.getElementById('call-status').innerText = 'SECURE LINK ACTIVE';
+                pc.ontrack = (e) => {
+                    if (type === 'video') {
+                        document.getElementById('remote-vid').srcObject = e.streams[0];
+                    } else {
+                        document.getElementById('remote-audio').srcObject = e.streams[0];
+                    }
+                    document.getElementById('call-status').textContent = 'Connected';
                 };
 
-                await state.pc.setRemoteDescription(new RTCSessionDescription(d.offer));
-                const answer = await state.pc.createAnswer();
-                await state.pc.setLocalDescription(answer);
+                pc.oniceconnectionstatechange = () => {
+                    if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+                        alert('Connection lost');
+                        hangup();
+                    }
+                };
 
-                await fetch(`${API_URL}/api/answer`, {
+                pc.onicecandidate = (e) => {
+                    if (e.candidate && room) {
+                        fetch(API + '/api/ice', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                room_code: room,
+                                candidate: e.candidate,
+                                sender_pin: myPin
+                            })
+                        });
+                    }
+                };
+
+                const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: type === 'video' });
+                await pc.setLocalDescription(offer);
+
+                const r = await fetch(API + '/api/call', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ room_code: d.room_code, answer, callee_pin: state.myPin })
+                    body: JSON.stringify({
+                        caller_pin: myPin,
+                        callee_pin: dialNum,
+                        offer: offer,
+                        call_type: type
+                    })
                 });
 
-                this.startPolling(d.room_code);
-            },
+                const d = await r.json();
+                if (d.success && d.room_code) {
+                    room = d.room_code;
+                    document.getElementById('call-avatar').textContent = dialNum[0];
+                    document.getElementById('call-pin').textContent = dialNum;
+                    document.getElementById('call-status').textContent = 'Calling...';
+                    document.getElementById('call').classList.add('show');
+                    addRecent(dialNum, 'outgoing');
+                    startPoll();
+                } else {
+                    alert('Call failed: ' + (d.error || 'Unknown error'));
+                    hangup();
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+                hangup();
+            }
+        }
 
-            async signal(signal) {
-                fetch(`${API_URL}/api/signal`, {
+        async function answer() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: incomingData.call_type === 'video'
+                });
+
+                pc = new RTCPeerConnection(ICE);
+                stream.getTracks().forEach(t => pc.addTrack(t, stream));
+
+                pc.ontrack = (e) => {
+                    if (incomingData.call_type === 'video') {
+                        document.getElementById('remote-vid').srcObject = e.streams[0];
+                    } else {
+                        document.getElementById('remote-audio').srcObject = e.streams[0];
+                    }
+                };
+
+                pc.onicecandidate = (e) => {
+                    if (e.candidate && room) {
+                        fetch(API + '/api/ice', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                room_code: room,
+                                candidate: e.candidate,
+                                sender_pin: myPin
+                            })
+                        });
+                    }
+                };
+
+                await pc.setRemoteDescription(incomingData.offer);
+                const ans = await pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: incomingData.call_type === 'video' });
+                await pc.setLocalDescription(ans);
+
+                await fetch(API + '/api/answer', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ room_code: state.roomCode, pin: state.myPin, signal })
+                    body: JSON.stringify({
+                        room_code: room,
+                        answer: ans,
+                        callee_pin: myPin
+                    })
                 });
-            },
 
-            hangup() {
-                if (state.pollRef) clearInterval(state.pollRef);
-                if (state.pc) state.pc.close();
-                if (state.localStream) state.localStream.getTracks().forEach(t => t.stop());
-                if (state.roomCode) {
-                    fetch(`${API_URL}/api/hangup`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ room_code: state.roomCode, pin: state.myPin })
-                    });
+                document.getElementById('incoming').classList.remove('show');
+                document.getElementById('call-avatar').textContent = incomingData.caller_pin[0];
+                document.getElementById('call-pin').textContent = incomingData.caller_pin;
+                document.getElementById('call-status').textContent = 'Connected';
+                document.getElementById('call').classList.add('show');
+
+                if (incomingData.call_type === 'video') {
+                    document.getElementById('local-vid').srcObject = stream;
+                    document.getElementById('video-box').classList.remove('hidden');
                 }
-                this.stopRinging();
-                this.stopTones();
-                location.reload();
-            },
 
-            dial(n) { if (state.dialing.length < 6) { state.dialing += n; ui.updateDial(); } },
-            backspace() { state.dialing = state.dialing.slice(0, -1); ui.updateDial(); },
-
-            logCall(pin, type) {
-                state.recent.unshift({ pin, type, time: Date.now() });
-                state.recent = state.recent.slice(0, 20);
-                localStorage.setItem('inet_v2_recent', JSON.stringify(state.recent));
-                ui.renderRecent();
-            },
-
-            // Audio Utility
-            startRinging() {
-                if ("vibrate" in navigator) navigator.vibrate([400, 200, 400, 200, 400]);
-                this.playTone(660, 0.5);
-                state.audio.ring = setInterval(() => this.playTone(660, 0.5), 1500);
-            },
-            stopRinging() { clearInterval(state.audio.ring); if ("vibrate" in navigator) navigator.vibrate(0); },
-            playTone(freq, dur) {
-                if (!state.audio.ctx) state.audio.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = state.audio.ctx.createOscillator();
-                const g = state.audio.ctx.createGain();
-                osc.connect(g); g.connect(state.audio.ctx.destination);
-                osc.frequency.value = freq;
-                g.gain.setValueAtTime(0.1, state.audio.ctx.currentTime);
-                osc.start(); osc.stop(state.audio.ctx.currentTime + dur);
-            },
-            stopTones() { /* Logic to stop ongoing oscillation if needed */ }
-        };
-
-        const ui = {
-            showScreen(id) {
-                document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-                document.getElementById(`screen-${id}`).classList.remove('hidden');
-                if (id !== 'signup') {
-                    document.getElementById('bottom-nav').classList.remove('hidden');
-                    document.getElementById('fab-dial').classList.remove('hidden');
-                }
-            },
-            switchTab(t) {
-                this.showScreen(t);
-                document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active'));
-                document.getElementById(`nav-${t}`).classList.add('tab-active');
-            },
-            openDialpad() { state.dialing = ''; this.updateDial(); document.getElementById('overlay-dialpad').classList.remove('hidden'); },
-            closeDialpad() { document.getElementById('overlay-dialpad').classList.add('hidden'); },
-            updateDial() { document.getElementById('dial-display').innerText = state.dialing || '------'; },
-            showCall(pin, type) {
-                const s = document.getElementById('screen-call');
-                s.classList.remove('hidden');
-                document.getElementById('call-id-display').innerText = pin;
-                document.getElementById('call-avatar').innerText = pin[0];
-            },
-            renderContacts() {
-                const l = document.getElementById('contact-list');
-                l.innerHTML = state.contacts.map(c => `
-                    <div onclick="app.startCall('audio', '${c.pin}')" class="p-5 glass-panel rounded-3xl flex items-center justify-between active:scale-95 transition-transform">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center font-black italic text-red-500">${c.name[0]}</div>
-                            <div>
-                                <p class="font-black">${c.name}</p>
-                                <p class="text-[10px] font-mono text-slate-500 tracking-widest">${c.pin}</p>
-                            </div>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500">📞</div>
-                    </div>
-                `).join('');
-            },
-            renderRecent() {
-                const l = document.getElementById('recent-list');
-                const e = document.getElementById('recent-empty');
-                if (state.recent.length === 0) { e.classList.remove('hidden'); l.innerHTML = ''; }
-                else {
-                    e.classList.add('hidden');
-                    l.innerHTML = state.recent.map(r => `
-                        <div class="p-4 glass-panel rounded-2xl flex items-center justify-between opacity-80">
-                            <div class="flex items-center gap-3">
-                                <div class="text-xs font-mono text-red-500">${r.type === 'incoming' ? '↙' : '↗'}</div>
-                                <div class="font-bold text-sm">${r.pin}</div>
-                            </div>
-                            <div class="text-[9px] text-slate-500 uppercase font-black">${new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                        </div>
-                    `).join('');
-                }
-            },
-            showAddContact() {
-                const n = prompt("Identity Name:");
-                const p = prompt("6-Digit ID:");
-                if (n && p?.length === 6) {
-                    state.contacts.push({ name: n, pin: p });
-                    localStorage.setItem('inet_v2_contacts', JSON.stringify(state.contacts));
-                    this.renderContacts();
-                }
+                addRecent(incomingData.caller_pin, 'incoming');
+                startPoll();
+            } catch (e) {
+                alert('Error: ' + e.message);
+                hangup();
             }
-        };
+        }
 
-        app.init();
-        
-        // Prevent accidental reloads on swipe
-        window.addEventListener('beforeunload', (e) => {
-            if (state.roomCode) {
-                e.preventDefault();
-                e.returnValue = '';
+        async function reject() {
+            if (room) {
+                await fetch(API + '/api/decline', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ room_code: room, pin: myPin })
+                });
             }
-        });
+            document.getElementById('incoming').classList.remove('show');
+            room = null;
+            incomingData = null;
+        }
+
+        function hangup() {
+            if (room) {
+                fetch(API + '/api/hangup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ room_code: room, pin: myPin })
+                });
+            }
+            if (pc) pc.close();
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            if (pollTimer) clearInterval(pollTimer);
+            pc = null;
+            stream = null;
+            room = null;
+            document.getElementById('call').classList.remove('show');
+            document.getElementById('video-box').classList.add('hidden');
+        }
+
+        function startPoll() {
+            pollTimer = setInterval(async () => {
+                try {
+                    const r = await fetch(API + '/api/poll/' + room + '/' + myPin);
+                    const d = await r.json();
+                    if (d.hangup) {
+                        alert('Call ended');
+                        hangup();
+                        return;
+                    }
+                    if (d.signals) {
+                        for (const s of d.signals) {
+                            if (s.type === 'answer') {
+                                await pc.setRemoteDescription(s.data);
+                                document.getElementById('call-status').textContent = 'Connected';
+                            } else if (s.type === 'ice') {
+                                await pc.addIceCandidate(s.data);
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }, 2000);
+        }
+
+        function startListen() {
+            setInterval(async () => {
+                if (room) return;
+                try {
+                    const r = await fetch(API + '/api/incoming/' + myPin);
+                    const d = await r.json();
+                    if (d.incoming) {
+                        incomingData = d;
+                        room = d.room_code;
+                        document.getElementById('inc-pin').textContent = d.caller_pin;
+                        document.getElementById('incoming').classList.add('show');
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('Incoming Call', { body: 'From: ' + d.caller_pin });
+                        }
+                    }
+                } catch (e) {}
+            }, 3000);
+        }
+
+        function addRecent(pin, type) {
+            recent.unshift({ pin, type, time: Date.now() });
+            recent = recent.slice(0, 50);
+            localStorage.setItem('recent', JSON.stringify(recent));
+            renderRecent();
+        }
+
+        function renderRecent() {
+            const list = document.getElementById('recent-list');
+            const empty = document.getElementById('recent-empty');
+            if (recent.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            list.innerHTML = recent.map(c => {
+                const date = new Date(c.time);
+                const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const icon = c.type === 'incoming' ? '📲' : '📞';
+                return '<div class="card call-item" onclick="dialNum=\'' + c.pin + '\'; openDial(); document.getElementById(\'disp\').textContent=\'' + c.pin + '\';">' +
+                    '<div class="avatar">' + c.pin[0] + '</div>' +
+                    '<div class="info">' +
+                        '<div class="pin">' + c.pin + '</div>' +
+                        '<div class="time">' + time + '</div>' +
+                    '</div>' +
+                    '<div style="font-size:20px">' + icon + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        function renderContacts() {
+            const list = document.getElementById('contacts-list');
+            const empty = document.getElementById('contacts-empty');
+            if (contacts.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            list.innerHTML = contacts.map(c => {
+                return '<div class="card call-item" onclick="dialNum=\'' + c.pin + '\'; openDial(); document.getElementById(\'disp\').textContent=\'' + c.pin + '\';">' +
+                    '<div class="avatar">' + c.name[0].toUpperCase() + '</div>' +
+                    '<div class="info">' +
+                        '<div class="pin">' + c.name + '</div>' +
+                        '<div class="time">' + c.pin + '</div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            const sw = 'self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",()=>self.clients.claim());';
+            const blob = new Blob([sw], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
     </script>
 </body>
-</html>
-
+    </html>
