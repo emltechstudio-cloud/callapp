@@ -1,32 +1,15 @@
 {
-  "name": "iNet – Secure Calls",
+  "name": "iNet - Private Connect",
   "short_name": "iNet",
-  "description": "Private peer-to-peer calls, chat & file transfer. No servers. No logs.",
+  "description": "Private peer-to-peer calls, chats, and file sharing",
   "start_url": "/app.html",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "background_color": "#0a0a0c",
-  "theme_color": "#0a0a0c",
-  "orientation": "portrait-primary",
-  "lang": "en",
-  "categories": ["communication", "utilities"],
-  "screenshots": [
-    {
-      "src": "/screenshots/recent.png",
-      "sizes": "640x1136",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Recent calls"
-    },
-    {
-      "src": "/screenshots/call.png",
-      "sizes": "640x1136",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Active call screen"
-    }
-  ],
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0e0e10",
+  "theme_color": "#e63946",
+  "orientation": "portrait",
+  "categories": ["communication", "social"],
   "icons": [
     {
       "src": "/icons/icon-72.png",
@@ -75,56 +58,32 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/badge-72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "monochrome"
     }
   ],
   "shortcuts": [
     {
-      "name": "Dial",
-      "short_name": "Dial",
-      "description": "Open the dialer",
-      "url": "/app.html?action=dial",
+      "name": "New Chat",
+      "short_name": "Chat",
+      "description": "Start a new chat",
+      "url": "/app.html?action=chat",
       "icons": [
         {
-          "src": "/icons/shortcut-dial.png",
-          "sizes": "96x96",
-          "type": "image/png"
+          "src": "/icons/shortcut-chat.png",
+          "sizes": "96x96"
         }
       ]
     },
     {
-      "name": "Recent Calls",
-      "short_name": "Recent",
-      "description": "View recent calls",
-      "url": "/app.html?tab=recent",
+      "name": "Contacts",
+      "short_name": "Contacts",
+      "description": "View contacts",
+      "url": "/app.html?tab=contacts",
       "icons": [
         {
-          "src": "/icons/shortcut-recent.png",
-          "sizes": "96x96",
-          "type": "image/png"
+          "src": "/icons/shortcut-contacts.png",
+          "sizes": "96x96"
         }
       ]
     }
-  ],
-  "share_target": {
-    "action": "/app.html",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
+  ]
     }
-  },
-  "protocol_handlers": [
-    {
-      "protocol": "web+inet",
-      "url": "/app.html?pin=%s"
-    }
-  ],
-  "prefer_related_applications": false
-}
