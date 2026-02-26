@@ -2,785 +2,936 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#dc3545">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iNet · Secure Calls</title>
+    <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="iNet">
-    <title>iNet</title>
-    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22iNet%22%2C%22short_name%22%3A%22iNet%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23dc3545%22%2C%22theme_color%22%3A%22%23dc3545%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520width%3D%27192%27%2520height%3D%27192%27%253E%253Crect%2520width%3D%27192%27%2520height%3D%27192%27%2520fill%3D%27%2523dc3545%27%2F%253E%253Ctext%2520x%3D%2750%2525%27%2520y%3D%2750%2525%27%2520font-size%3D%27140%27%2520font-family%3D%27system-ui%27%2520fill%3D%27white%27%2520text-anchor%3D%27middle%27%2520dy%3D%27.35em%27%253Ei%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%23dc3545'/%3E%3Ctext x='50%25' y='50%25' font-size='24' font-family='system-ui' fill='white' text-anchor='middle' dy='.35em'%3Ei%3C/text%3E%3C/svg%3E">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #fff;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        :root {
+            --bg:#0e0e10; --surface:#18181c; --surface2:#222228;
+            --border:rgba(255,255,255,0.07); --accent:#e63946;
+            --accent-dim:rgba(230,57,70,0.12); --green:#2ecc71;
+            --text:#f0f0f2; --muted:#6b6b75; --radius:16px; --radius-sm:10px;
         }
-        
-        .header {
-            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
-            padding: 15px 20px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .logo {
-            width: 35px;
-            height: 35px;
-            background: #dc3545;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 300;
-        }
-        .header h1 { font-size: 20px; font-weight: 500; flex: 1; }
-        
-        .main { flex: 1; overflow-y: auto; background: #f8f9fa; }
-        
-        .signup {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 40px 20px;
-            background: white;
-        }
-        .signup .logo-big {
-            width: 120px;
-            height: 120px;
-            background: #dc3545;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-            font-weight: 300;
-            color: white;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(220,53,69,0.3);
-        }
-        .signup h2 { font-size: 28px; margin-bottom: 10px; }
-        .signup p { color: #666; text-align: center; margin-bottom: 30px; }
-        .btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 16px 50px;
-            font-size: 18px;
-            border-radius: 25px;
-            cursor: pointer;
-        }
-        
-        .tab { display: none; padding: 20px; }
-        .tab.active { display: block; }
-        
-        .empty { text-align: center; padding: 60px 20px; color: #999; }
-        .empty .icon { font-size: 80px; margin-bottom: 20px; opacity: 0.3; }
-        
-        .card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .my-pin {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        .my-pin .label { font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
-        .my-pin .pin { font-size: 36px; font-weight: 600; letter-spacing: 4px; }
-        
-        .call-item {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-        .call-item .avatar {
-            width: 50px;
-            height: 50px;
-            background: #dc3545;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: 500;
-            margin-right: 15px;
-        }
-        .call-item .info { flex: 1; }
-        .call-item .pin { font-size: 18px; font-weight: 500; }
-        .call-item .time { font-size: 14px; color: #999; margin-top: 3px; }
-        
-        .nav {
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            padding: 8px 0;
-        }
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            color: #999;
-        }
-        .nav-item.active { color: #dc3545; }
-        .nav-item .icon { font-size: 24px; margin-bottom: 4px; }
-        .nav-item .label { font-size: 11px; }
-        
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: #dc3545;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 28px;
-            box-shadow: 0 4px 15px rgba(220,53,69,0.4);
-            cursor: pointer;
-            border: none;
-            z-index: 100;
-        }
-        
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .overlay.show { display: flex; }
-        
-        .dialpad {
-            background: white;
-            border-radius: 20px 20px 0 0;
-            width: 100%;
-            max-width: 400px;
-            padding: 30px 20px;
-            position: absolute;
-            bottom: 0;
-        }
-        .dial-display {
-            font-size: 36px;
-            text-align: center;
-            padding: 20px;
-            letter-spacing: 5px;
-            min-height: 60px;
-        }
-        .dial-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .dial-btn {
-            aspect-ratio: 1;
-            border: none;
-            background: #f8f9fa;
-            border-radius: 50%;
-            font-size: 28px;
-            cursor: pointer;
-        }
-        .dial-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .dial-actions button {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .btn-audio { background: #28a745; color: white; }
-        .btn-video { background: #dc3545; color: white; }
-        .btn-close { background: #6c757d; color: white; }
-        
-        .call-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 60px 20px 40px;
-            z-index: 2000;
-        }
-        .call-screen.show { display: flex; }
-        .call-screen .avatar-big {
-            width: 150px;
-            height: 150px;
-            background: #dc3545;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 60px;
-            font-weight: 500;
-            margin-bottom: 30px;
-        }
-        .call-screen .pin {
-            font-size: 32px;
-            color: white;
-            letter-spacing: 5px;
-            margin-bottom: 10px;
-        }
-        .call-screen .status {
-            font-size: 18px;
-            color: #999;
-            margin-bottom: 40px;
-        }
-        
-        .call-controls {
-            display: flex;
-            gap: 20px;
-        }
-        .call-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: none;
-            font-size: 30px;
-            cursor: pointer;
-        }
-        .call-btn.hangup { background: #dc3545; color: white; }
-        .call-btn.answer { background: #28a745; color: white; }
-        
-        .video-box {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            aspect-ratio: 4/3;
-            background: #000;
-            border-radius: 15px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-        .video-box video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .video-box .local-vid {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 120px;
-            height: 90px;
-            border-radius: 10px;
-            border: 2px solid white;
-        }
-        
-        .hidden { display: none !important; }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
+
+        /* HEADER */
+        .header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 20px; height:60px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+        .logo-mark { width:34px; height:34px; background:var(--accent); border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-weight:500; font-size:14px; color:white; letter-spacing:-1px; flex-shrink:0; }
+        .header-name { font-weight:600; font-size:1rem; flex:1; }
+        .pin-chip { background:var(--surface2); border:1px solid var(--border); color:var(--muted); font-family:'DM Mono',monospace; font-size:0.8rem; padding:6px 12px; border-radius:20px; letter-spacing:2px; }
+        .pin-chip.has-pin { color:var(--text); border-color:var(--accent); }
+        #install-btn { background:var(--accent); color:white; border:none; padding:7px 14px; border-radius:20px; font-size:0.8rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; display:none; }
+
+        /* MAIN */
+        .main { flex:1; overflow-y:auto; overscroll-behavior:contain; }
+        .main::-webkit-scrollbar { display:none; }
+
+        /* SIGNUP */
+        #signup-screen { min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; }
+        .signup-icon { width:100px; height:100px; background:var(--surface2); border:1px solid var(--border); border-radius:28px; display:flex; align-items:center; justify-content:center; margin-bottom:32px; position:relative; }
+        .signup-icon::after { content:''; position:absolute; inset:-1px; border-radius:28px; background:linear-gradient(135deg,var(--accent),transparent 60%); opacity:0.4; pointer-events:none; }
+        .signup-icon-inner { font-family:'DM Mono',monospace; font-size:2rem; font-weight:500; color:var(--accent); }
+        #signup-screen h2 { font-size:1.8rem; font-weight:600; margin-bottom:12px; }
+        #signup-screen p { color:var(--muted); font-size:0.95rem; max-width:280px; line-height:1.6; margin-bottom:40px; }
+        .btn-primary { background:var(--accent); color:white; border:none; padding:15px 44px; font-size:1rem; font-weight:600; font-family:'DM Sans',sans-serif; border-radius:30px; cursor:pointer; transition:opacity 0.15s,transform 0.1s; }
+        .btn-primary:active { opacity:0.85; transform:scale(0.98); }
+        #signup-error { color:var(--accent); margin-top:16px; font-size:0.9rem; }
+
+        /* TABS */
+        #tabs { display:flex; padding:12px 16px 0; gap:4px; border-bottom:1px solid var(--border); }
+        #tabs.hidden { display:none; }
+        .tab { flex:1; padding:10px 8px; text-align:center; cursor:pointer; font-size:0.8rem; font-weight:500; color:var(--muted); border-radius:var(--radius-sm); display:flex; flex-direction:column; align-items:center; gap:5px; transition:all 0.15s; border-bottom:2px solid transparent; }
+        .tab svg { width:20px; height:20px; fill:currentColor; }
+        .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+        .tab-content { display:none; padding:12px 16px 80px; }
+        .tab-content.active { display:block; }
+
+        /* MY PIN CARD */
+        .my-pin-card { background:linear-gradient(135deg,#1a0810 0%,#2a0a18 100%); border:1px solid rgba(230,57,70,0.3); border-radius:var(--radius); padding:20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+        .my-pin-card .lbl { font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+        .my-pin-card .pin-number { font-family:'DM Mono',monospace; font-size:2rem; font-weight:500; letter-spacing:6px; color:var(--text); }
+        .copy-btn { background:var(--accent-dim); border:1px solid rgba(230,57,70,0.3); color:var(--accent); border-radius:var(--radius-sm); padding:8px 14px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; cursor:pointer; }
+
+        /* CARDS */
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:background 0.1s,border-color 0.1s; }
+        .card:active { background:var(--surface2); border-color:var(--accent); }
+        .avatar { width:46px; height:46px; background:var(--surface2); border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:1rem; font-weight:500; color:var(--muted); flex-shrink:0; }
+        .avatar.group-av { border-radius:14px; }
+        .info { flex:1; min-width:0; }
+        .info .name { font-weight:600; font-size:1rem; font-family:'DM Mono',monospace; letter-spacing:1px; }
+        .info .meta { font-size:0.8rem; color:var(--muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .card-actions { display:flex; gap:8px; }
+        .icon-action { width:36px; height:36px; border-radius:50%; border:1px solid var(--border); background:var(--surface2); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.1s; }
+        .icon-action:active { background:var(--accent-dim); border-color:var(--accent); }
+        .icon-action svg { width:16px; height:16px; fill:var(--muted); }
+        .icon-action.green svg { fill:var(--green); }
+
+        /* EMPTY */
+        .empty { text-align:center; padding:60px 20px; color:var(--muted); font-size:0.9rem; line-height:1.6; }
+        .empty-icon { font-size:2.5rem; margin-bottom:12px; opacity:0.4; }
+
+        /* GROUP LINK */
+        .group-link { font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--muted); background:var(--surface2); padding:8px 10px; border-radius:var(--radius-sm); word-break:break-all; margin-top:8px; }
+        .btn-sec { background:transparent; border:1px solid var(--border); color:var(--muted); padding:8px 16px; border-radius:20px; font-family:'DM Sans',sans-serif; font-size:0.8rem; cursor:pointer; margin-top:8px; display:inline-flex; align-items:center; gap:6px; }
+        .btn-sec:active { border-color:var(--accent); color:var(--accent); }
+        .section-lbl { font-size:0.72rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); padding:16px 0 8px; }
+
+        /* FAB */
+        .fab { position:fixed; bottom:24px; right:24px; width:58px; height:58px; background:var(--accent); border:none; border-radius:50%; display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 24px rgba(230,57,70,0.4); z-index:100; transition:transform 0.15s,box-shadow 0.15s; }
+        .fab:active { transform:scale(0.94); }
+        .fab.visible { display:flex; }
+        .fab svg { width:24px; height:24px; fill:white; }
+
+        /* OVERLAY */
+        .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); display:none; align-items:flex-end; justify-content:center; z-index:1000; }
+        .overlay.show { display:flex; }
+        .overlay.center { align-items:center; }
+
+        /* DIALER */
+        .dialer { background:var(--surface); width:100%; max-width:420px; border-radius:24px 24px 0 0; padding:20px 24px 36px; border:1px solid var(--border); border-bottom:none; }
+        .sheet-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 20px; }
+        .dial-display { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:20px; text-align:center; font-family:'DM Mono',monospace; font-size:2.2rem; letter-spacing:8px; color:var(--text); margin-bottom:20px; min-height:72px; display:flex; align-items:center; justify-content:center; }
+        .dial-display.ph { color:var(--muted); font-size:1rem; letter-spacing:0; }
+        .dial-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+        .dial-btn { aspect-ratio:1; border:1px solid var(--border); background:var(--surface2); border-radius:50%; font-family:'DM Mono',monospace; font-size:1.5rem; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.1s; }
+        .dial-btn:active { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+        .dial-btn svg { width:22px; height:22px; fill:var(--muted); }
+        .dial-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+        .call-big { padding:14px; border:none; border-radius:30px; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:opacity 0.15s; }
+        .call-big:active { opacity:0.8; }
+        .call-big.audio { background:var(--green); color:white; }
+        .call-big.video { background:var(--accent); color:white; }
+        .call-big svg { width:18px; height:18px; fill:white; }
+        .btn-cancel { width:100%; padding:13px; border:1px solid var(--border); background:transparent; border-radius:30px; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.95rem; cursor:pointer; }
+
+        /* INCOMING */
+        .modal-box { background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:32px 24px; width:90%; max-width:320px; text-align:center; }
+        .inc-avatar { width:80px; height:80px; background:var(--surface2); border:2px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+        .inc-avatar svg { width:36px; height:36px; fill:var(--muted); }
+        #incoming-pin { font-family:'DM Mono',monospace; font-size:1.8rem; letter-spacing:4px; font-weight:500; margin-bottom:6px; }
+        #incoming-type { color:var(--muted); font-size:0.9rem; margin-bottom:28px; }
+        .inc-actions { display:flex; justify-content:center; gap:20px; }
+        .round-btn { width:64px; height:64px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.1s; }
+        .round-btn:active { transform:scale(0.93); }
+        .round-btn.accept { background:var(--green); }
+        .round-btn.decline { background:var(--accent); }
+        .round-btn svg { width:28px; height:28px; fill:white; }
+
+        /* CALL SCREEN */
+        #call-screen { position:fixed; inset:0; background:#08080a; display:none; flex-direction:column; z-index:2000; }
+        #call-screen.show { display:flex; }
+        .video-area { flex:1; position:relative; background:#0a0a0c; overflow:hidden; }
+        #remote-video { width:100%; height:100%; object-fit:cover; display:none; }
+        #local-video { position:absolute; bottom:100px; right:16px; width:90px; height:120px; border-radius:12px; border:2px solid var(--surface); object-fit:cover; background:#1a1a1e; cursor:pointer; z-index:10; }
+        .call-bg { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .call-big-avatar { width:110px; height:110px; background:var(--surface2); border:2px solid rgba(230,57,70,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+        .call-big-avatar svg { width:50px; height:50px; fill:var(--muted); }
+        .call-pin-lbl { font-family:'DM Mono',monospace; font-size:2rem; letter-spacing:4px; font-weight:500; color:var(--text); }
+        .call-status-lbl { font-size:0.9rem; color:var(--muted); margin-top:8px; }
+        .call-controls { position:absolute; bottom:0; left:0; right:0; padding:20px; background:linear-gradient(transparent,rgba(0,0,0,0.9)); display:flex; justify-content:center; align-items:center; gap:16px; }
+        .ctrl-btn { width:54px; height:54px; border-radius:50%; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; color:white; }
+        .ctrl-btn:active { background:rgba(255,255,255,0.2); }
+        .ctrl-btn.muted { background:var(--accent-dim); border-color:var(--accent); }
+        .ctrl-btn.end-call { width:62px; height:62px; background:var(--accent); border:none; box-shadow:0 4px 16px rgba(230,57,70,0.5); }
+        .ctrl-btn svg { width:22px; height:22px; fill:currentColor; }
+        .ctrl-btn.end-call svg { width:26px; height:26px; }
+
+        /* CHAT DRAWER */
+        .chat-drawer { position:absolute; bottom:0; left:0; right:0; background:var(--surface); border-radius:20px 20px 0 0; border:1px solid var(--border); border-bottom:none; transform:translateY(100%); transition:transform 0.28s cubic-bezier(0.4,0,0.2,1); max-height:65%; display:flex; flex-direction:column; z-index:20; }
+        .chat-drawer.open { transform:translateY(0); }
+        .drawer-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:12px auto 0; }
+        .drawer-top { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-weight:600; font-size:0.95rem; }
+        .drawer-close { width:28px; height:28px; background:var(--surface2); border:none; border-radius:50%; color:var(--muted); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .chat-msgs { flex:1; overflow-y:auto; padding:12px 16px; }
+        .chat-msgs::-webkit-scrollbar { display:none; }
+        .msg-row { margin-bottom:10px; }
+        .msg-row.own { text-align:right; }
+        .msg-sender { font-size:0.72rem; color:var(--muted); margin-bottom:3px; font-family:'DM Mono',monospace; }
+        .msg-bubble { display:inline-block; background:var(--surface2); padding:9px 14px; border-radius:16px; font-size:0.9rem; max-width:78%; word-break:break-word; border:1px solid var(--border); }
+        .msg-row.own .msg-bubble { background:var(--accent); border-color:var(--accent); color:white; }
+        .chat-input-row { display:flex; align-items:center; gap:8px; padding:10px 12px; border-top:1px solid var(--border); }
+        .chat-text { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:10px 16px; font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--text); outline:none; }
+        .chat-text:focus { border-color:rgba(230,57,70,0.5); }
+        .icon-btn-sm { width:36px; height:36px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+        .icon-btn-sm svg { width:22px; height:22px; fill:var(--muted); }
+        .icon-btn-sm.send svg { fill:var(--accent); }
+
+        /* TOAST */
+        .toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(30,30,35,0.95); color:white; padding:10px 20px; border-radius:20px; font-size:0.9rem; z-index:9999; border:1px solid rgba(255,255,255,0.1); backdrop-filter:blur(4px); font-family:'DM Sans',sans-serif; white-space:nowrap; pointer-events:none; animation:fadeup 0.2s ease; }
+        @keyframes fadeup { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+        @keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(230,57,70,0.5)} 70%{box-shadow:0 0 0 12px rgba(230,57,70,0)} 100%{box-shadow:0 0 0 0 rgba(230,57,70,0)} }
+        .ringing { animation:pulse-ring 1.4s infinite; }
+        #file-input { display:none; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">i</div>
-        <h1 id="hdr">iNet</h1>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="logo-mark">iN</div>
+    <span class="header-name" id="header-title">iNet</span>
+    <div class="pin-chip" id="header-pin">No PIN</div>
+    <button id="install-btn">Install</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- Signup -->
+    <div id="signup-screen">
+        <div class="signup-icon"><div class="signup-icon-inner">iN</div></div>
+        <h2>iNet</h2>
+        <p>Private peer-to-peer calls, chat &amp; file transfer. No servers after connection.</p>
+        <button class="btn-primary" id="signup-btn">Get your PIN</button>
+        <div id="signup-error"></div>
     </div>
 
-    <div class="main">
-        <div id="signup" class="signup">
-            <div class="logo-big">i</div>
-            <h2>Welcome to iNet</h2>
-            <p>Call anyone with just a PIN.<br>No phone number needed.</p>
-            <button class="btn" onclick="doSignup()">Get Started</button>
-            <div id="signup-msg" style="margin-top: 20px; color: #dc3545;"></div>
+    <!-- Tabs nav -->
+    <div id="tabs" class="hidden">
+        <div class="tab active" data-tab="recent">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+            Recent
         </div>
-
-        <div id="recent" class="tab">
-            <div id="recent-list"></div>
-            <div id="recent-empty" class="empty">
-                <div class="icon">📞</div>
-                <h3>No Recent Calls</h3>
-            </div>
+        <div class="tab" data-tab="contacts">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            Contacts
         </div>
-
-        <div id="contacts" class="tab">
-            <div class="my-pin">
-                <div class="label">My PIN</div>
-                <div class="pin" id="my-pin">------</div>
-            </div>
-            <div id="contacts-list"></div>
-            <div id="contacts-empty" class="empty">
-                <div class="icon">👥</div>
-                <h3>No Contacts</h3>
-            </div>
-        </div>
-    </div>
-
-    <div id="nav" class="nav hidden">
-        <button class="nav-item active" onclick="switchTab('recent')">
-            <div class="icon">🕒</div>
-            <div class="label">Recent</div>
-        </button>
-        <button class="nav-item" onclick="switchTab('contacts')">
-            <div class="icon">👤</div>
-            <div class="label">Contacts</div>
-        </button>
-    </div>
-
-    <button id="fab" class="fab hidden" onclick="openDial()">📞</button>
-
-    <div id="dialpad" class="overlay" onclick="if(event.target===this) closeDial()">
-        <div class="dialpad" onclick="event.stopPropagation()">
-            <div class="dial-display" id="disp"></div>
-            <div class="dial-grid">
-                <button class="dial-btn" onclick="dial('1')">1</button>
-                <button class="dial-btn" onclick="dial('2')">2</button>
-                <button class="dial-btn" onclick="dial('3')">3</button>
-                <button class="dial-btn" onclick="dial('4')">4</button>
-                <button class="dial-btn" onclick="dial('5')">5</button>
-                <button class="dial-btn" onclick="dial('6')">6</button>
-                <button class="dial-btn" onclick="dial('7')">7</button>
-                <button class="dial-btn" onclick="dial('8')">8</button>
-                <button class="dial-btn" onclick="dial('9')">9</button>
-                <button class="dial-btn" onclick="dial('*')">*</button>
-                <button class="dial-btn" onclick="dial('0')">0</button>
-                <button class="dial-btn" onclick="backspace()">⌫</button>
-            </div>
-            <div class="dial-actions">
-                <button class="btn-audio" onclick="call('audio')">🎤 Audio</button>
-                <button class="btn-video" onclick="call('video')">📹 Video</button>
-            </div>
-            <div class="dial-actions">
-                <button class="btn-close" onclick="closeDial()">Close</button>
-            </div>
+        <div class="tab" data-tab="groups">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-1 .05 1.16.84 2 1.87 2 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            Groups
         </div>
     </div>
 
-    <div id="call" class="call-screen">
-        <div>
-            <div class="avatar-big" id="call-avatar">?</div>
-            <div class="pin" id="call-pin">------</div>
-            <div class="status" id="call-status">Calling...</div>
+    <!-- Recent tab -->
+    <div id="recent-tab" class="tab-content active">
+        <div id="recent-list"></div>
+        <div id="recent-empty" class="empty"><div class="empty-icon">📞</div>No recent calls yet.<br>Tap the button below to dial.</div>
+    </div>
+
+    <!-- Contacts tab -->
+    <div id="contacts-tab" class="tab-content">
+        <div class="my-pin-card">
+            <div>
+                <div class="lbl">Your PIN</div>
+                <div class="pin-number" id="my-pin-display">——</div>
+            </div>
+            <button class="copy-btn" id="copy-pin-btn">Copy</button>
         </div>
-        <div id="video-box" class="video-box hidden">
-            <video id="remote-vid" autoplay playsinline></video>
-            <video id="local-vid" class="local-vid" autoplay playsinline muted></video>
+        <div class="section-lbl">Saved Contacts</div>
+        <div id="contacts-list"></div>
+        <div id="contacts-empty" class="empty"><div class="empty-icon">👤</div>No contacts yet.<br>Dial a PIN to add one.</div>
+    </div>
+
+    <!-- Groups tab -->
+    <div id="groups-tab" class="tab-content">
+        <button class="btn-primary" id="create-group-btn" style="width:100%;margin-bottom:16px;">+ Create Group Call</button>
+        <div id="groups-list"></div>
+        <div id="groups-empty" class="empty"><div class="empty-icon">👥</div>No active groups.<br>Create one and share the link.</div>
+    </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab">
+    <svg viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z"/></svg>
+</button>
+
+<!-- DIALER -->
+<div id="dialer" class="overlay">
+    <div class="dialer">
+        <div class="sheet-handle"></div>
+        <div class="dial-display ph" id="dial-display">Enter 6-digit PIN</div>
+        <div class="dial-grid">
+            <button class="dial-btn" data-digit="1">1</button>
+            <button class="dial-btn" data-digit="2">2</button>
+            <button class="dial-btn" data-digit="3">3</button>
+            <button class="dial-btn" data-digit="4">4</button>
+            <button class="dial-btn" data-digit="5">5</button>
+            <button class="dial-btn" data-digit="6">6</button>
+            <button class="dial-btn" data-digit="7">7</button>
+            <button class="dial-btn" data-digit="8">8</button>
+            <button class="dial-btn" data-digit="9">9</button>
+            <button class="dial-btn" data-digit="*">*</button>
+            <button class="dial-btn" data-digit="0">0</button>
+            <button class="dial-btn" id="dial-backspace">
+                <svg viewBox="0 0 24 24"><path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/></svg>
+            </button>
+        </div>
+        <div class="dial-row">
+            <button class="call-big audio" id="call-audio">
+                <svg viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z"/></svg>
+                Audio
+            </button>
+            <button class="call-big video" id="call-video">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                Video
+            </button>
+        </div>
+        <button class="btn-cancel" id="dial-close">Cancel</button>
+    </div>
+</div>
+
+<!-- INCOMING CALL -->
+<div id="incoming" class="overlay center">
+    <div class="modal-box">
+        <div class="inc-avatar ringing">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+        </div>
+        <div id="incoming-pin">000000</div>
+        <div id="incoming-type">Audio call</div>
+        <div class="inc-actions">
+            <button class="round-btn decline" id="incoming-decline">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+            </button>
+            <button class="round-btn accept" id="incoming-answer">
+                <svg viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ACTIVE CALL SCREEN -->
+<div id="call-screen" class="call-screen">
+    <div class="video-area">
+        <video id="remote-video" autoplay playsinline></video>
+        <video id="local-video" autoplay playsinline muted></video>
+        <div class="call-bg" id="call-bg">
+            <div class="call-big-avatar">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20v-2a7 7 0 0 1 14 0v2" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+            </div>
+            <div class="call-pin-lbl" id="call-pin"></div>
+            <div class="call-status-lbl" id="call-status">Connecting...</div>
         </div>
         <div class="call-controls">
-            <button class="call-btn hangup" onclick="hangup()">✕</button>
+            <button class="ctrl-btn" id="mute-btn" title="Mute">
+                <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+            </button>
+            <button class="ctrl-btn end-call" id="hangup-btn">
+                <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+            </button>
+            <button class="ctrl-btn" id="toggle-video-btn" title="Toggle camera">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            </button>
+            <button class="ctrl-btn" id="show-chat-btn" title="Chat">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </button>
+        </div>
+        <!-- Chat drawer inside call screen -->
+        <div class="chat-drawer" id="chat-drawer">
+            <div class="drawer-handle"></div>
+            <div class="drawer-top">
+                <span>Chat</span>
+                <button class="drawer-close" id="close-chat-btn">✕</button>
+            </div>
+            <div class="chat-msgs" id="chat-messages"></div>
+            <div class="chat-input-row">
+                <input class="chat-text" id="chat-input" type="text" placeholder="Message...">
+                <button class="icon-btn-sm" id="attach-btn">
+                    <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
+                </button>
+                <button class="icon-btn-sm send" id="send-chat-btn">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
-    <div id="incoming" class="call-screen">
-        <div>
-            <div class="avatar-big">📞</div>
-            <div class="pin" id="inc-pin">------</div>
-            <div class="status">Incoming Call...</div>
-        </div>
-        <div class="call-controls">
-            <button class="call-btn hangup" onclick="reject()">✕</button>
-            <button class="call-btn answer" onclick="answer()">✓</button>
-        </div>
-    </div>
+<audio id="remote-audio" autoplay playsinline></audio>
+<input type="file" id="file-input">
 
-    <audio id="remote-audio" autoplay playsinline></audio>
+<script>
+// ─── CONFIG ───
+const API_BASE = 'https://emltechstudio-inet.hf.space';
+const WS_URL   = 'wss://emltechstudio-inet.hf.space/ws';
+const ICE = { iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+]};
 
-    <script>
-        const API = 'https://emltechstudio-inet.hf.space';
-        const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }] };
+// ─── STATE ───
+let myPin    = localStorage.getItem('myPin');
+let deviceId = localStorage.getItem('deviceId');
+let ws = null, wsReconnectTimer = null;
+let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+let recent   = JSON.parse(localStorage.getItem('recent')   || '[]');
+let groups   = JSON.parse(localStorage.getItem('groups')   || '[]');
+let pcs = new Map(), dcs = new Map();
+let localStream = null, currentCall = null, incomingCall = null;
+let fileTransfers = new Map();
+let audioCtx = null, ringtoneGain = null, isRinging = false, ringInterval = null;
+let dialNum = '';
 
-        let myPin = localStorage.getItem('myPin');
-        let pc = null;
-        let stream = null;
-        let room = null;
-        let pollTimer = null;
-        let dialNum = '';
-        let callType = 'audio';
-        let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
-        let recent = JSON.parse(localStorage.getItem('recent') || '[]');
-        let incomingData = null;
+// ─── BOOT ───
+if (myPin && deviceId) {
+    showApp();
+    connectWS();
+    renderAll();
+    checkGroupLink();
+    registerSW();
+} else {
+    document.getElementById('signup-screen').style.display = 'flex';
+    document.getElementById('tabs').style.display = 'none';
+}
 
-        if (myPin) {
-            document.getElementById('signup').style.display = 'none';
-            document.getElementById('my-pin').textContent = myPin;
-            switchTab('recent');
-            renderRecent();
-            renderContacts();
-            startListen();
+function showApp() {
+    document.getElementById('signup-screen').style.display = 'none';
+    document.getElementById('tabs').classList.remove('hidden');
+    document.getElementById('fab').classList.add('visible');
+    const chip = document.getElementById('header-pin');
+    chip.textContent = myPin;
+    chip.classList.add('has-pin');
+    const pd = document.getElementById('my-pin-display');
+    if (pd) pd.textContent = myPin;
+}
+
+function renderAll() { renderRecent(); renderContacts(); renderGroups(); }
+
+// ─── PWA ───
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); deferredPrompt = e;
+    document.getElementById('install-btn').style.display = 'block';
+});
+document.getElementById('install-btn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    document.getElementById('install-btn').style.display = 'none';
+    deferredPrompt = null;
+});
+
+async function registerSW() {
+    if ('serviceWorker' in navigator) {
+        try { await navigator.serviceWorker.register('/sw.js'); } catch(e) {}
+    }
+}
+
+// ─── SIGNUP ───
+document.getElementById('signup-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('signup-btn');
+    btn.disabled = true; btn.textContent = 'Creating…';
+    document.getElementById('signup-error').textContent = '';
+    try {
+        const r = await fetch(API_BASE + '/signup', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ device_info: {} })
+        });
+        const d = await r.json();
+        if (d.net_number) {
+            myPin = d.net_number; deviceId = d.device_id;
+            localStorage.setItem('myPin', myPin);
+            localStorage.setItem('deviceId', deviceId);
+            if ('Notification' in window && Notification.permission !== 'granted') Notification.requestPermission();
+            showApp(); connectWS(); renderAll(); registerSW();
+            if (d.vapid_public_key) subPush(d.vapid_public_key);
+        } else throw new Error(d.error || 'Signup failed');
+    } catch(e) {
+        document.getElementById('signup-error').textContent = e.message;
+    } finally {
+        btn.disabled = false; btn.textContent = 'Get your PIN';
+    }
+});
+
+document.getElementById('copy-pin-btn').addEventListener('click', () => {
+    if (myPin) navigator.clipboard?.writeText(myPin).then(() => toast('PIN copied!'));
+});
+
+// ─── PUSH ───
+async function subPush(vpk) {
+    if (!vpk || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(vpk) });
+        await fetch(API_BASE + '/push/subscribe', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ net_number: myPin, device_id: deviceId, subscription: sub.toJSON() })
+        });
+    } catch(e) {}
+}
+function b64(s) {
+    const pad = '='.repeat((4 - s.length % 4) % 4);
+    const b = (s + pad).replace(/-/g,'+').replace(/_/g,'/');
+    const raw = atob(b); const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+}
+
+// ─── WEBSOCKET ───
+function connectWS() {
+    if (!myPin || !deviceId) return;
+    ws = new WebSocket(`${WS_URL}?net_number=${myPin}&device_id=${deviceId}`);
+    ws.onopen = () => { if (wsReconnectTimer) clearTimeout(wsReconnectTimer); };
+    ws.onmessage = e => handleSig(JSON.parse(e.data));
+    ws.onclose = () => { wsReconnectTimer = setTimeout(connectWS, 3000); };
+}
+function sig(target, type, payload) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ target, type, payload }));
+}
+function handleSig(msg) {
+    const { from, type, payload } = msg;
+    switch(type) {
+        case 'offer':
+            incomingCall = { from, type: payload.call_type || 'audio', sdp: payload.sdp };
+            startRing(); showIncoming(from, payload.call_type); break;
+        case 'answer':
+            if (pcs.has(from)) {
+                pcs.get(from).setRemoteDescription(new RTCSessionDescription(payload.sdp));
+                stopRing(); setStatus('Connected');
+            } break;
+        case 'ice-candidate':
+            if (pcs.has(from)) pcs.get(from).addIceCandidate(new RTCIceCandidate(payload.candidate)); break;
+        case 'join-room':          handleJoinRoom(from, payload.roomId); break;
+        case 'room-participants':  updateParticipants(payload.roomId, payload.participants); break;
+        case 'chat-message':       showMsg(from, payload.text, false); break;
+        case 'file-offer':         recvFileOffer(from, payload); break;
+        case 'file-chunk':         recvFileChunk(from, payload); break;
+    }
+}
+
+// ─── RINGTONE ───
+function startRing() {
+    if (isRinging) return;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx.resume().then(() => {
+        ringtoneGain = audioCtx.createGain();
+        ringtoneGain.gain.value = 0.3;
+        ringtoneGain.connect(audioCtx.destination);
+        isRinging = true;
+        function play() {
+            if (!isRinging) return;
+            const now = audioCtx.currentTime;
+            [[440,0,0.5],[554.37,0.2,0.7]].forEach(([f,s,e]) => {
+                const o = audioCtx.createOscillator();
+                o.type='sine'; o.frequency.value=f; o.connect(ringtoneGain);
+                o.start(now+s); o.stop(now+e);
+            });
         }
+        play(); ringInterval = setInterval(play, 2000);
+    });
+}
+function stopRing() {
+    isRinging = false;
+    if (ringInterval) clearInterval(ringInterval);
+    if (audioCtx) { audioCtx.close().then(() => audioCtx = null); }
+}
 
-        async function doSignup() {
-            const msg = document.getElementById('signup-msg');
-            msg.textContent = 'Creating PIN...';
-            try {
-                await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-                    .then(s => s.getTracks().forEach(t => t.stop()));
-                if ('Notification' in window) await Notification.requestPermission();
+// ─── CALLS ───
+async function startCall(remotePin, withVideo) {
+    if (!remotePin || remotePin.length !== 6) return toast('Invalid PIN');
+    closeDialer();
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
+        document.getElementById('local-video').srcObject = localStream;
+        document.getElementById('remote-video').style.display = withVideo ? 'block' : 'none';
+        document.getElementById('call-bg').style.display = 'flex';
 
-                const r = await fetch(API + '/api/signup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subscription: {} })
-                });
-                const d = await r.json();
-                if (d.success && d.pin) {
-                    myPin = d.pin;
-                    localStorage.setItem('myPin', myPin);
-                    document.getElementById('signup').style.display = 'none';
-                    document.getElementById('my-pin').textContent = myPin;
-                    switchTab('recent');
-                    startListen();
-                } else {
-                    msg.textContent = 'Error: ' + (d.error || 'Failed');
-                }
-            } catch (e) {
-                msg.textContent = 'Error: ' + e.message;
-            }
-        }
+        const pc = makePc(remotePin, true);
+        pcs.set(remotePin, pc);
+        localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            document.querySelectorAll('.nav-item')[tab === 'recent' ? 0 : 1].classList.add('active');
-            document.getElementById('hdr').textContent = tab === 'recent' ? 'Recent' : 'Contacts';
-            document.getElementById('nav').classList.remove('hidden');
-            document.getElementById('fab').classList.remove('hidden');
-        }
+        const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: withVideo });
+        await pc.setLocalDescription(offer);
+        sig(remotePin, 'offer', { sdp: pc.localDescription, call_type: withVideo ? 'video' : 'audio' });
 
-        function openDial() {
-            dialNum = '';
-            document.getElementById('disp').textContent = '';
-            document.getElementById('dialpad').classList.add('show');
-        }
+        currentCall = { type: 'one-to-one', remotePin, isVideo: withVideo };
+        document.getElementById('call-pin').textContent = remotePin;
+        setStatus('Calling…');
+        document.getElementById('call-screen').classList.add('show');
+        addRecent(remotePin, 'outgoing');
+        startRing();
+    } catch(e) {
+        toast('Failed: ' + e.message); cleanup();
+    }
+}
 
-        function closeDial() {
-            document.getElementById('dialpad').classList.remove('show');
-        }
+function makePc(remotePin, initiator) {
+    const pc = new RTCPeerConnection(ICE);
+    pc.onicecandidate = e => { if (e.candidate) sig(remotePin, 'ice-candidate', { candidate: e.candidate }); };
+    pc.ontrack = e => {
+        if (currentCall?.isVideo) document.getElementById('remote-video').srcObject = e.streams[0];
+        else document.getElementById('remote-audio').srcObject = e.streams[0];
+        setStatus('Connected');
+    };
+    pc.oniceconnectionstatechange = () => {
+        if (['disconnected','failed'].includes(pc.iceConnectionState) && currentCall) { toast('Call ended'); cleanup(); }
+    };
+    if (initiator) { const dc = pc.createDataChannel('chat'); setupDc(dc, remotePin); }
+    else pc.ondatachannel = e => setupDc(e.channel, remotePin);
+    return pc;
+}
 
-        function dial(n) {
-            if (dialNum.length < 6) {
-                dialNum += n;
-                document.getElementById('disp').textContent = dialNum;
-            }
-        }
+function setupDc(dc, pin) {
+    dcs.set(pin, dc);
+    dc.onmessage = e => {
+        try {
+            const m = JSON.parse(e.data);
+            if (m.type === 'chat') showMsg(pin, m.text, false);
+            else if (m.type === 'file-offer') recvFileOffer(pin, m);
+            else if (m.type === 'file-chunk') recvFileChunk(pin, m);
+        } catch(e) {}
+    };
+}
 
-        function backspace() {
-            dialNum = dialNum.slice(0, -1);
-            document.getElementById('disp').textContent = dialNum;
-        }
+function acceptCall() {
+    if (!incomingCall) return;
+    const { from, type } = incomingCall;
+    hideIncoming(); stopRing();
+    navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' })
+        .then(stream => {
+            localStream = stream;
+            document.getElementById('local-video').srcObject = stream;
+            document.getElementById('remote-video').style.display = type === 'video' ? 'block' : 'none';
+            document.getElementById('call-bg').style.display = 'flex';
 
-        async function call(type) {
-            if (dialNum.length !== 6) {
-                alert('Enter 6-digit PIN');
-                return;
-            }
-            callType = type;
-            closeDial();
+            const pc = makePc(from, false);
+            pcs.set(from, pc);
+            stream.getTracks().forEach(t => pc.addTrack(t, stream));
+            pc.setRemoteDescription(new RTCSessionDescription(incomingCall.sdp))
+                .then(() => pc.createAnswer())
+                .then(a => pc.setLocalDescription(a))
+                .then(() => sig(from, 'answer', { sdp: pc.localDescription }));
 
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: type === 'video'
-                });
+            currentCall = { type: 'one-to-one', remotePin: from, isVideo: type === 'video' };
+            document.getElementById('call-pin').textContent = from;
+            setStatus('Connected');
+            document.getElementById('call-screen').classList.add('show');
+            addRecent(from, 'incoming');
+        })
+        .catch(() => { toast('Could not access media'); cleanup(); });
+}
 
-                pc = new RTCPeerConnection(ICE);
-                stream.getTracks().forEach(t => pc.addTrack(t, stream));
+function declineCall() { hideIncoming(); stopRing(); incomingCall = null; }
 
-                if (type === 'video') {
-                    document.getElementById('local-vid').srcObject = stream;
-                    document.getElementById('video-box').classList.remove('hidden');
-                }
+function setStatus(s) { document.getElementById('call-status').textContent = s; }
 
-                pc.ontrack = (e) => {
-                    if (type === 'video') {
-                        document.getElementById('remote-vid').srcObject = e.streams[0];
-                    } else {
-                        document.getElementById('remote-audio').srcObject = e.streams[0];
-                    }
-                    document.getElementById('call-status').textContent = 'Connected';
-                };
+// ─── GROUP CALLS ───
+function createGroup() {
+    const roomId = Math.random().toString(36).substring(2, 10);
+    const link = `${location.origin}${location.pathname}?room=${roomId}&host=${myPin}`;
+    const name = prompt('Group name', `Group ${groups.length + 1}`) || `Group ${groups.length + 1}`;
+    groups.push({ id: roomId, name, link, participants: [myPin], createdAt: new Date().toISOString() });
+    localStorage.setItem('groups', JSON.stringify(groups));
+    renderGroups();
+    navigator.clipboard?.writeText(link).then(() => toast('Link copied!'));
+}
 
-                pc.oniceconnectionstatechange = () => {
-                    if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
-                        alert('Connection lost');
-                        hangup();
-                    }
-                };
+function checkGroupLink() {
+    const p = new URLSearchParams(location.search);
+    const room = p.get('room'), host = p.get('host');
+    if (room && host && myPin) {
+        sig(host, 'join-room', { roomId: room, joiner: myPin });
+        currentCall = { type: 'group', roomId: room, host, participants: [host] };
+        document.getElementById('call-pin').textContent = room;
+        setStatus('Joining group…');
+        document.getElementById('call-screen').classList.add('show');
+    }
+}
 
-                pc.onicecandidate = (e) => {
-                    if (e.candidate && room) {
-                        fetch(API + '/api/ice', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                room_code: room,
-                                candidate: e.candidate,
-                                sender_pin: myPin
-                            })
-                        });
-                    }
-                };
+function handleJoinRoom(joinerPin, roomId) {
+    const g = groups.find(g => g.id === roomId);
+    if (!g) return;
+    if (!g.participants.includes(joinerPin)) g.participants.push(joinerPin);
+    localStorage.setItem('groups', JSON.stringify(groups));
+    g.participants.forEach(p => {
+        if (p !== myPin) sig(p, 'room-participants', { roomId, participants: g.participants });
+    });
+    sig(joinerPin, 'room-participants', { roomId, participants: g.participants });
+    connectAll(g.participants);
+}
 
-                const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: type === 'video' });
-                await pc.setLocalDescription(offer);
+function updateParticipants(roomId, participants) {
+    if (!currentCall || currentCall.roomId !== roomId) return;
+    currentCall.participants = participants;
+    connectAll(participants);
+}
 
-                const r = await fetch(API + '/api/call', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        caller_pin: myPin,
-                        callee_pin: dialNum,
-                        offer: offer,
-                        call_type: type
-                    })
-                });
+function connectAll(participants) {
+    participants.forEach(p => { if (p !== myPin && !pcs.has(p)) connectPeer(p); });
+}
 
-                const d = await r.json();
-                if (d.success && d.room_code) {
-                    room = d.room_code;
-                    document.getElementById('call-avatar').textContent = dialNum[0];
-                    document.getElementById('call-pin').textContent = dialNum;
-                    document.getElementById('call-status').textContent = 'Calling...';
-                    document.getElementById('call').classList.add('show');
-                    addRecent(dialNum, 'outgoing');
-                    startPoll();
-                } else {
-                    alert('Call failed: ' + (d.error || 'Unknown error'));
-                    hangup();
-                }
-            } catch (e) {
-                alert('Error: ' + e.message);
-                hangup();
-            }
-        }
+async function connectPeer(remotePin) {
+    if (myPin < remotePin) {
+        const pc = makePc(remotePin, true);
+        pcs.set(remotePin, pc);
+        if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+        const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: currentCall?.isVideo || false });
+        await pc.setLocalDescription(offer);
+        sig(remotePin, 'offer', { sdp: pc.localDescription, call_type: currentCall?.isVideo ? 'video' : 'audio' });
+    }
+}
 
-        async function answer() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: incomingData.call_type === 'video'
-                });
+// ─── CHAT & FILES ───
+function sendMsg(text) {
+    if (!currentCall) return;
+    const targets = currentCall.type === 'one-to-one'
+        ? [currentCall.remotePin]
+        : currentCall.participants.filter(p => p !== myPin);
+    targets.forEach(t => {
+        const dc = dcs.get(t);
+        if (dc && dc.readyState === 'open') dc.send(JSON.stringify({ type: 'chat', text }));
+        else sig(t, 'chat-message', { text });
+    });
+    showMsg('Me', text, true);
+}
 
-                pc = new RTCPeerConnection(ICE);
-                stream.getTracks().forEach(t => pc.addTrack(t, stream));
+function showMsg(sender, text, own) {
+    const c = document.getElementById('chat-messages');
+    const row = document.createElement('div');
+    row.className = 'msg-row' + (own ? ' own' : '');
+    row.innerHTML = `<div class="msg-sender">${sender}</div><div class="msg-bubble">${esc(text)}</div>`;
+    c.appendChild(row);
+    c.scrollTop = c.scrollHeight;
+}
 
-                pc.ontrack = (e) => {
-                    if (incomingData.call_type === 'video') {
-                        document.getElementById('remote-vid').srcObject = e.streams[0];
-                    } else {
-                        document.getElementById('remote-audio').srcObject = e.streams[0];
-                    }
-                };
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-                pc.onicecandidate = (e) => {
-                    if (e.candidate && room) {
-                        fetch(API + '/api/ice', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                room_code: room,
-                                candidate: e.candidate,
-                                sender_pin: myPin
-                            })
-                        });
-                    }
-                };
+function sendFile(file) {
+    if (!currentCall) return toast('No active call');
+    const reader = new FileReader();
+    const CS = 16384; let offset = 0;
+    const fileId = Date.now() + '-' + Math.random().toString(36);
+    const meta = { type:'file-offer', fileId, name:file.name, size:file.size, mime:file.type, totalChunks:Math.ceil(file.size/CS) };
+    const targets = currentCall.type === 'one-to-one' ? [currentCall.remotePin] : currentCall.participants.filter(p => p !== myPin);
+    targets.forEach(t => {
+        const dc = dcs.get(t);
+        if (dc?.readyState==='open') dc.send(JSON.stringify(meta)); else sig(t,'file-offer',meta);
+    });
+    reader.onload = e => {
+        const chunk = e.target.result;
+        const isLast = offset + chunk.byteLength >= file.size;
+        const m = { type:'file-chunk', fileId, chunk:Array.from(new Uint8Array(chunk)), offset, last:isLast };
+        targets.forEach(t => {
+            const dc = dcs.get(t);
+            if (dc?.readyState==='open') dc.send(JSON.stringify(m)); else sig(t,'file-chunk',m);
+        });
+        offset += chunk.byteLength;
+        if (offset < file.size) reader.readAsArrayBuffer(file.slice(offset, offset + CS));
+        else showMsg('Me', '📎 ' + file.name, true);
+    };
+    reader.readAsArrayBuffer(file.slice(0, CS));
+}
 
-                await pc.setRemoteDescription(incomingData.offer);
-                const ans = await pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: incomingData.call_type === 'video' });
-                await pc.setLocalDescription(ans);
+function recvFileOffer(sender, meta) {
+    fileTransfers.set(meta.fileId, { meta, chunks: [], received: 0 });
+    showMsg(sender, `📎 ${meta.name} (${(meta.size/1024).toFixed(1)} KB) incoming…`, false);
+}
 
-                await fetch(API + '/api/answer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        room_code: room,
-                        answer: ans,
-                        callee_pin: myPin
-                    })
-                });
+function recvFileChunk(sender, msg) {
+    const t = fileTransfers.get(msg.fileId); if (!t) return;
+    t.chunks[msg.offset / 16384] = new Uint8Array(msg.chunk);
+    t.received += msg.chunk.length;
+    if (msg.last) {
+        const blob = new Blob(t.chunks, { type: t.meta.mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download=t.meta.name; a.click();
+        URL.revokeObjectURL(url);
+        showMsg(sender, '📎 ' + t.meta.name + ' saved', false);
+        fileTransfers.delete(msg.fileId);
+    }
+}
 
-                document.getElementById('incoming').classList.remove('show');
-                document.getElementById('call-avatar').textContent = incomingData.caller_pin[0];
-                document.getElementById('call-pin').textContent = incomingData.caller_pin;
-                document.getElementById('call-status').textContent = 'Connected';
-                document.getElementById('call').classList.add('show');
+// ─── RENDER ───
+function renderRecent() {
+    const list = document.getElementById('recent-list');
+    const empty = document.getElementById('recent-empty');
+    if (!recent.length) { list.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display='none';
+    list.innerHTML = recent.map(r => `
+        <div class="card" onclick="startCall('${r.pin}',false)">
+            <div class="avatar">${r.pin[0]}</div>
+            <div class="info">
+                <div class="name">${r.pin}</div>
+                <div class="meta">${r.type} · ${new Date(r.time).toLocaleString()}</div>
+            </div>
+            <div class="card-actions">
+                <div class="icon-action green" onclick="event.stopPropagation();startCall('${r.pin}',false)" title="Audio call">
+                    <svg viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z"/></svg>
+                </div>
+                <div class="icon-action" onclick="event.stopPropagation();startCall('${r.pin}',true)" title="Video call">
+                    <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                </div>
+            </div>
+        </div>`).join('');
+}
 
-                if (incomingData.call_type === 'video') {
-                    document.getElementById('local-vid').srcObject = stream;
-                    document.getElementById('video-box').classList.remove('hidden');
-                }
+function renderContacts() {
+    const list = document.getElementById('contacts-list');
+    const empty = document.getElementById('contacts-empty');
+    if (!contacts.length) { list.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display='none';
+    list.innerHTML = contacts.map(c => `
+        <div class="card" onclick="startCall('${c.pin}',false)">
+            <div class="avatar">${c.pin[0]}</div>
+            <div class="info">
+                <div class="name">${c.pin}</div>
+                <div class="meta">${c.name !== c.pin ? c.name : 'Contact'}</div>
+            </div>
+            <div class="card-actions">
+                <div class="icon-action green" onclick="event.stopPropagation();startCall('${c.pin}',false)" title="Audio">
+                    <svg viewBox="0 0 24 24"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z"/></svg>
+                </div>
+                <div class="icon-action" onclick="event.stopPropagation();startCall('${c.pin}',true)" title="Video">
+                    <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                </div>
+            </div>
+        </div>`).join('');
+}
 
-                addRecent(incomingData.caller_pin, 'incoming');
-                startPoll();
-            } catch (e) {
-                alert('Error: ' + e.message);
-                hangup();
-            }
-        }
+function renderGroups() {
+    const list = document.getElementById('groups-list');
+    const empty = document.getElementById('groups-empty');
+    if (!groups.length) { list.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display='none';
+    list.innerHTML = groups.map(g => `
+        <div class="card" style="flex-direction:column;align-items:flex-start;gap:8px;">
+            <div style="display:flex;align-items:center;gap:14px;width:100%;">
+                <div class="avatar group-av">G</div>
+                <div class="info">
+                    <div class="name" style="letter-spacing:0;font-family:'DM Sans',sans-serif;">${esc(g.name)}</div>
+                    <div class="meta">${g.participants.length} participant${g.participants.length!==1?'s':''} · ${new Date(g.createdAt).toLocaleDateString()}</div>
+                </div>
+            </div>
+            <div class="group-link">${esc(g.link)}</div>
+            <button class="btn-sec" onclick="cpLink('${esc(g.link)}')">
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M16 1H4C3 1 2 2 2 3v14h2V3h12V1zm3 4H8C7 5 6 6 6 7v14c0 1 1 2 2 2h11c1 0 2-1 2-2V7c0-1-1-2-2-2zm0 16H8V7h11v14z"/></svg>
+                Copy link
+            </button>
+        </div>`).join('');
+}
 
-        async function reject() {
-            if (room) {
-                await fetch(API + '/api/decline', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ room_code: room, pin: myPin })
-                });
-            }
-            document.getElementById('incoming').classList.remove('show');
-            room = null;
-            incomingData = null;
-        }
+function addRecent(pin, type) {
+    recent.unshift({ pin, type, time: new Date().toISOString() });
+    recent = recent.slice(0, 30);
+    localStorage.setItem('recent', JSON.stringify(recent));
+    if (!contacts.find(c => c.pin === pin)) {
+        contacts.push({ pin, name: pin });
+        localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+    renderAll();
+}
 
-        function hangup() {
-            if (room) {
-                fetch(API + '/api/hangup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ room_code: room, pin: myPin })
-                });
-            }
-            if (pc) pc.close();
-            if (stream) stream.getTracks().forEach(t => t.stop());
-            if (pollTimer) clearInterval(pollTimer);
-            pc = null;
-            stream = null;
-            room = null;
-            document.getElementById('call').classList.remove('show');
-            document.getElementById('video-box').classList.add('hidden');
-        }
+// ─── DIALER ───
+document.getElementById('fab').addEventListener('click', () => document.getElementById('dialer').classList.add('show'));
+document.getElementById('dial-close').addEventListener('click', closeDialer);
+document.getElementById('dialer').addEventListener('click', e => { if (e.target === document.getElementById('dialer')) closeDialer(); });
 
-        function startPoll() {
-            pollTimer = setInterval(async () => {
-                try {
-                    const r = await fetch(API + '/api/poll/' + room + '/' + myPin);
-                    const d = await r.json();
-                    if (d.hangup) {
-                        alert('Call ended');
-                        hangup();
-                        return;
-                    }
-                    if (d.signals) {
-                        for (const s of d.signals) {
-                            if (s.type === 'answer') {
-                                await pc.setRemoteDescription(s.data);
-                                document.getElementById('call-status').textContent = 'Connected';
-                            } else if (s.type === 'ice') {
-                                await pc.addIceCandidate(s.data);
-                            }
-                        }
-                    }
-                } catch (e) {}
-            }, 2000);
-        }
+function closeDialer() {
+    document.getElementById('dialer').classList.remove('show');
+    dialNum = ''; updateDial();
+}
 
-        function startListen() {
-            setInterval(async () => {
-                if (room) return;
-                try {
-                    const r = await fetch(API + '/api/incoming/' + myPin);
-                    const d = await r.json();
-                    if (d.incoming) {
-                        incomingData = d;
-                        room = d.room_code;
-                        document.getElementById('inc-pin').textContent = d.caller_pin;
-                        document.getElementById('incoming').classList.add('show');
-                        if ('Notification' in window && Notification.permission === 'granted') {
-                            new Notification('Incoming Call', { body: 'From: ' + d.caller_pin });
-                        }
-                    }
-                } catch (e) {}
-            }, 3000);
-        }
+function updateDial() {
+    const el = document.getElementById('dial-display');
+    if (!dialNum) { el.textContent = 'Enter 6-digit PIN'; el.classList.add('ph'); }
+    else { el.textContent = dialNum; el.classList.remove('ph'); }
+}
 
-        function addRecent(pin, type) {
-            recent.unshift({ pin, type, time: Date.now() });
-            recent = recent.slice(0, 50);
-            localStorage.setItem('recent', JSON.stringify(recent));
-            renderRecent();
-        }
+document.querySelectorAll('.dial-btn[data-digit]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (dialNum.length < 6) { dialNum += btn.dataset.digit; updateDial(); }
+    });
+});
+document.getElementById('dial-backspace').addEventListener('click', () => { dialNum = dialNum.slice(0,-1); updateDial(); });
+document.getElementById('call-audio').addEventListener('click', () => {
+    if (dialNum.length !== 6) return toast('Enter a 6-digit PIN'); startCall(dialNum, false);
+});
+document.getElementById('call-video').addEventListener('click', () => {
+    if (dialNum.length !== 6) return toast('Enter a 6-digit PIN'); startCall(dialNum, true);
+});
 
-        function renderRecent() {
-            const list = document.getElementById('recent-list');
-            const empty = document.getElementById('recent-empty');
-            if (recent.length === 0) {
-                list.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-            empty.style.display = 'none';
-            list.innerHTML = recent.map(c => {
-                const date = new Date(c.time);
-                const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const icon = c.type === 'incoming' ? '📲' : '📞';
-                return '<div class="card call-item" onclick="dialNum=\'' + c.pin + '\'; openDial(); document.getElementById(\'disp\').textContent=\'' + c.pin + '\';">' +
-                    '<div class="avatar">' + c.pin[0] + '</div>' +
-                    '<div class="info">' +
-                        '<div class="pin">' + c.pin + '</div>' +
-                        '<div class="time">' + time + '</div>' +
-                    '</div>' +
-                    '<div style="font-size:20px">' + icon + '</div>' +
-                '</div>';
-            }).join('');
-        }
+// ─── INCOMING ───
+function showIncoming(from, type) {
+    document.getElementById('incoming-pin').textContent = from;
+    document.getElementById('incoming-type').textContent = type === 'video' ? 'Video call' : 'Audio call';
+    document.getElementById('incoming').classList.add('show');
+}
+function hideIncoming() { document.getElementById('incoming').classList.remove('show'); }
+document.getElementById('incoming-answer').addEventListener('click', acceptCall);
+document.getElementById('incoming-decline').addEventListener('click', declineCall);
 
-        function renderContacts() {
-            const list = document.getElementById('contacts-list');
-            const empty = document.getElementById('contacts-empty');
-            if (contacts.length === 0) {
-                list.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-            empty.style.display = 'none';
-            list.innerHTML = contacts.map(c => {
-                return '<div class="card call-item" onclick="dialNum=\'' + c.pin + '\'; openDial(); document.getElementById(\'disp\').textContent=\'' + c.pin + '\';">' +
-                    '<div class="avatar">' + c.name[0].toUpperCase() + '</div>' +
-                    '<div class="info">' +
-                        '<div class="pin">' + c.name + '</div>' +
-                        '<div class="time">' + c.pin + '</div>' +
-                    '</div>' +
-                '</div>';
-            }).join('');
-        }
+// ─── CALL CONTROLS ───
+document.getElementById('hangup-btn').addEventListener('click', () => { stopRing(); cleanup(); });
 
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            const sw = 'self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",()=>self.clients.claim());';
-            const blob = new Blob([sw], { type: 'application/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob));
-        }
-    </script>
+document.getElementById('mute-btn').addEventListener('click', function() {
+    if (!localStream) return;
+    const t = localStream.getAudioTracks()[0];
+    if (t) { t.enabled = !t.enabled; this.classList.toggle('muted', !t.enabled); }
+});
+
+document.getElementById('toggle-video-btn').addEventListener('click', function() {
+    if (!localStream) return;
+    const t = localStream.getVideoTracks()[0];
+    if (t) { t.enabled = !t.enabled; this.classList.toggle('muted', !t.enabled); }
+});
+
+document.getElementById('local-video').addEventListener('click', () => {
+    const rv = document.getElementById('remote-video');
+    const lv = document.getElementById('local-video');
+    const tmp = rv.srcObject; rv.srcObject = lv.srcObject; lv.srcObject = tmp;
+});
+
+document.getElementById('show-chat-btn').addEventListener('click', () => document.getElementById('chat-drawer').classList.add('open'));
+document.getElementById('close-chat-btn').addEventListener('click', () => document.getElementById('chat-drawer').classList.remove('open'));
+
+document.getElementById('send-chat-btn').addEventListener('click', () => {
+    const inp = document.getElementById('chat-input');
+    const txt = inp.value.trim();
+    if (txt) { sendMsg(txt); inp.value = ''; }
+});
+document.getElementById('chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('send-chat-btn').click();
+});
+document.getElementById('attach-btn').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', e => { if (e.target.files[0]) sendFile(e.target.files[0]); });
+
+function cleanup() {
+    for (let pc of pcs.values()) pc.close();
+    pcs.clear(); dcs.clear();
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+    document.getElementById('call-screen').classList.remove('show');
+    document.getElementById('chat-drawer').classList.remove('open');
+    document.getElementById('remote-video').srcObject = null;
+    document.getElementById('local-video').srcObject = null;
+    document.getElementById('remote-audio').srcObject = null;
+    currentCall = null; incomingCall = null;
+}
+
+// ─── TABS ───
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const id = tab.dataset.tab;
+        document.getElementById(id + '-tab').classList.add('active');
+        document.getElementById('header-title').textContent =
+            id === 'recent' ? 'iNet' : id === 'contacts' ? 'Contacts' : 'Groups';
+    });
+});
+
+document.getElementById('create-group-btn').addEventListener('click', createGroup);
+
+// ─── UTILS ───
+function toast(msg) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+}
+
+function cpLink(link) { navigator.clipboard?.writeText(link).then(() => toast('Copied!')); }
+
+window.startCall = startCall;
+window.cpLink = cpLink;
+</script>
 </body>
-    </html>
+</html>
