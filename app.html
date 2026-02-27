@@ -28,13 +28,9 @@
 }
 html,body{height:100%;width:100%;overflow:hidden;position:fixed}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
-
-/* ─── SCROLLBARS ─── */
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
-
-/* ─── HEADER ─── */
 .header{
   background:rgba(14,14,16,0.92);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
@@ -68,8 +64,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   border-radius:20px;font-size:0.72rem;font-weight:700;cursor:pointer;
   display:none;font-family:'DM Sans',sans-serif;
 }
-
-/* ─── TABS ─── */
 .tabs{
   display:none;background:var(--surface);border-bottom:1px solid var(--border);
   flex-shrink:0;
@@ -88,16 +82,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   background:var(--accent);color:#fff;border-radius:99px;
   padding:1px 6px;font-size:0.65rem;font-weight:700;min-width:18px;
 }
-
-/* ─── MAIN ─── */
 .main{flex:1;overflow:hidden;position:relative}
 .view{
   height:100%;overflow-y:auto;padding:12px 12px 90px;
   display:none;-webkit-overflow-scrolling:touch;
 }
 .view.active{display:block}
-
-/* ─── ITEMS ─── */
 .item{
   background:var(--surface);border:1px solid var(--border);
   border-radius:var(--radius);padding:14px;margin-bottom:8px;
@@ -117,10 +107,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--text2);
   flex-shrink:0;position:relative;
 }
-.avatar-group{
-  font-size:0.8rem;background:linear-gradient(135deg,var(--purple),var(--blue));
-  color:#fff;font-family:'DM Sans',monospace;font-weight:700;
-}
 .avatar-online::after{
   content:'';position:absolute;bottom:2px;right:2px;
   width:11px;height:11px;border-radius:50%;background:var(--green);
@@ -139,8 +125,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   background:var(--yellow);color:#000;border-radius:99px;
   padding:2px 7px;font-size:0.68rem;font-weight:700;
 }
-
-/* ─── EMPTY ─── */
 .empty{text-align:center;padding:70px 20px;color:var(--text3)}
 .empty-icon{
   width:64px;height:64px;background:var(--surface2);border-radius:24px;
@@ -149,8 +133,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .empty-icon svg{width:32px;height:32px;fill:var(--text3)}
 .empty-title{font-weight:600;font-size:1rem;color:var(--text2);margin-bottom:8px}
 .empty-sub{font-size:0.82rem;line-height:1.5}
-
-/* ─── FAB ─── */
 .fab{
   position:fixed;bottom:calc(20px + var(--safe-bottom));right:20px;
   width:56px;height:56px;background:var(--accent);border:none;border-radius:50%;
@@ -183,10 +165,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .fab-btn:active{transform:scale(0.9)}
 .fab-btn svg{width:20px;height:20px;fill:#fff}
 .fab-btn.blue{background:var(--blue)}
-.fab-btn.purple{background:var(--purple)}
 .fab-btn.green{background:var(--green)}
-
-/* ─── MODAL ─── */
 .modal{
   position:fixed;inset:0;background:rgba(0,0,0,0.75);
   backdrop-filter:blur(6px);display:none;align-items:center;
@@ -222,22 +201,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .btn.secondary{background:var(--surface2);color:var(--text2)}
 .btn.blue{background:var(--blue);color:#fff}
 .btn.green{background:var(--green);color:#fff}
-.members-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-.member-chip{
-  background:var(--surface2);border:1px solid var(--border2);
-  border-radius:20px;padding:5px 10px 5px 8px;
-  font-size:0.78rem;display:flex;align-items:center;gap:6px;
-}
-.member-chip button{
-  background:none;border:none;cursor:pointer;color:var(--text3);
-  width:14px;height:14px;display:flex;align-items:center;justify-content:center;
-}
-.add-member-row{display:flex;gap:8px}
-.add-member-row input{flex:1;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;letter-spacing:2px}
-.add-member-row input:focus{outline:none;border-color:var(--accent)}
-.add-member-btn{padding:10px 14px;background:var(--accent);border:none;border-radius:10px;color:#fff;cursor:pointer;font-weight:700}
-
-/* ─── CHAT SCREEN ─── */
 .screen{
   position:fixed;inset:0;background:var(--bg);
   display:none;flex-direction:column;z-index:1000;
@@ -270,11 +233,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .act-btn.green svg{fill:var(--green)}
 .act-btn.red{background:var(--accent-dim)}
 .act-btn.red svg{fill:var(--accent)}
-.act-btn.blue{background:var(--blue-dim)}
-.act-btn.blue svg{fill:var(--blue)}
 .act-btn svg{width:18px;height:18px;fill:var(--text2)}
-
-/* ─── MESSAGES ─── */
 .messages{
   flex:1;overflow-y:auto;padding:12px;
   display:flex;flex-direction:column;gap:6px;
@@ -301,8 +260,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .msg.own .msg-meta{justify-content:flex-end}
 .tick{color:var(--text3);font-size:0.7rem}
 .tick.sent{color:var(--green)}
-
-/* ─── INPUT AREA ─── */
 .input-area{
   background:var(--surface);border-top:1px solid var(--border);
   padding:10px 10px calc(10px + var(--safe-bottom));
@@ -333,8 +290,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 }
 .send-btn:active{transform:scale(0.9)}
 .send-btn svg{width:18px;height:18px;fill:#fff}
-
-/* ─── INCOMING CALL OVERLAY ─── */
 #incomingOverlay{
   position:fixed;inset:0;z-index:3000;display:none;flex-direction:column;
   align-items:center;justify-content:center;
@@ -370,8 +325,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .call-action-btn.answer{background:var(--green)}
 .call-action-btn.decline{background:var(--accent)}
 .call-action-btn svg{width:28px;height:28px;fill:#fff}
-
-/* ─── GROUP CALL SCREEN ─── */
 #groupCallScreen{
   position:fixed;inset:0;z-index:2500;display:none;flex-direction:column;
   background:#000;
@@ -390,7 +343,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   color:#fff;padding:6px 12px;border-radius:20px;font-size:0.78rem;
   cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;
 }
-/* Participant grid */
 .gc-grid{
   flex:1;display:grid;gap:2px;padding-top:80px;padding-bottom:140px;
   overflow:hidden;transition:grid-template-columns .3s,grid-template-rows .3s;
@@ -415,7 +367,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   display:flex;align-items:center;gap:6px;
 }
 .gc-tile-name{color:#fff;font-size:0.75rem;font-weight:600}
-.gc-tile-muted{color:var(--accent);font-size:0.7rem}
 .gc-tile-avatar{
   width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   background:var(--surface2);font-family:'DM Mono',monospace;
@@ -428,7 +379,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   animation:speakPulse .4s ease;
 }
 @keyframes speakPulse{0%{opacity:0.4}50%{opacity:1}100%{opacity:0.7}}
-/* Local pip */
 #gcLocalPip{
   position:absolute;bottom:150px;right:10px;
   width:80px;height:106px;border-radius:10px;overflow:hidden;
@@ -436,7 +386,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   background:#111;cursor:move;
 }
 #gcLocalPip video{width:100%;height:100%;object-fit:cover}
-/* Controls */
 .gc-controls{
   position:absolute;bottom:0;left:0;right:0;
   padding:16px 20px calc(16px + var(--safe-bottom));
@@ -458,8 +407,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .gc-btn.share{background:var(--blue)}
 .gc-btn.add{background:var(--purple)}
 .gc-btn.speaker{background:var(--surface2)}
-
-/* ─── 1:1 CALL SCREEN ─── */
 #callScreen{
   position:fixed;inset:0;background:#000;
   display:none;flex-direction:column;z-index:2000;
@@ -507,16 +454,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   background:var(--accent);width:66px;height:66px;
   box-shadow:0 4px 20px var(--accent-glow);
 }
-
-/* ─── SECTION HEADERS ─── */
 .section-hd{
   display:flex;align-items:center;justify-content:space-between;
   padding:8px 4px 6px;margin-bottom:2px;
 }
 .section-hd-title{font-size:0.72rem;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
 .section-hd-action{font-size:0.78rem;color:var(--accent);font-weight:600;cursor:pointer}
-
-/* ─── LINK CALL CARD ─── */
 .link-card{
   background:linear-gradient(135deg,var(--blue-dim),rgba(139,92,246,0.1));
   border:1px solid rgba(59,130,246,0.25);
@@ -537,8 +480,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 }
 .link-btn.copy{background:var(--surface2);color:var(--text)}
 .link-btn.join{background:var(--blue);color:#fff}
-
-/* ─── TOAST ─── */
 .toast{
   position:fixed;bottom:calc(90px + var(--safe-bottom));left:50%;
   transform:translateX(-50%) translateY(0);
@@ -550,8 +491,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 }
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes toastOut{to{opacity:0;transform:translateX(-50%) translateY(10px)}}
-
-/* ─── MISC ─── */
 .divider{height:1px;background:var(--border);margin:6px 0}
 .section-label{
   font-size:0.7rem;color:var(--text3);font-weight:700;
@@ -565,8 +504,6 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   animation:spin 0.7s linear infinite;display:inline-block;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ─── SIGNUP VIEW ─── */
 #signupView{
   display:flex;flex-direction:column;align-items:center;
   justify-content:center;padding:40px 28px;text-align:center;min-height:100%;
@@ -588,8 +525,6 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 .signup-btn:active{transform:scale(0.96)}
 .signup-btn:disabled{opacity:0.6}
 #signupError{color:var(--accent);font-size:0.85rem;margin-top:14px;min-height:20px}
-
-/* ─── RESPONSIVE ─── */
 @media(min-width:600px){
   .modal-box{max-width:420px}
   .main{max-width:500px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
@@ -607,16 +542,12 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   <button id="installBtn" onclick="installApp()">Install</button>
 </div>
 
-<!-- TABS -->
+<!-- TABS (Groups removed) -->
 <div class="tabs" id="tabs">
   <div class="tabs-inner">
     <div class="tab active" data-tab="contacts" onclick="switchTab('contacts',this)">
       <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
       Contacts
-    </div>
-    <div class="tab" data-tab="groups" onclick="switchTab('groups',this)">
-      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-      Groups
     </div>
     <div class="tab" data-tab="chats" onclick="switchTab('chats',this)">
       <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
@@ -656,17 +587,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
     </div>
   </div>
 
-  <!-- GROUPS VIEW -->
-  <div class="view" id="groupsView">
-    <div id="groupsList"></div>
-    <div class="empty" id="groupsEmpty" style="display:none">
-      <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
-      <div class="empty-title">No groups yet</div>
-      <div class="empty-sub">Tap + to create a group with contacts</div>
-    </div>
-  </div>
-
-  <!-- CHATS VIEW -->
+  <!-- CHATS VIEW (DMs only) -->
   <div class="view" id="chatsView">
     <div id="chatsList"></div>
     <div class="empty" id="chatsEmpty" style="display:none">
@@ -686,7 +607,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
     </div>
   </div>
 
-  <!-- CALL LINK VIEW -->
+  <!-- CALL LINK VIEW (Zoom‑like) -->
   <div class="view" id="callLinkView">
     <div class="link-card">
       <div class="link-card-title">🔗 Link Call</div>
@@ -717,21 +638,15 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- FAB -->
+<!-- FAB (now with Add Contact and Create Room) -->
 <button class="fab" id="fab" onclick="toggleFab()">
   <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
 </button>
 <div class="fab-menu" id="fabMenu">
-  <div class="fab-item" id="fabGroupCallItem" style="display:none">
-    <span class="fab-label">Group Call</span>
-    <button class="fab-btn purple" onclick="startGroupCall()">
-      <svg viewBox="0 0 24 24"><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/></svg>
-    </button>
-  </div>
-  <div class="fab-item" id="fabNewGroupItem">
-    <span class="fab-label">New Group</span>
-    <button class="fab-btn purple" onclick="showCreateGroupModal()">
-      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+  <div class="fab-item">
+    <span class="fab-label">Create Room</span>
+    <button class="fab-btn green" onclick="createLinkCallAndStart()">
+      <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
     </button>
   </div>
   <div class="fab-item">
@@ -756,28 +671,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- CREATE GROUP MODAL -->
-<div class="modal" id="createGroupModal" onclick="if(event.target===this)closeModal('createGroupModal')">
-  <div class="modal-box">
-    <div class="modal-title">Create Group</div>
-    <div class="modal-sub">Add contacts by PIN or choose from your list</div>
-    <div class="field"><label>Group name</label><input type="text" id="groupNameInput" placeholder="e.g. Team, Family…"></div>
-    <div class="field">
-      <label>Members</label>
-      <div class="members-list" id="newGroupMembers"></div>
-      <div class="add-member-row">
-        <input type="tel" id="addMemberPin" maxlength="6" placeholder="PIN" oninput="this.value=this.value.replace(/\D/g,'')">
-        <button class="add-member-btn" onclick="addMemberToNew()">+</button>
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn primary" onclick="createGroup()">Create</button>
-      <button class="btn secondary" onclick="closeModal('createGroupModal')">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- INCOMING CALL OVERLAY (replaces confirm()) -->
+<!-- INCOMING CALL OVERLAY -->
 <div id="incomingOverlay">
   <div class="incoming-ring" id="incomingRingAvatar">
     <div class="ring-wave"></div>
@@ -823,7 +717,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- GROUP CALL SCREEN -->
+<!-- GROUP CALL SCREEN (mesh / Zoom‑like) -->
 <div id="groupCallScreen">
   <div class="gc-header">
     <div>
@@ -857,7 +751,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- CHAT SCREEN -->
+<!-- CHAT SCREEN (DM only) -->
 <div class="screen" id="chatScreen">
   <div class="screen-header">
     <button class="back-btn" onclick="closeChat()">
@@ -875,12 +769,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
         <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
       </button>
     </div>
-    <!-- Group call button injected dynamically -->
-    <div id="groupCallBtn" style="display:none">
-      <button class="act-btn blue" onclick="startGroupCall()" title="Group call">
-        <svg viewBox="0 0 24 24"><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/></svg>
-      </button>
-    </div>
+    <!-- group call button removed -->
   </div>
   <div class="messages" id="chatMessages"></div>
   <div class="input-area">
@@ -917,7 +806,7 @@ const ICE   = { iceServers: [
 ]};
 
 // ═══════════════════════════════════════════════════
-//  STATE
+//  STATE (groups removed)
 // ═══════════════════════════════════════════════════
 let myPin     = localStorage.getItem('myPin');
 let deviceId  = localStorage.getItem('deviceId');
@@ -926,15 +815,23 @@ let ws        = null;
 let wsTimer   = null;
 
 let contacts  = JSON.parse(localStorage.getItem('contacts') || '[]');
-let groups    = JSON.parse(localStorage.getItem('groups')   || '[]');
 let chats     = JSON.parse(localStorage.getItem('chats')    || '{}');
 let calls     = JSON.parse(localStorage.getItem('calls')    || '[]');
 let pending   = JSON.parse(localStorage.getItem('pending')  || '{}');
 let unread    = JSON.parse(localStorage.getItem('unread')   || '{}');
 
+// Clean up old group chats from localStorage
+Object.keys(chats).forEach(key => {
+  if (key.startsWith('grp:')) delete chats[key];
+});
+localStorage.setItem('chats', JSON.stringify(chats));
+
+// Remove groups from localStorage if present
+localStorage.removeItem('groups');
+
 let onlineStatus = {};
-let currentChatId   = null; // pin or groupId
-let currentChatType = 'dm'; // 'dm' | 'group'
+let currentChatId   = null; // pin only (DM)
+let currentChatType = 'dm'; // always 'dm' now
 let pingInterval    = null;
 let fabOpen         = false;
 let deferredPrompt  = null;
@@ -951,7 +848,7 @@ let isCamOff     = false;
 // Incoming call buffer
 let incomingCallBuffer = null;
 
-// Group call state
+// Group call state (mesh via links)
 let gcRoomId     = null;
 let gcStream     = null;
 let gcPeers      = {};       // { pin: RTCPeerConnection }
@@ -977,14 +874,12 @@ let recentRooms  = JSON.parse(localStorage.getItem('recentRooms') || '[]');
 (function init() {
   if (myPin) startApp();
 
-  // Check URL hash for join link
   const hash = location.hash.replace('#','');
   if (hash.startsWith('room:')) {
     const rid = hash.slice(5);
     setTimeout(() => joinRoomById(rid), 1500);
   }
 
-  // PWA
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault(); deferredPrompt = e;
     document.getElementById('installBtn').style.display = 'block';
@@ -997,7 +892,6 @@ let recentRooms  = JSON.parse(localStorage.getItem('recentRooms') || '[]');
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   if (isStandalone) document.getElementById('installBtn').style.display = 'none';
 
-  // SW messages
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', e => {
       if (e.data?.type === 'notification_action') {
@@ -1007,10 +901,7 @@ let recentRooms  = JSON.parse(localStorage.getItem('recentRooms') || '[]');
     });
   }
 
-  // File input
   document.getElementById('fileInput').addEventListener('change', handleFileInput);
-
-  // Draggable PiP
   makeDraggable(document.getElementById('gcLocalPip'));
   makeDraggable(document.getElementById('localVideo'));
 })();
@@ -1057,7 +948,7 @@ async function signup() {
 }
 
 // ═══════════════════════════════════════════════════
-//  SERVICE WORKER + PUSH
+//  SERVICE WORKER + PUSH (unchanged)
 // ═══════════════════════════════════════════════════
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
@@ -1066,13 +957,11 @@ async function registerSW() {
     if (vapidKey) await subscribePush();
   } catch(e) { console.warn('SW:', e); }
 }
-
 async function requestPushPermission() {
   if (!('Notification' in window)) return;
   const perm = await Notification.requestPermission();
   if (perm === 'granted' && vapidKey) subscribePush();
 }
-
 async function subscribePush() {
   if (!vapidKey || !('PushManager' in window)) return;
   try {
@@ -1087,7 +976,6 @@ async function subscribePush() {
     });
   } catch(e) { console.warn('Push sub:', e); }
 }
-
 function b64ToUint8(b64) {
   const pad = '='.repeat((4 - b64.length % 4) % 4);
   const raw = atob((b64 + pad).replace(/-/g,'+').replace(/_/g,'/'));
@@ -1095,9 +983,9 @@ function b64ToUint8(b64) {
 }
 
 // ═══════════════════════════════════════════════════
-//  WEBSOCKET
+//  WEBSOCKET (unchanged)
 // ═══════════════════════════════════════════════════
-function connectWS() {
+function connectWS() { /* same as before */ 
   if (!myPin || !deviceId) return;
   if (ws?.readyState === WebSocket.OPEN) return;
   setWsDot('ing');
@@ -1109,36 +997,31 @@ function connectWS() {
     ws.onerror = () => { setWsDot(''); };
   } catch { schedReconnect(); }
 }
-
 function schedReconnect() {
   if (wsTimer) return;
   wsTimer = setTimeout(() => { wsTimer = null; connectWS(); }, 3000);
 }
-
 function setWsDot(s) {
   const d = document.getElementById('wsDot');
   d.className = 'ws-dot' + (s ? ' ' + s : '');
 }
-
 function signal(target, type, payload) {
   if (!ws || ws.readyState !== WebSocket.OPEN) { toast('Not connected'); return; }
   ws.send(JSON.stringify({ target, type, payload }));
 }
-
 function signalRoom(room, type, payload) {
   if (!ws || ws.readyState !== WebSocket.OPEN) return;
   ws.send(JSON.stringify({ room, type, payload }));
 }
 
 // ═══════════════════════════════════════════════════
-//  PING LOOP (30s online check)
+//  PING LOOP (unchanged)
 // ═══════════════════════════════════════════════════
 function startPingLoop() {
   if (pingInterval) clearInterval(pingInterval);
   pingInterval = setInterval(pingContacts, 30000);
   pingContacts();
 }
-
 async function pingContacts() {
   if (!navigator.onLine || !contacts.length) return;
   const pins = contacts.map(c => c.pin);
@@ -1149,23 +1032,21 @@ async function pingContacts() {
     });
     const data = await r.json();
     Object.assign(onlineStatus, data);
-    renderContacts(); renderChats(); renderGroups();
+    renderContacts(); renderChats(); 
     if (currentChatId) updateChatStatus();
   } catch {}
-
-  // Also WS ping
   if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'ping' }));
 }
 
 // ═══════════════════════════════════════════════════
-//  MESSAGE HANDLER
+//  MESSAGE HANDLER (group chat removed)
 // ═══════════════════════════════════════════════════
 function handleMsg(msg) {
   const { from, type, payload, room } = msg;
   if (type === 'pong') return;
   if (type === 'status_change') {
     onlineStatus[payload.net_number] = { online: payload.online, last_seen: payload.last_seen };
-    renderContacts(); renderChats(); renderGroups();
+    renderContacts(); renderChats(); 
     if (currentChatId === payload.net_number) updateChatStatus();
     return;
   }
@@ -1177,7 +1058,7 @@ function handleMsg(msg) {
   if (type === 'call_answer') { handleCallAnswer(from, payload); return; }
   if (type === 'ice_candidate') { handleIce(from, payload); return; }
   if (type === 'call_end') { if (callPeer === from || from === gcLocalPin) endCall(); return; }
-  // Group call
+  // Group call (mesh) – keep
   if (type === 'gc_join') { handleGcJoin(from, payload); return; }
   if (type === 'gc_offer') { handleGcOffer(from, payload); return; }
   if (type === 'gc_answer') { handleGcAnswer(from, payload); return; }
@@ -1187,7 +1068,7 @@ function handleMsg(msg) {
 }
 
 // ═══════════════════════════════════════════════════
-//  CHAT
+//  CHAT (DM only)
 // ═══════════════════════════════════════════════════
 function sendMsg() {
   if (!currentChatId) return;
@@ -1195,51 +1076,32 @@ function sendMsg() {
   const text = input.value.trim();
   if (!text) return;
   const msg = { id: Date.now(), type: 'text', content: text, time: new Date().toISOString(), from: myPin };
-  dispatchMsg(currentChatId, currentChatType, msg);
-  input.value = ''; input.style.height = '';
-}
-
-function dispatchMsg(chatId, chatType, msg) {
-  const key = chatId;
+  // DM only: target is currentChatId
+  const key = currentChatId;
   if (!chats[key]) chats[key] = [];
   chats[key].push({ ...msg, dir: 'out', status: 'sending' });
   saveChats();
 
-  if (chatType === 'group') {
-    const grp = groups.find(g => g.id === chatId);
-    if (grp) {
-      grp.members.forEach(pin => {
-        if (pin === myPin) return;
-        if (onlineStatus[pin]?.online) {
-          signal(pin, 'chat', { ...msg, group: chatId });
-          updateMsgStatus(key, msg.id, 'sent');
-        } else {
-          queuePending(pin, { ...msg, group: chatId });
-          updateMsgStatus(key, msg.id, 'pending');
-        }
-      });
-    }
+  if (onlineStatus[key]?.online) {
+    signal(key, 'chat', msg);
+    updateMsgStatus(key, msg.id, 'sent');
   } else {
-    if (onlineStatus[chatId]?.online) {
-      signal(chatId, 'chat', msg);
-      updateMsgStatus(key, msg.id, 'sent');
-    } else {
-      queuePending(chatId, msg);
-      updateMsgStatus(key, msg.id, 'pending');
-    }
+    queuePending(key, msg);
+    updateMsgStatus(key, msg.id, 'pending');
   }
   renderChatMessages();
   renderChats();
+  input.value = ''; input.style.height = '';
 }
 
 function receiveChat(from, msg, room) {
-  const key = room || from;
+  const key = room || from; // room might be present for old group messages, but we ignore groups now
+  if (key.startsWith('grp:')) return; // discard any lingering group messages
   if (!chats[key]) chats[key] = [];
-  if (chats[key].find(m => m.id === msg.id)) return; // dedup
+  if (chats[key].find(m => m.id === msg.id)) return;
   chats[key].push({ ...msg, dir: 'in', status: 'delivered' });
   saveChats();
 
-  // Unread
   if (currentChatId !== key) {
     unread[key] = (unread[key] || 0) + 1;
     localStorage.setItem('unread', JSON.stringify(unread));
@@ -1256,23 +1118,19 @@ function queuePending(pin, msg) {
   pending[pin].push(msg);
   localStorage.setItem('pending', JSON.stringify(pending));
 }
-
 function flushPending(to) {
   if (!pending[to]?.length) return;
   signal(to, 'sync_deliver', { messages: pending[to] });
   delete pending[to];
   localStorage.setItem('pending', JSON.stringify(pending));
 }
-
 function updateMsgStatus(key, id, status) {
   const c = chats[key];
   if (!c) return;
   const m = c.find(x => x.id === id);
   if (m) { m.status = status; saveChats(); }
 }
-
 function saveChats() { localStorage.setItem('chats', JSON.stringify(chats)); }
-
 function showLocalNotif(from, msg) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const contact = contacts.find(c => c.pin === from);
@@ -1280,7 +1138,6 @@ function showLocalNotif(from, msg) {
   const body = msg.type === 'text' ? msg.content : msg.type === 'image' ? '📷 Image' : '🎤 Voice note';
   new Notification(`iNet · ${name}`, { body, icon: '/icons/icon-192.png', tag: `msg-${from}` });
 }
-
 function updateUnreadBadge() {
   const total = Object.values(unread).reduce((a,b) => a+b, 0);
   const badge = document.getElementById('chatsBadge');
@@ -1289,19 +1146,17 @@ function updateUnreadBadge() {
 }
 
 // ═══════════════════════════════════════════════════
-//  1:1 CALL
+//  1:1 CALL (unchanged)
 // ═══════════════════════════════════════════════════
-async function startDMCall(type) {
+async function startDMCall(type) { /* ... unchanged ... */ 
   if (!currentChatId || currentChatType !== 'dm') return;
   callPeer = currentChatId;
   callType = type;
-
   if (!onlineStatus[callPeer]?.online) {
     toast(`${getContactName(callPeer)} is offline`);
     logCall(callPeer, type, 'out', 'missed');
     return;
   }
-
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
     showCallScreen(callPeer, 'Calling…', type);
@@ -1319,13 +1174,10 @@ async function startDMCall(type) {
     }, 45000);
   } catch(e) { toast('Media error: ' + e.message); endCall(); }
 }
-
 function handleCallOffer(from, payload) {
-  // Show full-screen incoming call overlay
   incomingCallBuffer = { from, payload };
   showIncoming(from, payload.call_type || 'audio');
 }
-
 async function answerIncomingCall() {
   if (!incomingCallBuffer) return;
   const { from, payload } = incomingCallBuffer;
@@ -1333,13 +1185,10 @@ async function answerIncomingCall() {
   hideIncoming();
   await answerCall(from, payload);
 }
-
 async function answerIncomingCallFrom(data) {
-  // From SW notification action
   incomingCallBuffer = { from: data.from, payload: { sdp: null, call_type: data.call_type } };
   showIncoming(data.from, data.call_type);
 }
-
 function declineCall() {
   if (incomingCallBuffer) {
     signal(incomingCallBuffer.from, 'call_end', {});
@@ -1348,7 +1197,6 @@ function declineCall() {
   }
   hideIncoming();
 }
-
 async function answerCall(from, payload) {
   callPeer = from; callType = payload.call_type || 'audio';
   try {
@@ -1364,15 +1212,12 @@ async function answerCall(from, payload) {
     }
   } catch(e) { toast('Call error: ' + e.message); endCall(); }
 }
-
 function handleCallAnswer(from, payload) {
   if (peerConn) peerConn.setRemoteDescription(new RTCSessionDescription(payload.sdp));
 }
-
 function handleIce(from, payload) {
   if (peerConn) peerConn.addIceCandidate(new RTCIceCandidate(payload.candidate)).catch(()=>{});
 }
-
 function createPeerConn(pin, isAnswer) {
   const pc = new RTCPeerConnection(ICE);
   pc.onicecandidate = e => { if (e.candidate) signal(pin, 'ice_candidate', { candidate: e.candidate }); };
@@ -1387,7 +1232,6 @@ function createPeerConn(pin, isAnswer) {
   };
   return pc;
 }
-
 function showCallScreen(pin, status, type) {
   const name = getContactName(pin);
   document.getElementById('callName').textContent = name;
@@ -1404,7 +1248,6 @@ function showCallScreen(pin, status, type) {
   }
   document.getElementById('callScreen').classList.add('show');
 }
-
 function endCall() {
   document.getElementById('callScreen').classList.remove('show');
   if (callTimer) { clearTimeout(callTimer); callTimer = null; }
@@ -1414,7 +1257,6 @@ function endCall() {
   callPeer = null; isMuted = false; isCamOff = false;
   renderCalls();
 }
-
 function toggleCallMute() {
   isMuted = !isMuted;
   if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
@@ -1424,8 +1266,7 @@ function toggleCallCam() {
   isCamOff = !isCamOff;
   if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = !isCamOff);
 }
-function toggleSpeaker() { /* iOS: audio output API not widely available */ toast('Speaker toggle coming soon'); }
-
+function toggleSpeaker() { toast('Speaker toggle coming soon'); }
 function showIncoming(from, type) {
   stopRingtone(); startRingtone();
   const name = getContactName(from);
@@ -1433,13 +1274,9 @@ function showIncoming(from, type) {
   document.getElementById('incomingRingAvatar').childNodes[3].textContent = from[0];
   document.getElementById('incomingType').textContent = (type === 'video' ? '📹 Video' : '📞 Audio') + ' Call';
   document.getElementById('incomingOverlay').classList.add('show');
-  // Request notification permission on first call
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
 }
-
 function hideIncoming() { document.getElementById('incomingOverlay').classList.remove('show'); stopRingtone(); }
-
-// Ringtone (simple oscillator)
 let ringtoneCtx = null, ringtoneNodes = [];
 function startRingtone() {
   try {
@@ -1464,23 +1301,24 @@ function stopRingtone() {
 }
 
 // ═══════════════════════════════════════════════════
-//  GROUP CALL
+//  GROUP CALL (mesh, Zoom‑like) – keep, but adapt start
 // ═══════════════════════════════════════════════════
-async function startGroupCall() {
+// New function: create link and immediately start the room
+function createLinkCallAndStart() {
   closeFab();
-  let members = [];
-  if (currentChatType === 'group') {
-    const g = groups.find(x => x.id === currentChatId);
-    members = g ? g.members.filter(p => p !== myPin) : [];
-    gcRoomId = currentChatId;
-    document.getElementById('gcTitle').textContent = g?.name || 'Group Call';
-  } else {
-    // DM → create ad-hoc 2-person group call
-    gcRoomId = 'room:' + Date.now();
-    members = [currentChatId];
-    document.getElementById('gcTitle').textContent = getContactName(currentChatId);
-  }
+  createLinkCall();  // sets myRoomId
+  setTimeout(() => {
+    if (myRoomId) joinRoomById(myRoomId);
+  }, 100);
+}
 
+async function startGroupCall() { // kept for possible use, but we now use joinRoomById directly
+  closeFab();
+  // default to a new room if none
+  if (!gcRoomId) {
+    gcRoomId = 'room:' + Date.now();
+    addToRecentRooms(gcRoomId);
+  }
   try {
     gcStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
   } catch {
@@ -1489,37 +1327,19 @@ async function startGroupCall() {
       gcCamOff = true;
     } catch(e) { toast('Mic/Camera error: ' + e.message); return; }
   }
-
   gcLocalPin = myPin;
   document.getElementById('gcLocalVideo').srcObject = gcStream;
   document.getElementById('groupCallScreen').classList.add('show');
-
-  // Add self tile
   addGcTile(myPin, gcStream, true);
-
-  // Notify all online members
-  members.forEach(pin => {
-    if (onlineStatus[pin]?.online) {
-      signal(pin, 'gc_invite', { room: gcRoomId, from: myPin, type: 'video' });
-    }
-  });
-
-  // Signal to the room that I joined
   signalRoom(gcRoomId, 'gc_join', { from: myPin });
-
-  // Start existing peers
-  members.forEach(pin => {
-    if (onlineStatus[pin]?.online) initiateGcPeer(pin);
-  });
-
   startGcTimer();
-  addToRecentRooms(gcRoomId);
+  document.getElementById('gcTitle').textContent = 'Room ' + gcRoomId.slice(-6);
 }
 
 async function joinRoomById(roomId) {
   if (!myPin) { toast('Please sign up first'); return; }
   gcRoomId = roomId;
-  document.getElementById('gcTitle').textContent = 'Room Call';
+  document.getElementById('gcTitle').textContent = 'Room ' + roomId.slice(-6);
   try {
     gcStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
   } catch {
@@ -1535,8 +1355,8 @@ async function joinRoomById(roomId) {
   toast('Joined room!');
 }
 
+// All other group call functions (handleGcInvite, handleGcJoin, etc.) remain unchanged
 function handleGcInvite(from, payload) {
-  // Show incoming group call overlay
   showIncoming(from, 'group');
   document.getElementById('incomingType').textContent = '👥 Group Call';
   document.getElementById('answerBtn').onclick = () => {
@@ -1545,14 +1365,11 @@ function handleGcInvite(from, payload) {
     joinRoomById(payload.room);
   };
 }
-
 async function handleGcJoin(from, payload) {
   if (!gcRoomId) return;
   toast(`${getContactName(from)} joined`);
-  // We initiate an offer to the new joiner
   await initiateGcPeer(from);
 }
-
 async function initiateGcPeer(pin) {
   if (gcPeers[pin]) return;
   const pc = createGcPeerConn(pin);
@@ -1561,7 +1378,6 @@ async function initiateGcPeer(pin) {
   await pc.setLocalDescription(offer);
   signalRoom(gcRoomId, 'gc_offer', { to: pin, sdp: offer, from: myPin });
 }
-
 async function handleGcOffer(from, payload) {
   if (!gcRoomId || payload.to !== myPin) return;
   const pc = createGcPeerConn(from);
@@ -1571,19 +1387,16 @@ async function handleGcOffer(from, payload) {
   await pc.setLocalDescription(answer);
   signalRoom(gcRoomId, 'gc_answer', { to: from, sdp: answer, from: myPin });
 }
-
 async function handleGcAnswer(from, payload) {
   if (payload.to !== myPin) return;
   const pc = gcPeers[from];
   if (pc) await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
 }
-
 function handleGcIce(from, payload) {
   if (payload.to !== myPin) return;
   const pc = gcPeers[from];
   if (pc) pc.addIceCandidate(new RTCIceCandidate(payload.candidate)).catch(()=>{});
 }
-
 function handleGcLeave(from) {
   removeGcTile(from);
   const pc = gcPeers[from];
@@ -1591,39 +1404,32 @@ function handleGcLeave(from) {
   delete gcStreams[from];
   toast(`${getContactName(from)} left`);
 }
-
 function createGcPeerConn(pin) {
   if (gcPeers[pin]) { gcPeers[pin].close(); }
   const pc = new RTCPeerConnection(ICE);
   gcPeers[pin] = pc;
-
   pc.onicecandidate = e => {
     if (e.candidate) signalRoom(gcRoomId, 'gc_ice', { to: pin, candidate: e.candidate, from: myPin });
   };
-
   pc.ontrack = e => {
     const stream = e.streams[0];
     gcStreams[pin] = stream;
     addGcTile(pin, stream, false);
   };
-
   pc.onconnectionstatechange = () => {
     if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
       removeGcTile(pin);
     }
   };
-
   return pc;
 }
-
 function addGcTile(pin, stream, isLocal) {
-  removeGcTile(pin); // prevent dups
+  removeGcTile(pin);
   const grid = document.getElementById('gcGrid');
   const tile = document.createElement('div');
   tile.className = 'gc-tile';
   tile.id = 'gc-tile-' + pin;
   tile.dataset.pin = pin;
-
   const hasVideo = stream.getVideoTracks().some(t => t.enabled && t.readyState === 'live');
   if (hasVideo) {
     const vid = document.createElement('video');
@@ -1638,33 +1444,26 @@ function addGcTile(pin, stream, isLocal) {
     av.textContent = pin[0];
     tile.appendChild(av);
   }
-
   const overlay = document.createElement('div');
   overlay.className = 'gc-tile-overlay';
   overlay.innerHTML = `<span class="gc-tile-name">${isLocal ? 'You' : getContactName(pin)}</span>`;
   tile.appendChild(overlay);
-
   grid.appendChild(tile);
   updateGcGrid();
-
-  // Speaker detection via Web Audio API (only for remote)
   if (!isLocal && stream.getAudioTracks().length) {
     setupSpeakerDetect(pin, stream);
   }
 }
-
 function removeGcTile(pin) {
   const el = document.getElementById('gc-tile-' + pin);
   if (el) el.remove();
   updateGcGrid();
 }
-
 function updateGcGrid() {
   const grid = document.getElementById('gcGrid');
   const count = Math.min(grid.children.length, 6);
   grid.setAttribute('data-count', String(count || 1));
 }
-
 function setupSpeakerDetect(pin, stream) {
   try {
     const ctx = new AudioContext();
@@ -1686,7 +1485,6 @@ function setupSpeakerDetect(pin, stream) {
     }, 200);
   } catch {}
 }
-
 function startGcTimer() {
   gcSeconds = 0;
   gcTimer = setInterval(() => {
@@ -1696,7 +1494,6 @@ function startGcTimer() {
     document.getElementById('gcTimer').textContent = m + ':' + s;
   }, 1000);
 }
-
 function endGroupCall() {
   signalRoom(gcRoomId, 'gc_leave', { from: myPin });
   document.getElementById('groupCallScreen').classList.remove('show');
@@ -1708,29 +1505,24 @@ function endGroupCall() {
   updateGcGrid();
   gcRoomId = null; gcMuted = false; gcCamOff = false;
 }
-
 function toggleGcMute() {
   gcMuted = !gcMuted;
   if (gcStream) gcStream.getAudioTracks().forEach(t => t.enabled = !gcMuted);
   const btn = document.getElementById('gcMuteBtn');
   btn.classList.toggle('muted', gcMuted);
 }
-
 function toggleGcCam() {
   gcCamOff = !gcCamOff;
   if (gcStream) gcStream.getVideoTracks().forEach(t => t.enabled = !gcCamOff);
   const btn = document.getElementById('gcCamBtn');
   btn.classList.toggle('cam-off', gcCamOff);
-  // Update self tile
   const tile = document.getElementById('gc-tile-' + myPin);
   if (tile) {
     const vid = tile.querySelector('video');
     if (vid) vid.style.display = gcCamOff ? 'none' : 'block';
   }
 }
-
 function toggleGcSpeaker() { toast('Speaker: system default'); }
-
 function shareGroupCallLink() {
   if (!gcRoomId) return;
   const url = `${location.origin}${location.pathname}#room:${gcRoomId}`;
@@ -1741,7 +1533,6 @@ function shareGroupCallLink() {
     toast('Link copied!');
   }
 }
-
 function showInviteToCall() {
   const pins = contacts
     .filter(c => onlineStatus[c.pin]?.online && !gcPeers[c.pin] && c.pin !== myPin)
@@ -1752,7 +1543,7 @@ function showInviteToCall() {
 }
 
 // ═══════════════════════════════════════════════════
-//  CALL LOGS
+//  CALL LOGS (unchanged)
 // ═══════════════════════════════════════════════════
 function logCall(pin, type, dir, status, duration) {
   calls.unshift({ with: pin, type, dir, status, duration: duration || 0, time: new Date().toISOString() });
@@ -1762,7 +1553,7 @@ function logCall(pin, type, dir, status, duration) {
 }
 
 // ═══════════════════════════════════════════════════
-//  LINK CALLS
+//  LINK CALLS (unchanged)
 // ═══════════════════════════════════════════════════
 function createLinkCall() {
   myRoomId = 'room:' + Date.now();
@@ -1770,7 +1561,6 @@ function createLinkCall() {
   updateLinkView();
   toast('Room created! Share the link to invite people.');
 }
-
 function updateLinkView() {
   const card = document.getElementById('myLinkCard');
   if (myRoomId) {
@@ -1778,7 +1568,6 @@ function updateLinkView() {
     document.getElementById('myLinkUrl').textContent = url;
     card.style.display = 'block';
   } else card.style.display = 'none';
-
   const recent = document.getElementById('recentRooms');
   if (recentRooms.length) {
     recent.innerHTML = recentRooms.map(r => `
@@ -1794,30 +1583,25 @@ function updateLinkView() {
     recent.innerHTML = '<div style="color:var(--text3);font-size:0.82rem;padding:8px 4px">No recent rooms</div>';
   }
 }
-
 function copyLink() {
   const url = document.getElementById('myLinkUrl').textContent;
   navigator.clipboard?.writeText(url).then(() => toast('Link copied!')).catch(() => toast(url));
 }
-
 function joinMyLinkCall() { if (myRoomId) joinRoomById(myRoomId); }
-
 function joinLinkCall() {
   let val = document.getElementById('joinRoomId').value.trim();
-  // Accept full URL or just room ID
   if (val.includes('#room:')) val = val.split('#room:')[1];
   if (val.includes('room:')) val = val.replace('room:', '');
   if (!val) { toast('Enter a room link or ID'); return; }
   joinRoomById('room:' + val.replace('room:', ''));
 }
-
 function addToRecentRooms(roomId) {
   recentRooms = [{ id: roomId, time: Date.now() }, ...recentRooms.filter(r => r.id !== roomId)].slice(0, 10);
   localStorage.setItem('recentRooms', JSON.stringify(recentRooms));
 }
 
 // ═══════════════════════════════════════════════════
-//  VOICE RECORDING
+//  VOICE RECORDING (unchanged)
 // ═══════════════════════════════════════════════════
 async function toggleVoice() {
   if (!isRecording) {
@@ -1847,8 +1631,6 @@ async function toggleVoice() {
     document.getElementById('voiceBtn').classList.remove('recording');
   }
 }
-
-// File handling
 function handleFileInput(e) {
   const file = e.target.files[0];
   if (!file || !currentChatId) return;
@@ -1863,10 +1645,9 @@ function handleFileInput(e) {
 }
 
 // ═══════════════════════════════════════════════════
-//  CONTACTS
+//  CONTACTS (unchanged)
 // ═══════════════════════════════════════════════════
 function showAddContactModal() { closeFab(); openModal('addContactModal'); }
-
 function addContact() {
   const pin = document.getElementById('contactPinInput').value.trim();
   const name = document.getElementById('contactNameInput').value.trim();
@@ -1881,7 +1662,6 @@ function addContact() {
   document.getElementById('contactNameInput').value = '';
   toast('Contact added!');
 }
-
 function getContactName(pin) {
   if (pin === myPin) return 'You';
   const c = contacts.find(x => x.pin === pin);
@@ -1889,68 +1669,11 @@ function getContactName(pin) {
 }
 
 // ═══════════════════════════════════════════════════
-//  GROUPS
-// ═══════════════════════════════════════════════════
-let newGroupMembers = [];
-
-function showCreateGroupModal() {
-  closeFab();
-  newGroupMembers = [];
-  renderNewGroupMembers();
-  openModal('createGroupModal');
-}
-
-function renderNewGroupMembers() {
-  const el = document.getElementById('newGroupMembers');
-  el.innerHTML = newGroupMembers.map(pin => `
-    <div class="member-chip">
-      <span>${getContactName(pin)}</span>
-      <button onclick="removeFromNew('${pin}')">✕</button>
-    </div>
-  `).join('');
-}
-
-function addMemberToNew() {
-  const pin = document.getElementById('addMemberPin').value.trim();
-  if (pin.length !== 6) { toast('Invalid PIN'); return; }
-  if (newGroupMembers.includes(pin)) { toast('Already added'); return; }
-  newGroupMembers.push(pin);
-  renderNewGroupMembers();
-  document.getElementById('addMemberPin').value = '';
-}
-
-function removeFromNew(pin) {
-  newGroupMembers = newGroupMembers.filter(p => p !== pin);
-  renderNewGroupMembers();
-}
-
-function createGroup() {
-  const name = document.getElementById('groupNameInput').value.trim();
-  if (!name) { toast('Enter a group name'); return; }
-  if (newGroupMembers.length < 1) { toast('Add at least 1 member'); return; }
-  const g = {
-    id: 'grp:' + Date.now(),
-    name,
-    members: [myPin, ...newGroupMembers],
-    created: new Date().toISOString()
-  };
-  groups.push(g);
-  localStorage.setItem('groups', JSON.stringify(groups));
-  renderGroups();
-  closeModal('createGroupModal');
-  document.getElementById('groupNameInput').value = '';
-  newGroupMembers = [];
-  toast(`Group "${name}" created`);
-  openGroupChat(g.id);
-}
-
-// ═══════════════════════════════════════════════════
-//  RENDER
+//  RENDER (groups removed)
 // ═══════════════════════════════════════════════════
 function renderAll() {
-  renderContacts(); renderGroups(); renderChats(); renderCalls(); updateUnreadBadge(); updateLinkView();
+  renderContacts(); renderChats(); renderCalls(); updateUnreadBadge(); updateLinkView();
 }
-
 function renderContacts() {
   const list = document.getElementById('contactsList');
   const empty = document.getElementById('contactsEmpty');
@@ -1970,65 +1693,30 @@ function renderContacts() {
     </div>`;
   }).join('');
 }
-
-function renderGroups() {
-  const list = document.getElementById('groupsList');
-  const empty = document.getElementById('groupsEmpty');
-  if (!groups.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  list.innerHTML = groups.map(g => {
-    const onlineCount = g.members.filter(p => p !== myPin && onlineStatus[p]?.online).length;
-    const unreadCount = unread[g.id] || 0;
-    const lastMsg = chats[g.id]?.slice(-1)[0];
-    return `<div class="item" onclick="openGroupChat('${g.id}')">
-      <div class="avatar avatar-group">${g.name[0]}</div>
-      <div class="item-info">
-        <div class="item-name">${g.name}</div>
-        <div class="item-sub">
-          ${g.members.length} members · ${onlineCount} online
-          ${lastMsg ? ' · ' + (lastMsg.type === 'text' ? lastMsg.content.substring(0,20) : '📎') : ''}
-        </div>
-      </div>
-      <div class="item-right">
-        ${unreadCount ? `<span class="unread-badge">${unreadCount}</span>` : ''}
-        <button class="act-btn blue" style="width:34px;height:34px"
-          onclick="event.stopPropagation();currentChatId='${g.id}';currentChatType='group';startGroupCall()">
-          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--blue)"><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/></svg>
-        </button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
 function renderChats() {
   const list = document.getElementById('chatsList');
   const empty = document.getElementById('chatsEmpty');
-  const keys = Object.keys(chats);
+  const keys = Object.keys(chats).filter(k => !k.startsWith('grp:')); // only DMs
   if (!keys.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-
   const sorted = keys.sort((a,b) => {
     const la = chats[a].slice(-1)[0]?.time || '';
     const lb = chats[b].slice(-1)[0]?.time || '';
     return lb.localeCompare(la);
   });
-
   list.innerHTML = sorted.map(key => {
     const msgs = chats[key];
     const last = msgs[msgs.length - 1];
-    const isGroup = key.startsWith('grp:');
-    const name = isGroup ? (groups.find(g => g.id === key)?.name || key) : getContactName(key);
-    const online = !isGroup && onlineStatus[key]?.online;
+    const name = getContactName(key);
+    const online = onlineStatus[key]?.online;
     const ub = unread[key] || 0;
-    const pend = !isGroup && pending[key]?.length;
-
+    const pend = pending[key]?.length;
     const preview = last.type === 'text' ? last.content.substring(0,35) :
                     last.type === 'image' ? '📷 Image' :
                     last.type === 'audio' ? '🎤 Voice note' :
                     last.type === 'video' ? '🎥 Video' : '📎 File';
-
-    return `<div class="item" onclick="${isGroup ? "openGroupChat('" + key + "')" : "openDMChat('" + key + "')"}">
-      <div class="avatar ${online ? 'avatar-online' : ''} ${isGroup ? 'avatar-group' : ''}">${name[0]}</div>
+    return `<div class="item" onclick="openDMChat('${key}')">
+      <div class="avatar ${online ? 'avatar-online' : ''}">${name[0]}</div>
       <div class="item-info">
         <div class="item-name">${name}</div>
         <div class="item-sub">${last.dir === 'out' ? 'You: ' : ''}${preview}</div>
@@ -2041,7 +1729,6 @@ function renderChats() {
     </div>`;
   }).join('');
 }
-
 function renderCalls() {
   const list = document.getElementById('callsList');
   const empty = document.getElementById('callsEmpty');
@@ -2062,7 +1749,6 @@ function renderCalls() {
     </div>`;
   }).join('');
 }
-
 function renderChatMessages() {
   const c = document.getElementById('chatMessages');
   const key = currentChatId;
@@ -2075,10 +1761,8 @@ function renderChatMessages() {
     else if (m.type === 'video') body = `<video src="${m.content}" class="msg-video" controls></video>`;
     else if (m.type === 'audio') body = `<audio src="${m.content}" class="msg-audio" controls></audio>`;
     else body = `<div class="bubble">📎 ${m.fileName || 'File'}</div>`;
-    const sender = !own && currentChatType === 'group' ? `<div style="font-size:0.7rem;color:var(--text3);margin-bottom:2px">${getContactName(m.from)}</div>` : '';
     const tick = own ? `<span class="tick ${m.status === 'sent' || m.status === 'delivered' ? 'sent' : ''}">${m.status === 'pending' ? '⏳' : '✓'}</span>` : '';
     return `<div class="msg ${own ? 'own' : ''}">
-      ${sender}
       ${body}
       <div class="msg-meta">${fmtTime(m.time)} ${tick}</div>
     </div>`;
@@ -2087,19 +1771,14 @@ function renderChatMessages() {
 }
 
 // ═══════════════════════════════════════════════════
-//  UI ACTIONS
+//  UI ACTIONS (groups removed)
 // ═══════════════════════════════════════════════════
 function switchTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(tab + 'View').classList.add('active');
-
-  // Show/hide FAB group call button based on context
-  document.getElementById('fabGroupCallItem').style.display = 'none';
-  document.getElementById('fabNewGroupItem').style.display = tab === 'groups' ? 'flex' : 'none';
-
-  // Clear unread when opening chats
+  // No group items to show/hide
   if (tab === 'chats') { unread = {}; localStorage.setItem('unread', JSON.stringify(unread)); updateUnreadBadge(); }
 }
 
@@ -2110,7 +1789,6 @@ function toggleFab() {
     ? `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`
     : `<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>`;
 }
-
 function closeFab() {
   fabOpen = false;
   document.getElementById('fabMenu').classList.remove('open');
@@ -2123,66 +1801,37 @@ function openDMChat(pin) {
   clearUnread(pin);
   document.getElementById('chatName').textContent = getContactName(pin);
   document.getElementById('chatActions').style.display = 'flex';
-  document.getElementById('groupCallBtn').style.display = 'none';
   updateChatStatus();
   document.getElementById('chatScreen').classList.add('show');
   renderChatMessages();
-
-  // Enable group call FAB item for this DM
-  document.getElementById('fabGroupCallItem').style.display = 'flex';
 }
-
-function openGroupChat(id) {
-  currentChatId = id;
-  currentChatType = 'group';
-  clearUnread(id);
-  const g = groups.find(x => x.id === id);
-  document.getElementById('chatName').textContent = g?.name || id;
-  document.getElementById('chatActions').style.display = 'none';
-  document.getElementById('groupCallBtn').style.display = 'flex';
-  document.getElementById('chatStatus').textContent = `${g?.members?.length || 0} members`;
-  document.getElementById('chatScreen').classList.add('show');
-  renderChatMessages();
-}
-
 function clearUnread(key) {
   if (unread[key]) { delete unread[key]; localStorage.setItem('unread', JSON.stringify(unread)); updateUnreadBadge(); }
 }
-
 function updateChatStatus() {
-  if (currentChatType !== 'dm') return;
   const online = onlineStatus[currentChatId]?.online;
   const s = document.getElementById('chatStatus');
   s.textContent = online ? 'online' : 'offline';
   s.className = 'screen-status' + (online ? ' online' : '');
 }
-
 function closeChat() {
   document.getElementById('chatScreen').classList.remove('show');
   currentChatId = null;
 }
-
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
 function copyPin() {
   navigator.clipboard?.writeText(myPin).then(() => toast('PIN copied!')).catch(() => {});
 }
-
 function installApp() {
   if (!deferredPrompt) { toast('Already installed or use browser menu to install'); return; }
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
 }
-
 function autoResize(el) {
   el.style.height = '';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
-
-// ═══════════════════════════════════════════════════
-//  DRAG PiP
-// ═══════════════════════════════════════════════════
 function makeDraggable(el) {
   let startX, startY, elX, elY;
   el.addEventListener('touchstart', e => {
@@ -2199,21 +1848,15 @@ function makeDraggable(el) {
     el.style.right = 'auto'; el.style.bottom = 'auto';
   }, { passive: true });
 }
-
-// ═══════════════════════════════════════════════════
-//  UTILS
-// ═══════════════════════════════════════════════════
 function fmtTime(iso) {
   const d = new Date(iso);
   const now = new Date();
   if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
-
 function esc(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
-
 function toast(msg) {
   document.querySelectorAll('.toast').forEach(t => t.remove());
   const el = document.createElement('div');
@@ -2225,4 +1868,3 @@ function toast(msg) {
 </script>
 </body>
 </html>
-
