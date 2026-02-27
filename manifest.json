@@ -1,17 +1,22 @@
 {
   "name": "iNet",
   "short_name": "iNet",
-  "description": "Private peer-to-peer calls, chats, and groups",
-  "start_url": "/app.html",
-  "scope": "/",
+  "description": "Private calls & messages. No accounts. Just a PIN.",
+  "start_url": "/app",
   "display": "standalone",
   "background_color": "#0e0e10",
   "theme_color": "#e63946",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23e63946'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='white' font-family='Arial'%3EiN%3C/text%3E%3C/svg%3E",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
