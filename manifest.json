@@ -1,7 +1,7 @@
 {
   "name": "iNet",
   "short_name": "iNet",
-  "start_url": ".",
+  "start_url": "/app.html",
   "display": "standalone",
   "theme_color": "#e63946",
   "background_color": "#0e0e10",
