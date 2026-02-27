@@ -1,14 +1,29 @@
-// sw.js – iNet service worker with inline icon
+// sw.js - iNet Service Worker
+const CACHE_NAME = 'inet-v1';
+const APP_URL = '/app.html';
+
+// Inline icon
 const ICON_DATA = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%23e63946\'/%3E%3Ctext x=\'50\' y=\'70\' font-size=\'50\' text-anchor=\'middle\' fill=\'white\' font-family=\'Arial\'%3EiN%3C/text%3E%3C/svg%3E';
 
+// Install event
 self.addEventListener('install', (event) => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll([
+        APP_URL,
+        'manifest.json'
+      ]);
+    })
+  );
 });
 
+// Activate event
 self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
+// Push event
 self.addEventListener('push', (event) => {
   let data = {};
   try {
@@ -25,7 +40,8 @@ self.addEventListener('push', (event) => {
     badge: ICON_DATA,
     vibrate: [200, 100, 200],
     data: { type, from, call_type, room },
-    actions: []
+    actions: [],
+    requireInteraction: true
   };
 
   if (type === 'incoming_call' || type === 'incoming_group_call') {
@@ -34,61 +50,35 @@ self.addEventListener('push', (event) => {
       { action: 'decline', title: 'Decline' }
     ];
     title = type === 'incoming_call' ? '📞 Incoming call' : '👥 Group invite';
-  } else if (type === 'new_message') {
-    title = '💬 New message';
   }
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+// Notification click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
   const { action } = event;
-  const { type, from, call_type, room } = event.notification.data;
+  const { from, call_type, room } = event.notification.data;
 
   if (action === 'answer') {
     event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true })
-        .then(clientList => {
-          for (const client of clientList) {
-            if (client.url.includes(self.location.origin) && 'focus' in client) {
-              client.focus();
-              client.postMessage({
-                type: 'notification_action',
-                action: 'answer',
-                data: { from, call_type, room }
-              });
-              return;
-            }
-          }
-          if (clients.openWindow) {
-            return clients.openWindow('/').then(client => {
-              setTimeout(() => {
-                client.postMessage({
-                  type: 'notification_action',
-                  action: 'answer',
-                  data: { from, call_type, room }
-                });
-              }, 1000);
+      clients.matchAll({ type: 'window' }).then(clientList => {
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin)) {
+            client.focus();
+            client.postMessage({
+              type: 'notification_action',
+              action: 'answer',
+              data: { from, call_type, room }
             });
+            return;
           }
-        })
+        }
+        clients.openWindow(APP_URL);
+      })
     );
-  } else if (action === 'decline') {
-    // Optionally notify server that you declined (can be added later)
   } else {
-    event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true })
-        .then(clientList => {
-          for (const client of clientList) {
-            if (client.url.includes(self.location.origin) && 'focus' in client) {
-              client.focus();
-              return;
-            }
-          }
-          if (clients.openWindow) clients.openWindow('/');
-        })
-    );
+    event.waitUntil(clients.openWindow(APP_URL));
   }
 });
