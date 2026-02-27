@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>iNet · Connect</title>
+<title>iNet · Private Calls</title>
 <meta name="theme-color" content="#e63946">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,8 +12,6 @@
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ===== FULL CSS FROM YOUR ORIGINAL WORKING CODE ===== */
-/* (I'm including the exact styles you had before – they are long, but necessary) */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0e0e10;--surface:#18181c;--surface2:#222228;--surface3:#2a2a32;
@@ -25,13 +23,14 @@
   --text:#f4f4f6;--text2:#a0a0b0;--text3:#606070;
   --radius:16px;--radius-sm:10px;
   --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
-  --safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px);
 }
 html,body{height:100%;width:100%;overflow:hidden;position:fixed}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+/* Header */
 .header{
   background:rgba(14,14,16,0.92);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
@@ -45,14 +44,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   box-shadow:0 0 16px var(--accent-glow);flex-shrink:0;
 }
 .app-name{font-weight:700;font-size:1rem;flex:1;letter-spacing:-0.3px}
-.pin-badge{
-  background:var(--surface2);border:1px solid var(--border2);
-  color:var(--text2);font-family:'DM Mono',monospace;font-size:0.72rem;
-  padding:5px 10px;border-radius:20px;letter-spacing:2px;cursor:pointer;
-  transition:all .2s;
-}
-.pin-badge.active{color:var(--text);border-color:var(--accent);color:var(--accent)}
-.pin-badge:active{transform:scale(0.95)}
 .ws-dot{
   width:9px;height:9px;border-radius:50%;background:var(--text3);
   flex-shrink:0;transition:background .3s;
@@ -65,6 +56,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   border-radius:20px;font-size:0.72rem;font-weight:700;cursor:pointer;
   display:none;font-family:'DM Sans',sans-serif;
 }
+
+/* Tabs */
 .tabs{
   display:none;background:var(--surface);border-bottom:1px solid var(--border);
   flex-shrink:0;
@@ -75,33 +68,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   flex:1;min-width:72px;padding:12px 8px;text-align:center;cursor:pointer;
   color:var(--text3);font-weight:600;font-size:0.75rem;
   display:flex;align-items:center;justify-content:center;gap:5px;
-  border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:all .2s;
 }
-.tab svg{width:17px;height:17px;fill:currentColor;flex-shrink:0}
+.tab svg{width:17px;height:17px;fill:currentColor}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tab-badge{
   background:var(--accent);color:#fff;border-radius:99px;
   padding:1px 6px;font-size:0.65rem;font-weight:700;min-width:18px;
 }
+
+/* Main */
 .main{flex:1;overflow:hidden;position:relative}
 .view{
   height:100%;overflow-y:auto;padding:12px 12px 90px;
   display:none;-webkit-overflow-scrolling:touch;
 }
 .view.active{display:block}
+
+/* Items */
 .item{
   background:var(--surface);border:1px solid var(--border);
   border-radius:var(--radius);padding:14px;margin-bottom:8px;
   display:flex;align-items:center;gap:12px;cursor:pointer;
-  transition:background .15s,transform .1s;position:relative;overflow:hidden;
-}
-.item::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.02),transparent);
-  opacity:0;transition:opacity .3s;
+  transition:background .15s,transform .1s;
 }
 .item:active{background:var(--surface2);transform:scale(0.99)}
-.item:active::before{opacity:1}
 .avatar{
   width:48px;height:48px;background:var(--surface2);border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -116,16 +107,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .item-info{flex:1;min-width:0}
 .item-name{font-weight:600;font-size:0.92rem;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item-sub{font-size:0.77rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .item-time{font-size:0.68rem;color:var(--text3)}
 .unread-badge{
   background:var(--accent);color:#fff;border-radius:99px;
   padding:2px 7px;font-size:0.68rem;font-weight:700;
 }
-.pending-badge{
-  background:var(--yellow);color:#000;border-radius:99px;
-  padding:2px 7px;font-size:0.68rem;font-weight:700;
-}
+
+/* Empty state */
 .empty{text-align:center;padding:70px 20px;color:var(--text3)}
 .empty-icon{
   width:64px;height:64px;background:var(--surface2);border-radius:24px;
@@ -134,6 +123,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .empty-icon svg{width:32px;height:32px;fill:var(--text3)}
 .empty-title{font-weight:600;font-size:1rem;color:var(--text2);margin-bottom:8px}
 .empty-sub{font-size:0.82rem;line-height:1.5}
+
+/* FAB */
 .fab{
   position:fixed;bottom:calc(20px + var(--safe-bottom));right:20px;
   width:56px;height:56px;background:var(--accent);border:none;border-radius:50%;
@@ -167,6 +158,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .fab-btn svg{width:20px;height:20px;fill:#fff}
 .fab-btn.blue{background:var(--blue)}
 .fab-btn.green{background:var(--green)}
+
+/* Modal */
 .modal{
   position:fixed;inset:0;background:rgba(0,0,0,0.75);
   backdrop-filter:blur(6px);display:none;align-items:center;
@@ -201,6 +194,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .btn.primary{background:var(--accent);color:#fff}
 .btn.secondary{background:var(--surface2);color:var(--text2)}
 .btn.blue{background:var(--blue);color:#fff}
+
+/* Screen */
 .screen{
   position:fixed;inset:0;background:var(--bg);
   display:none;flex-direction:column;z-index:1000;
@@ -226,7 +221,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .act-btn{
   width:38px;height:38px;border-radius:50%;border:none;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  transition:transform .15s;
 }
 .act-btn:active{transform:scale(0.9)}
 .act-btn.green{background:rgba(34,197,94,0.15)}
@@ -234,10 +228,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .act-btn.red{background:var(--accent-dim)}
 .act-btn.red svg{fill:var(--accent)}
 .act-btn svg{width:18px;height:18px;fill:var(--text2)}
+
+/* Messages */
 .messages{
   flex:1;overflow-y:auto;padding:12px;
   display:flex;flex-direction:column;gap:6px;
-  -webkit-overflow-scrolling:touch;
 }
 .msg{max-width:78%;align-self:flex-start;display:flex;flex-direction:column}
 .msg.own{align-self:flex-end}
@@ -250,9 +245,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   background:var(--accent);border-color:var(--accent);
   border-radius:18px 18px 4px 18px;
 }
-.msg-img{max-width:220px;border-radius:14px;cursor:pointer;display:block}
-.msg-video{max-width:220px;border-radius:14px;display:block}
-.msg-audio{width:200px;height:36px;border-radius:20px}
+.msg-img{max-width:220px;border-radius:14px;cursor:pointer}
 .msg-meta{
   font-size:0.65rem;color:var(--text3);
   margin-top:3px;display:flex;align-items:center;gap:4px;
@@ -260,6 +253,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .msg.own .msg-meta{justify-content:flex-end}
 .tick{color:var(--text3);font-size:0.7rem}
 .tick.sent{color:var(--green)}
+
+/* Input area */
 .input-area{
   background:var(--surface);border-top:1px solid var(--border);
   padding:10px 10px calc(10px + var(--safe-bottom));
@@ -268,13 +263,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .icon-btn{
   width:40px;height:40px;border-radius:50%;background:var(--surface2);
   border:none;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;transition:all .15s;
+  cursor:pointer;flex-shrink:0;
 }
 .icon-btn:active{transform:scale(0.9)}
 .icon-btn svg{width:20px;height:20px;fill:var(--text2)}
-.icon-btn.recording{background:var(--accent);animation:pulse-btn 1s infinite}
-.icon-btn.recording svg{fill:#fff}
-@keyframes pulse-btn{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .msg-input{
   flex:1;background:var(--surface2);border:1px solid var(--border2);
   border-radius:22px;padding:11px 16px;color:var(--text);
@@ -286,10 +278,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   width:42px;height:42px;border-radius:50%;background:var(--accent);
   border:none;display:flex;align-items:center;justify-content:center;
   cursor:pointer;flex-shrink:0;
-  box-shadow:0 2px 10px var(--accent-glow);transition:transform .15s;
+  box-shadow:0 2px 10px var(--accent-glow);
 }
 .send-btn:active{transform:scale(0.9)}
 .send-btn svg{width:18px;height:18px;fill:#fff}
+
+/* Incoming call */
 #incomingOverlay{
   position:fixed;inset:0;z-index:3000;display:none;flex-direction:column;
   align-items:center;justify-content:center;
@@ -308,7 +302,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   animation:ringWave 2s infinite;
 }
 .ring-wave:nth-child(2){animation-delay:.5s}
-.ring-wave:nth-child(3){animation-delay:1s}
 @keyframes ringWave{
   0%{transform:scale(0.9);opacity:0.6}
   100%{transform:scale(1.5);opacity:0}
@@ -325,87 +318,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .call-action-btn.answer{background:var(--green)}
 .call-action-btn.decline{background:var(--accent)}
 .call-action-btn svg{width:28px;height:28px;fill:#fff}
-#groupCallScreen{
-  position:fixed;inset:0;z-index:2500;display:none;flex-direction:column;
-  background:#000;
-}
-#groupCallScreen.show{display:flex}
-.gc-header{
-  position:absolute;top:0;left:0;right:0;z-index:10;
-  padding:calc(var(--safe-top) + 12px) 16px 16px;
-  background:linear-gradient(#000a,transparent);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.gc-title{color:#fff;font-weight:700;font-size:1rem}
-.gc-timer{color:rgba(255,255,255,0.7);font-family:'DM Mono',monospace;font-size:0.85rem}
-.gc-link-btn{
-  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
-  color:#fff;padding:6px 12px;border-radius:20px;font-size:0.78rem;
-  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;
-}
-.gc-grid{
-  flex:1;display:grid;gap:2px;padding-top:80px;padding-bottom:140px;
-  overflow:hidden;transition:grid-template-columns .3s,grid-template-rows .3s;
-}
-.gc-grid[data-count="1"]{grid-template-columns:1fr}
-.gc-grid[data-count="2"]{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
-.gc-grid[data-count="3"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
-.gc-grid[data-count="3"] .gc-tile:first-child{grid-column:1/-1}
-.gc-grid[data-count="4"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
-.gc-grid[data-count="5"]{grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr)}
-.gc-grid[data-count="5"] .gc-tile:last-child{grid-column:1/-1}
-.gc-grid[data-count="6"]{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr}
-.gc-tile{
-  position:relative;background:#111;overflow:hidden;
-  border-radius:4px;animation:tileIn .3s ease;
-}
-@keyframes tileIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
-.gc-tile video{width:100%;height:100%;object-fit:cover;display:block}
-.gc-tile-overlay{
-  position:absolute;bottom:0;left:0;right:0;padding:8px;
-  background:linear-gradient(transparent,rgba(0,0,0,0.7));
-  display:flex;align-items:center;gap:6px;
-}
-.gc-tile-name{color:#fff;font-size:0.75rem;font-weight:600}
-.gc-tile-avatar{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  background:var(--surface2);font-family:'DM Mono',monospace;
-  font-size:2.5rem;color:var(--text2);
-}
-.gc-tile.speaking .gc-tile-overlay{display:block}
-.gc-tile.speaking::after{
-  content:'';position:absolute;inset:0;
-  border:3px solid var(--green);border-radius:4px;pointer-events:none;
-  animation:speakPulse .4s ease;
-}
-@keyframes speakPulse{0%{opacity:0.4}50%{opacity:1}100%{opacity:0.7}}
-#gcLocalPip{
-  position:absolute;bottom:150px;right:10px;
-  width:80px;height:106px;border-radius:10px;overflow:hidden;
-  border:2px solid rgba(255,255,255,0.3);z-index:15;
-  background:#111;cursor:move;
-}
-#gcLocalPip video{width:100%;height:100%;object-fit:cover}
-.gc-controls{
-  position:absolute;bottom:0;left:0;right:0;
-  padding:16px 20px calc(16px + var(--safe-bottom));
-  background:linear-gradient(transparent,#000d);
-  display:flex;align-items:center;justify-content:center;gap:14px;
-}
-.gc-btn{
-  width:56px;height:56px;border-radius:50%;border:none;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  transition:all .15s;
-}
-.gc-btn:active{transform:scale(0.9)}
-.gc-btn svg{width:22px;height:22px;fill:#fff}
-.gc-btn.mute{background:var(--surface2)}
-.gc-btn.muted{background:var(--accent)}
-.gc-btn.cam{background:var(--surface2)}
-.gc-btn.cam-off{background:var(--surface3)}
-.gc-btn.end{background:var(--accent);box-shadow:0 4px 16px var(--accent-glow)}
-.gc-btn.add{background:var(--purple)}
-.gc-btn.speaker{background:var(--surface2)}
+
+/* Call screen */
 #callScreen{
   position:fixed;inset:0;background:#000;
   display:none;flex-direction:column;z-index:2000;
@@ -443,22 +357,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .c-btn{
   width:56px;height:56px;border-radius:50%;border:none;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  transition:all .15s;
 }
 .c-btn:active{transform:scale(0.9)}
 .c-btn svg{width:22px;height:22px;fill:#fff}
-.c-btn.mute-btn,.c-btn.cam-btn,.c-btn.spk-btn{background:rgba(255,255,255,0.12)}
+.c-btn.mute-btn,.c-btn.cam-btn{background:rgba(255,255,255,0.12)}
 .c-btn.muted{background:var(--accent)}
 .c-btn.end-btn{
   background:var(--accent);width:66px;height:66px;
   box-shadow:0 4px 20px var(--accent-glow);
 }
-.section-hd{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 4px 6px;margin-bottom:2px;
-}
-.section-hd-title{font-size:0.72rem;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
-.section-hd-action{font-size:0.78rem;color:var(--accent);font-weight:600;cursor:pointer}
+
+/* Link card */
 .link-card{
   background:linear-gradient(135deg,var(--blue-dim),rgba(139,92,246,0.1));
   border:1px solid rgba(59,130,246,0.25);
@@ -475,10 +384,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .link-btn{
   flex:1;padding:9px;border:none;border-radius:10px;
   font-size:0.8rem;font-weight:700;cursor:pointer;
-  font-family:'DM Sans',sans-serif;
 }
 .link-btn.copy{background:var(--surface2);color:var(--text)}
 .link-btn.join{background:var(--blue);color:#fff}
+
+/* Toast */
 .toast{
   position:fixed;bottom:calc(90px + var(--safe-bottom));left:50%;
   transform:translateX(-50%) translateY(0);
@@ -490,19 +400,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 }
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes toastOut{to{opacity:0;transform:translateX(-50%) translateY(10px)}}
-.divider{height:1px;background:var(--border);margin:6px 0}
-.section-label{
-  font-size:0.7rem;color:var(--text3);font-weight:700;
-  letter-spacing:1.2px;text-transform:uppercase;
-  padding:12px 4px 6px;
-}
-input::placeholder,textarea::placeholder{color:var(--text3)}
-.spinner{
-  width:24px;height:24px;border:2.5px solid var(--border2);
-  border-top-color:var(--accent);border-radius:50%;
-  animation:spin 0.7s linear infinite;display:inline-block;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Signup */
 #signupView{
   display:flex;flex-direction:column;align-items:center;
   justify-content:center;padding:40px 28px;text-align:center;min-height:100%;
@@ -524,15 +423,104 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 .signup-btn:active{transform:scale(0.96)}
 .signup-btn:disabled{opacity:0.6}
 #signupError{color:var(--accent);font-size:0.85rem;margin-top:14px;min-height:20px}
-@media(min-width:600px){
-  .modal-box{max-width:420px}
-  .main{max-width:500px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+
+/* Install page */
+#installPage{
+  position:fixed;inset:0;background:var(--bg);z-index:10000;
+  overflow-y:auto;padding:20px;display:flex;flex-direction:column;
+  align-items:center;animation:fadeIn 0.3s ease;
 }
+#installPage .logo{
+  width:80px;height:80px;font-size:2rem;margin:40px auto 20px;
+}
+#installPage h1{font-size:2rem;margin-bottom:10px}
+#installPage p{color:var(--text2);margin-bottom:30px}
+#installInstructions{
+  background:var(--surface);border-radius:16px;padding:20px;margin:20px 0;
+}
+#installInstructions ol{text-align:left;color:var(--text2);line-height:2;padding-left:20px}
+#installNowBtn,#continueWebBtn{
+  width:100%;padding:16px;border-radius:30px;font-size:1.1rem;
+  font-weight:700;cursor:pointer;margin:10px 0;border:none;
+}
+#installNowBtn{background:var(--accent);color:#fff}
+#continueWebBtn{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+#installNowBtn:active,#continueWebBtn:active{transform:scale(0.97)}
+
+/* Group call screen (simplified) */
+#groupCallScreen{
+  position:fixed;inset:0;z-index:2500;display:none;flex-direction:column;
+  background:#000;
+}
+#groupCallScreen.show{display:flex}
+.gc-header{
+  position:absolute;top:0;left:0;right:0;z-index:10;
+  padding:calc(var(--safe-top) + 12px) 16px 16px;
+  background:linear-gradient(#000a,transparent);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.gc-title{color:#fff;font-weight:700;font-size:1rem}
+.gc-timer{color:rgba(255,255,255,0.7);font-family:'DM Mono',monospace;font-size:0.85rem}
+.gc-link-btn{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+  color:#fff;padding:6px 12px;border-radius:20px;font-size:0.78rem;
+  cursor:pointer;font-weight:600;
+}
+.gc-grid{
+  flex:1;display:grid;gap:2px;padding-top:80px;padding-bottom:140px;
+  overflow:hidden;
+}
+.gc-grid[data-count="1"]{grid-template-columns:1fr}
+.gc-grid[data-count="2"]{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+.gc-grid[data-count="3"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.gc-grid[data-count="3"] .gc-tile:first-child{grid-column:1/-1}
+.gc-grid[data-count="4"]{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.gc-tile{
+  position:relative;background:#111;overflow:hidden;border-radius:4px;
+}
+.gc-tile video{width:100%;height:100%;object-fit:cover}
+.gc-tile-overlay{
+  position:absolute;bottom:0;left:0;right:0;padding:8px;
+  background:linear-gradient(transparent,rgba(0,0,0,0.7));
+  display:flex;align-items:center;gap:6px;
+}
+.gc-tile-name{color:#fff;font-size:0.75rem;font-weight:600}
+.gc-tile-avatar{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  background:var(--surface2);font-family:'DM Mono',monospace;
+  font-size:2.5rem;color:var(--text2);
+}
+#gcLocalPip{
+  position:absolute;bottom:150px;right:10px;
+  width:80px;height:106px;border-radius:10px;overflow:hidden;
+  border:2px solid rgba(255,255,255,0.3);z-index:15;background:#111;cursor:move;
+}
+#gcLocalPip video{width:100%;height:100%;object-fit:cover}
+.gc-controls{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:16px 20px calc(16px + var(--safe-bottom));
+  background:linear-gradient(transparent,#000d);
+  display:flex;align-items:center;justify-content:center;gap:14px;
+}
+.gc-btn{
+  width:56px;height:56px;border-radius:50%;border:none;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.gc-btn:active{transform:scale(0.9)}
+.gc-btn svg{width:22px;height:22px;fill:#fff}
+.gc-btn.mute{background:var(--surface2)}
+.gc-btn.muted{background:var(--accent)}
+.gc-btn.cam{background:var(--surface2)}
+.gc-btn.end{background:var(--accent);box-shadow:0 4px 16px var(--accent-glow)}
+.gc-btn.add{background:var(--purple)}
+.gc-btn.speaker{background:var(--surface2)}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 
-<!-- ========== HEADER ========== -->
+<!-- HEADER -->
 <div class="header" id="header">
   <div class="logo">iN</div>
   <div class="app-name">iNet</div>
@@ -541,7 +529,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   <button id="installBtn" onclick="installApp()">Install</button>
 </div>
 
-<!-- ========== TABS ========== -->
+<!-- TABS -->
 <div class="tabs" id="tabs">
   <div class="tabs-inner">
     <div class="tab active" data-tab="contacts" onclick="switchTab('contacts',this)">
@@ -564,7 +552,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- ========== MAIN VIEWS ========== -->
+<!-- MAIN CONTENT -->
 <div class="main">
   <!-- SIGNUP VIEW -->
   <div id="signupView">
@@ -612,7 +600,6 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
       <div class="link-card-sub">Share a link — anyone can join your call, like Zoom.</div>
       <button class="btn primary" onclick="createLinkCall()" style="margin-bottom:12px">Create Call Link</button>
     </div>
-
     <div id="myLinkCard" style="display:none">
       <div class="section-label">Your active room</div>
       <div class="link-card">
@@ -623,20 +610,18 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
         </div>
       </div>
     </div>
-
     <div class="section-label" style="margin-top:8px">Join a Room</div>
     <div style="display:flex;gap:8px;margin-bottom:16px">
       <input type="text" id="joinRoomId" placeholder="Paste link or room ID"
         style="flex:1;padding:12px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif">
       <button class="btn blue" style="max-width:80px" onclick="joinLinkCall()">Join</button>
     </div>
-
     <div class="section-label">Recent Rooms</div>
     <div id="recentRooms"></div>
   </div>
 </div>
 
-<!-- ========== FAB ========== -->
+<!-- FAB -->
 <button class="fab" id="fab" onclick="toggleFab()">
   <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
 </button>
@@ -655,7 +640,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- ========== ADD CONTACT MODAL ========== -->
+<!-- ADD CONTACT MODAL -->
 <div class="modal" id="addContactModal" onclick="if(event.target===this)closeModal('addContactModal')">
   <div class="modal-box">
     <div class="modal-title">Add Contact</div>
@@ -669,7 +654,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- ========== INCOMING CALL OVERLAY ========== -->
+<!-- INCOMING CALL OVERLAY -->
 <div id="incomingOverlay">
   <div class="incoming-ring" id="incomingRingAvatar">
     <div class="ring-wave"></div>
@@ -688,7 +673,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- ========== 1:1 CALL SCREEN ========== -->
+<!-- 1:1 CALL SCREEN -->
 <div id="callScreen">
   <div class="call-bg">
     <video id="remoteVideo" autoplay playsinline></video>
@@ -715,7 +700,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- ========== GROUP CALL SCREEN ========== -->
+<!-- GROUP CALL SCREEN -->
 <div id="groupCallScreen">
   <div class="gc-header">
     <div>
@@ -724,12 +709,8 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
     </div>
     <button class="gc-link-btn" onclick="shareGroupCallLink()">Share Link 🔗</button>
   </div>
-  <div class="gc-grid" id="gcGrid" data-count="1">
-    <!-- tiles injected here -->
-  </div>
-  <div id="gcLocalPip">
-    <video id="gcLocalVideo" autoplay playsinline muted></video>
-  </div>
+  <div class="gc-grid" id="gcGrid" data-count="1"></div>
+  <div id="gcLocalPip"><video id="gcLocalVideo" autoplay playsinline muted></video></div>
   <div class="gc-controls">
     <button class="gc-btn mute" id="gcMuteBtn" onclick="toggleGcMute()">
       <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6.5 6c0 3-2.54 5.1-5.5 5.1S6.5 14 6.5 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.5z"/></svg>
@@ -749,7 +730,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   </div>
 </div>
 
-<!-- ========== CHAT SCREEN ========== -->
+<!-- CHAT SCREEN -->
 <div class="screen" id="chatScreen">
   <div class="screen-header">
     <button class="back-btn" onclick="closeChat()">
@@ -776,134 +757,149 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
     <button class="icon-btn" id="voiceBtn" onclick="toggleVoice()">
       <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6.5 6c0 3-2.54 5.1-5.5 5.1S6.5 14 6.5 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.5z"/></svg>
     </button>
-    <textarea class="msg-input" id="msgInput" placeholder="Message…" rows="1"
-      oninput="autoResize(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+    <textarea class="msg-input" id="msgInput" placeholder="Message…" rows="1" oninput="autoResize(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
     <button class="send-btn" onclick="sendMsg()">
       <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
     </button>
   </div>
 </div>
 
-<!-- ========== HIDDEN FILE INPUT ========== -->
+<!-- Hidden inputs -->
 <input type="file" id="fileInput" style="display:none" accept="image/*,video/*,audio/*">
 <audio id="remoteAudio" autoplay></audio>
-<audio id="ringtone" loop>
-  <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFhYqFjpKVkpKVkpmcoJycn5+jpqmop6qrra+xr62usLGztLW0s7S1uLm5uLm5ubm4ubq7ub" type="audio/wav">
-</audio>
+<audio id="ringtone" loop src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFhYqFjpKVkpKVkpmcoJycn5+jpqmop6qrra+xr62usLGztLW0s7S1uLm5uLm5ubm4ubq7ub"></audio>
 
 <script>
-// ==================== FULL JAVASCRIPT ====================
-// CONFIG
-const API   = 'https://emltechstudio-inet.hf.space';
-const WS    = 'wss://emltechstudio-inet.hf.space/ws';
-const ICE   = { iceServers: [
+// ========== CONSTANTS ==========
+const API = 'https://emltechstudio-inet.hf.space';
+const WS = 'wss://emltechstudio-inet.hf.space/ws';
+const VAPID_PUBLIC_KEY = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAyJB135ZICdBzzYKAGOOnMlIXTMz';
+const ICE = { iceServers: [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
   { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
 ]};
 
-// STATE
-let myPin     = localStorage.getItem('myPin');
-let deviceId  = localStorage.getItem('deviceId');
-let vapidKey  = localStorage.getItem('vapidKey');
-let ws        = null;
-let wsTimer   = null;
-
-let contacts  = JSON.parse(localStorage.getItem('contacts') || '[]');
-let chats     = JSON.parse(localStorage.getItem('chats')    || '{}');
-let calls     = JSON.parse(localStorage.getItem('calls')    || '[]');
-let pending   = JSON.parse(localStorage.getItem('pending')  || '{}');
-let unread    = JSON.parse(localStorage.getItem('unread')   || '{}');
-
-// Remove any lingering group chats
-Object.keys(chats).forEach(key => {
-  if (key.startsWith('grp:')) delete chats[key];
-});
-localStorage.setItem('chats', JSON.stringify(chats));
-
+// ========== STATE ==========
+let myPin = localStorage.getItem('myPin');
+let deviceId = localStorage.getItem('deviceId');
+let vapidKey = localStorage.getItem('vapidKey') || VAPID_PUBLIC_KEY;
+let ws = null;
+let wsTimer = null;
+let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+let chats = JSON.parse(localStorage.getItem('chats') || '{}');
+let calls = JSON.parse(localStorage.getItem('calls') || '[]');
+let pending = JSON.parse(localStorage.getItem('pending') || '{}');
+let unread = JSON.parse(localStorage.getItem('unread') || '{}');
 let onlineStatus = {};
-let currentChatId   = null;
+let currentChatId = null;
 let currentChatType = 'dm';
-let pingInterval    = null;
-let fabOpen         = false;
-let deferredPrompt  = null;
-
-// 1:1 call state
-let localStream  = null;
-let peerConn     = null;
-let callPeer     = null;
-let callType     = null;
-let callTimer    = null;
-let isMuted      = false;
-let isCamOff     = false;
-
-// Incoming call buffer
+let pingInterval = null;
+let fabOpen = false;
+let deferredPrompt = null;
+let localStream = null;
+let peerConn = null;
+let callPeer = null;
+let callType = null;
+let callTimer = null;
+let isMuted = false;
+let isCamOff = false;
 let incomingCallBuffer = null;
+let gcRoomId = null;
+let gcStream = null;
+let gcPeers = {};
+let gcStreams = {};
+let gcTimer = null;
+let gcSeconds = 0;
+let gcMuted = false;
+let gcCamOff = false;
+let gcLocalPin = null;
+let mediaRec = null;
+let audioChunks = [];
+let isRecording = false;
+let myRoomId = localStorage.getItem('myRoomId') || null;
+let recentRooms = JSON.parse(localStorage.getItem('recentRooms') || '[]');
 
-// Group call state
-let gcRoomId     = null;
-let gcStream     = null;
-let gcPeers      = {};
-let gcStreams    = {};
-let gcTimer      = null;
-let gcSeconds    = 0;
-let gcMuted      = false;
-let gcCamOff     = false;
-let gcLocalPin   = null;
+// ========== INSTALL PAGE ==========
+if (window.location.hash === '#install') {
+  showInstallPage();
+}
 
-// Media recording
-let mediaRec     = null;
-let audioChunks  = [];
-let isRecording  = false;
-
-// Link call
-let myRoomId     = localStorage.getItem('myRoomId') || null;
-let recentRooms  = JSON.parse(localStorage.getItem('recentRooms') || '[]');
+function showInstallPage() {
+  document.getElementById('signupView').style.display = 'none';
+  document.getElementById('tabs').style.display = 'none';
+  document.querySelector('.main').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
+  
+  if (!document.getElementById('installPage')) {
+    const page = document.createElement('div');
+    page.id = 'installPage';
+    page.innerHTML = `
+      <div class="logo">iN</div>
+      <h1>Install iNet</h1>
+      <p>Get the best experience by installing on your device</p>
+      <div id="installInstructions"></div>
+      <button id="installNowBtn">Install Now</button>
+      <button id="continueWebBtn">Continue in Browser</button>
+    `;
+    document.body.appendChild(page);
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const instr = document.getElementById('installInstructions');
+    
+    if (isIOS) instr.innerHTML = '<ol><li>Tap Share <span style="font-size:1.2rem">⬆️</span></li><li>Tap "Add to Home Screen"</li><li>Tap "Add"</li></ol>';
+    else if (isAndroid) instr.innerHTML = '<ol><li>Tap menu <span style="font-size:1.2rem">⋮</span></li><li>Tap "Add to Home screen"</li><li>Tap "Add"</li></ol>';
+    else instr.innerHTML = '<p>Click the install button below.</p>';
+    
+    document.getElementById('installNowBtn').onclick = () => {
+      if (deferredPrompt) { deferredPrompt.prompt(); }
+      else if (isIOS) toast('Use Safari share menu → Add to Home Screen');
+      else toast('Use browser menu to install');
+    };
+    document.getElementById('continueWebBtn').onclick = () => {
+      document.getElementById('installPage').remove();
+      location.hash = '';
+      startApp();
+    };
+  }
+}
 
 // ========== INIT ==========
 (function init() {
   if (myPin) startApp();
-
   const hash = location.hash.replace('#','');
-  if (hash.startsWith('room:')) {
-    const rid = hash.slice(5);
-    setTimeout(() => joinRoomById(rid), 1500);
-  }
-
+  if (hash.startsWith('room:')) setTimeout(() => joinRoomById(hash.slice(5)), 1500);
+  
   window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault(); deferredPrompt = e;
+    e.preventDefault();
+    deferredPrompt = e;
     document.getElementById('installBtn').style.display = 'block';
   });
-  window.addEventListener('appinstalled', () => {
-    deferredPrompt = null;
-    document.getElementById('installBtn').style.display = 'none';
-    toast('App installed! 🎉');
-  });
-
+  
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', e => {
-      if (e.data?.type === 'notification_action') {
-        const { action, data } = e.data;
-        if (action === 'answer' && data.from) answerIncomingCallFrom(data);
+      if (e.data?.type === 'notification_action' && e.data.action === 'answer') {
+        answerIncomingCallFrom(e.data.data);
       }
     });
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
-
+  
   document.getElementById('fileInput').addEventListener('change', handleFileInput);
   makeDraggable(document.getElementById('gcLocalPip'));
   makeDraggable(document.getElementById('localVideo'));
 })();
 
 function startApp() {
+  if (location.hash === '#install') return showInstallPage();
   document.getElementById('signupView').style.display = 'none';
   document.getElementById('tabs').style.display = 'flex';
   document.querySelector('.main').style.overflow = 'hidden';
   document.getElementById('pinBadge').textContent = myPin;
   document.getElementById('pinBadge').classList.add('active');
   document.getElementById('fab').classList.add('visible');
-
   connectWS();
   renderAll();
   startPingLoop();
@@ -911,83 +907,51 @@ function startApp() {
   updateLinkView();
 }
 
-// ========== SIGNUP ==========
-async function signup() {
-  const btn = document.getElementById('signupBtn');
-  btn.disabled = true; btn.textContent = 'Creating…';
-  document.getElementById('signupError').textContent = '';
-  try {
-    const r = await fetch(API + '/signup', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({})
-    });
-    const d = await r.json();
-    if (!d.net_number) throw new Error('Signup failed');
-    myPin = d.net_number; deviceId = d.device_id; vapidKey = d.vapid_public_key || '';
-    localStorage.setItem('myPin', myPin);
-    localStorage.setItem('deviceId', deviceId);
-    if (vapidKey) localStorage.setItem('vapidKey', vapidKey);
-    startApp();
-    requestPushPermission();
-  } catch(e) {
-    document.getElementById('signupError').textContent = e.message;
-    btn.disabled = false; btn.textContent = 'Get your PIN';
-  }
-}
-
 // ========== WEBSOCKET ==========
 function connectWS() {
-  if (!myPin || !deviceId) return;
-  if (ws?.readyState === WebSocket.OPEN) return;
+  if (!myPin || !deviceId || ws?.readyState === WebSocket.OPEN) return;
   setWsDot('ing');
   try {
     ws = new WebSocket(`${WS}?net_number=${myPin}&device_id=${deviceId}`);
-    ws.onopen  = () => { setWsDot('on'); clearTimeout(wsTimer); wsTimer = null; };
-    ws.onmessage = e => { try { handleMsg(JSON.parse(e.data)); } catch{} };
+    ws.onopen = () => { setWsDot('on'); clearTimeout(wsTimer); };
+    ws.onmessage = e => { try { handleMsg(JSON.parse(e.data)); } catch {} };
     ws.onclose = () => { setWsDot(''); schedReconnect(); };
     ws.onerror = () => { setWsDot(''); };
   } catch { schedReconnect(); }
 }
 
 function schedReconnect() {
-  if (wsTimer) return;
-  wsTimer = setTimeout(() => { wsTimer = null; connectWS(); }, 3000);
+  if (!wsTimer) wsTimer = setTimeout(() => { wsTimer = null; connectWS(); }, 3000);
 }
 
 function setWsDot(s) {
-  const d = document.getElementById('wsDot');
-  d.className = 'ws-dot' + (s ? ' ' + s : '');
+  document.getElementById('wsDot').className = 'ws-dot' + (s ? ' ' + s : '');
 }
 
 function signal(target, type, payload) {
-  if (!ws || ws.readyState !== WebSocket.OPEN) { toast('Not connected'); return; }
-  ws.send(JSON.stringify({ target, type, payload }));
+  if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ target, type, payload }));
+  else toast('Not connected');
 }
 
 function signalRoom(room, type, payload) {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
-  ws.send(JSON.stringify({ room, type, payload }));
+  if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ room, type, payload }));
 }
 
-// ========== PING LOOP ==========
+// ========== PING ==========
 function startPingLoop() {
-  if (pingInterval) clearInterval(pingInterval);
   pingInterval = setInterval(pingContacts, 30000);
   pingContacts();
 }
 
 async function pingContacts() {
-  if (!navigator.onLine || !contacts.length) return;
-  const pins = contacts.map(c => c.pin);
+  if (!contacts.length) return;
   try {
     const r = await fetch(API + '/status/batch', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(pins)
+      body: JSON.stringify(contacts.map(c => c.pin))
     });
-    const data = await r.json();
-    Object.assign(onlineStatus, data);
+    Object.assign(onlineStatus, await r.json());
     renderContacts(); renderChats();
-    if (currentChatId) updateChatStatus();
   } catch {}
   if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'ping' }));
 }
@@ -995,28 +959,20 @@ async function pingContacts() {
 // ========== MESSAGE HANDLER ==========
 function handleMsg(msg) {
   const { from, type, payload, room } = msg;
-  if (type === 'pong') return;
   if (type === 'status_change') {
-    onlineStatus[payload.net_number] = { online: payload.online, last_seen: payload.last_seen };
+    onlineStatus[payload.net_number] = { online: payload.online };
     renderContacts(); renderChats();
     if (currentChatId === payload.net_number) updateChatStatus();
-    return;
-  }
-  if (type === 'chat') { receiveChat(from, payload, room); return; }
-  if (type === 'sync_deliver') { (payload.messages||[]).forEach(m => receiveChat(from, m)); return; }
-  if (type === 'sync_request') { flushPending(from); return; }
-  // 1:1 call
-  if (type === 'call_offer') { handleCallOffer(from, payload); return; }
-  if (type === 'call_answer') { handleCallAnswer(from, payload); return; }
-  if (type === 'ice_candidate') { handleIce(from, payload); return; }
-  if (type === 'call_end') { if (callPeer === from || from === gcLocalPin) endCall(); return; }
-  // Group call
-  if (type === 'gc_join') { handleGcJoin(from, payload); return; }
-  if (type === 'gc_offer') { handleGcOffer(from, payload); return; }
-  if (type === 'gc_answer') { handleGcAnswer(from, payload); return; }
-  if (type === 'gc_ice') { handleGcIce(from, payload); return; }
-  if (type === 'gc_leave') { handleGcLeave(from); return; }
-  if (type === 'gc_invite') { handleGcInvite(from, payload); return; }
+  } else if (type === 'chat') receiveChat(from, payload, room);
+  else if (type === 'sync_deliver') payload.messages?.forEach(m => receiveChat(from, m));
+  else if (type === 'sync_request') flushPending(from);
+  else if (type === 'call_offer') handleCallOffer(from, payload);
+  else if (type === 'call_answer') handleCallAnswer(from, payload);
+  else if (type === 'ice_candidate') handleIce(from, payload);
+  else if (type === 'call_end') endCall();
+  else if (type === 'gc_join') handleGcJoin(from);
+  else if (type === 'gc_leave') handleGcLeave(from);
+  else if (type === 'gc_invite') handleGcInvite(from, payload);
 }
 
 // ========== CHAT ==========
@@ -1030,7 +986,6 @@ function sendMsg() {
   if (!chats[key]) chats[key] = [];
   chats[key].push({ ...msg, dir: 'out', status: 'sending' });
   saveChats();
-
   if (onlineStatus[key]?.online) {
     signal(key, 'chat', msg);
     updateMsgStatus(key, msg.id, 'sent');
@@ -1040,26 +995,23 @@ function sendMsg() {
   }
   renderChatMessages();
   renderChats();
-  input.value = ''; input.style.height = '';
+  input.value = '';
+  input.style.height = '';
 }
 
 function receiveChat(from, msg, room) {
   const key = room || from;
-  if (key.startsWith('grp:')) return;
   if (!chats[key]) chats[key] = [];
   if (chats[key].find(m => m.id === msg.id)) return;
   chats[key].push({ ...msg, dir: 'in', status: 'delivered' });
   saveChats();
-
   if (currentChatId !== key) {
     unread[key] = (unread[key] || 0) + 1;
     localStorage.setItem('unread', JSON.stringify(unread));
   }
-
   if (currentChatId === key) renderChatMessages();
   renderChats();
   updateUnreadBadge();
-  if (document.hidden) showLocalNotif(from, msg);
 }
 
 function queuePending(pin, msg) {
@@ -1069,52 +1021,36 @@ function queuePending(pin, msg) {
 }
 
 function flushPending(to) {
-  if (!pending[to]?.length) return;
-  signal(to, 'sync_deliver', { messages: pending[to] });
-  delete pending[to];
-  localStorage.setItem('pending', JSON.stringify(pending));
+  if (pending[to]?.length) {
+    signal(to, 'sync_deliver', { messages: pending[to] });
+    delete pending[to];
+    localStorage.setItem('pending', JSON.stringify(pending));
+  }
 }
 
 function updateMsgStatus(key, id, status) {
-  const c = chats[key];
-  if (!c) return;
-  const m = c.find(x => x.id === id);
+  const m = chats[key]?.find(x => x.id === id);
   if (m) { m.status = status; saveChats(); }
 }
 
 function saveChats() { localStorage.setItem('chats', JSON.stringify(chats)); }
-
-function showLocalNotif(from, msg) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const contact = contacts.find(c => c.pin === from);
-  const name = contact?.name || from;
-  const body = msg.type === 'text' ? msg.content : msg.type === 'image' ? '📷 Image' : '🎤 Voice note';
-  new Notification(`iNet · ${name}`, { body, icon: '/icons/icon-192.png', tag: `msg-${from}` });
-}
-
 function updateUnreadBadge() {
   const total = Object.values(unread).reduce((a,b) => a+b, 0);
   const badge = document.getElementById('chatsBadge');
-  if (total > 0) { badge.textContent = total > 99 ? '99+' : total; badge.style.display = 'inline'; }
-  else badge.style.display = 'none';
+  badge.style.display = total ? 'inline' : 'none';
+  if (total) badge.textContent = total > 99 ? '99+' : total;
 }
 
-// ========== 1:1 CALL (FIXED: allows offline) ==========
+// ========== 1:1 CALL ==========
 async function startDMCall(type) {
-  if (!currentChatId || currentChatType !== 'dm') return;
+  if (!currentChatId) return;
   callPeer = currentChatId;
   callType = type;
-
-  // Even if offline, attempt the call – push notification will alert them
-  if (!onlineStatus[callPeer]?.online) {
-    toast(`${getContactName(callPeer)} is offline – they'll be notified`);
-    // Continue anyway
-  }
-
+  if (!onlineStatus[callPeer]?.online) toast(`${getContactName(callPeer)} is offline – they'll be notified`);
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
     showCallScreen(callPeer, 'Calling…', type);
-    peerConn = createPeerConn(callPeer, false);
+    peerConn = createPeerConn(callPeer);
     localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
     const offer = await peerConn.createOffer();
     await peerConn.setLocalDescription(offer);
@@ -1122,7 +1058,6 @@ async function startDMCall(type) {
     callTimer = setTimeout(() => {
       if (document.getElementById('callStatus').textContent !== 'Connected') {
         document.getElementById('callStatus').textContent = 'No answer';
-        logCall(callPeer, type, 'out', 'no-answer');
         setTimeout(endCall, 2000);
       }
     }, 45000);
@@ -1150,18 +1085,18 @@ async function answerIncomingCallFrom(data) {
 function declineCall() {
   if (incomingCallBuffer) {
     signal(incomingCallBuffer.from, 'call_end', {});
-    logCall(incomingCallBuffer.from, incomingCallBuffer.payload?.call_type || 'audio', 'in', 'missed');
     incomingCallBuffer = null;
   }
   hideIncoming();
 }
 
 async function answerCall(from, payload) {
-  callPeer = from; callType = payload.call_type || 'audio';
+  callPeer = from;
+  callType = payload.call_type || 'audio';
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: callType === 'video' });
     showCallScreen(from, 'Connecting…', callType);
-    peerConn = createPeerConn(from, true);
+    peerConn = createPeerConn(from);
     localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
     if (payload.sdp) {
       await peerConn.setRemoteDescription(new RTCSessionDescription(payload.sdp));
@@ -1180,53 +1115,43 @@ function handleIce(from, payload) {
   if (peerConn) peerConn.addIceCandidate(new RTCIceCandidate(payload.candidate)).catch(()=>{});
 }
 
-function createPeerConn(pin, isAnswer) {
+function createPeerConn(pin) {
   const pc = new RTCPeerConnection(ICE);
-  pc.onicecandidate = e => {
-    if (e.candidate) signal(pin, 'ice_candidate', { candidate: e.candidate });
-  };
+  pc.onicecandidate = e => { if (e.candidate) signal(pin, 'ice_candidate', { candidate: e.candidate }); };
   pc.ontrack = e => {
-    const remote = e.streams[0];
     if (callType === 'video') {
-      const rv = document.getElementById('remoteVideo');
-      rv.srcObject = remote;
-      rv.play().catch(() => {});
+      document.getElementById('remoteVideo').srcObject = e.streams[0];
+      document.getElementById('remoteVideo').play();
     } else {
-      document.getElementById('remoteAudio').srcObject = remote;
+      document.getElementById('remoteAudio').srcObject = e.streams[0];
     }
     document.getElementById('callStatus').textContent = 'Connected';
     document.getElementById('callOverlay').style.display = 'none';
-    if (callTimer) { clearTimeout(callTimer); callTimer = null; }
-    logCall(pin, callType, isAnswer ? 'in' : 'out', 'connected');
+    clearTimeout(callTimer);
   };
   return pc;
 }
 
 function showCallScreen(pin, status, type) {
-  const name = getContactName(pin);
-  document.getElementById('callName').textContent = name;
+  document.getElementById('callName').textContent = getContactName(pin);
   document.getElementById('callStatus').textContent = status;
   document.getElementById('callAvatar').textContent = pin[0];
   document.getElementById('callOverlay').style.display = 'flex';
   const lv = document.getElementById('localVideo');
-  const rv = document.getElementById('remoteVideo');
-  if (type === 'video') {
-    lv.srcObject = localStream; lv.style.display = 'block';
-    rv.style.display = 'block';
-  } else {
-    lv.style.display = 'none'; rv.style.display = 'none';
-  }
+  lv.srcObject = localStream;
+  lv.style.display = type === 'video' ? 'block' : 'none';
   document.getElementById('callScreen').classList.add('show');
 }
 
 function endCall() {
   document.getElementById('callScreen').classList.remove('show');
-  if (callTimer) { clearTimeout(callTimer); callTimer = null; }
+  clearTimeout(callTimer);
   if (callPeer) signal(callPeer, 'call_end', {});
-  if (peerConn) { peerConn.close(); peerConn = null; }
-  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-  callPeer = null; isMuted = false; isCamOff = false;
-  renderCalls();
+  if (peerConn) peerConn.close();
+  if (localStream) localStream.getTracks().forEach(t => t.stop());
+  peerConn = null;
+  localStream = null;
+  callPeer = null;
 }
 
 function toggleCallMute() {
@@ -1243,47 +1168,38 @@ function toggleCallCam() {
 function toggleSpeaker() { toast('Speaker toggle coming soon'); }
 
 function showIncoming(from, type) {
-  stopRingtone(); startRingtone();
-  const name = getContactName(from);
-  document.getElementById('incomingName').textContent = name;
-  document.getElementById('incomingRingAvatar').childNodes[3].textContent = from[0];
+  startRingtone();
+  document.getElementById('incomingName').textContent = getContactName(from);
   document.getElementById('incomingType').textContent = (type === 'video' ? '📹 Video' : '📞 Audio') + ' Call';
   document.getElementById('incomingOverlay').classList.add('show');
-  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
 }
 
-function hideIncoming() { document.getElementById('incomingOverlay').classList.remove('show'); stopRingtone(); }
+function hideIncoming() {
+  document.getElementById('incomingOverlay').classList.remove('show');
+  stopRingtone();
+}
 
-let ringtoneCtx = null, ringtoneNodes = [];
+let ringtoneCtx = null;
 function startRingtone() {
   try {
     ringtoneCtx = new AudioContext();
-    function beep() {
-      const osc = ringtoneCtx.createOscillator();
-      const gain = ringtoneCtx.createGain();
-      osc.connect(gain); gain.connect(ringtoneCtx.destination);
-      osc.frequency.value = 440; gain.gain.value = 0.1;
-      osc.start(); osc.stop(ringtoneCtx.currentTime + 0.3);
-      ringtoneNodes.push(osc);
-    }
-    beep();
-    const iv = setInterval(beep, 1000);
-    ringtoneNodes.push({ stop: () => clearInterval(iv) });
+    const osc = ringtoneCtx.createOscillator();
+    const gain = ringtoneCtx.createGain();
+    osc.connect(gain);
+    gain.connect(ringtoneCtx.destination);
+    osc.frequency.value = 440;
+    gain.gain.value = 0.1;
+    osc.start();
+    setTimeout(() => osc.stop(), 1000);
   } catch {}
 }
-function stopRingtone() {
-  ringtoneNodes.forEach(n => { try { n.stop(); } catch {} });
-  ringtoneNodes = [];
-  if (ringtoneCtx) { ringtoneCtx.close().catch(()=>{}); ringtoneCtx = null; }
-}
+function stopRingtone() { ringtoneCtx?.close(); }
 
-// ========== GROUP CALL (mesh) ==========
+// ========== GROUP CALL ==========
 function createLinkCallAndStart() {
   closeFab();
   createLinkCall();
-  setTimeout(() => {
-    if (myRoomId) joinRoomById(myRoomId);
-  }, 100);
+  setTimeout(() => myRoomId && joinRoomById(myRoomId), 100);
 }
 
 async function joinRoomById(roomId) {
@@ -1293,10 +1209,7 @@ async function joinRoomById(roomId) {
   try {
     gcStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
   } catch {
-    try {
-      gcStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      gcCamOff = true;
-    } catch(e) { toast('Mic/Camera error: ' + e.message); return; }
+    gcStream = await navigator.mediaDevices.getUserMedia({ audio: true });
   }
   gcLocalPin = myPin;
   document.getElementById('gcLocalVideo').srcObject = gcStream;
@@ -1305,7 +1218,6 @@ async function joinRoomById(roomId) {
   signalRoom(gcRoomId, 'gc_join', { from: myPin });
   startGcTimer();
   addToRecentRooms(roomId);
-  toast('Joined room!');
 }
 
 function handleGcInvite(from, payload) {
@@ -1313,81 +1225,36 @@ function handleGcInvite(from, payload) {
   document.getElementById('incomingType').textContent = '👥 Group Call';
   document.getElementById('answerBtn').onclick = () => {
     hideIncoming();
-    document.getElementById('answerBtn').onclick = answerIncomingCall;
     joinRoomById(payload.room);
   };
 }
 
-async function handleGcJoin(from, payload) {
+function handleGcJoin(from) {
   if (!gcRoomId) return;
   toast(`${getContactName(from)} joined`);
-  await initiateGcPeer(from);
+  createGcPeer(from);
 }
 
-async function initiateGcPeer(pin) {
+async function createGcPeer(pin) {
   if (gcPeers[pin]) return;
-  const pc = createGcPeerConn(pin);
+  const pc = new RTCPeerConnection(ICE);
+  gcPeers[pin] = pc;
   gcStream.getTracks().forEach(t => pc.addTrack(t, gcStream));
+  pc.onicecandidate = e => e.candidate && signalRoom(gcRoomId, 'gc_ice', { to: pin, candidate: e.candidate, from: myPin });
+  pc.ontrack = e => {
+    gcStreams[pin] = e.streams[0];
+    addGcTile(pin, e.streams[0], false);
+  };
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
   signalRoom(gcRoomId, 'gc_offer', { to: pin, sdp: offer, from: myPin });
 }
 
-async function handleGcOffer(from, payload) {
-  if (!gcRoomId || payload.to !== myPin) return;
-  const pc = createGcPeerConn(from);
-  gcStream.getTracks().forEach(t => pc.addTrack(t, gcStream));
-  await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-  signalRoom(gcRoomId, 'gc_answer', { to: from, sdp: answer, from: myPin });
-}
-
-async function handleGcAnswer(from, payload) {
-  if (payload.to !== myPin) return;
-  const pc = gcPeers[from];
-  if (pc) await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-}
-
-function handleGcIce(from, payload) {
-  if (payload.to !== myPin) return;
-  const pc = gcPeers[from];
-  if (pc) pc.addIceCandidate(new RTCIceCandidate(payload.candidate)).catch(()=>{});
-}
-
 function handleGcLeave(from) {
   removeGcTile(from);
-  const pc = gcPeers[from];
-  if (pc) { pc.close(); delete gcPeers[from]; }
+  if (gcPeers[from]) gcPeers[from].close();
+  delete gcPeers[from];
   delete gcStreams[from];
-  toast(`${getContactName(from)} left`);
-}
-
-function createGcPeerConn(pin) {
-  if (gcPeers[pin]) gcPeers[pin].close();
-  const pc = new RTCPeerConnection(ICE);
-  gcPeers[pin] = pc;
-  pc.onicecandidate = e => {
-    if (e.candidate) signalRoom(gcRoomId, 'gc_ice', { to: pin, candidate: e.candidate, from: myPin });
-  };
-  pc.ontrack = e => {
-    const stream = e.streams[0];
-    gcStreams[pin] = stream;
-    addGcTile(pin, stream, false);
-    const tile = document.getElementById('gc-tile-' + pin);
-    if (tile) {
-      const vid = tile.querySelector('video');
-      if (vid) vid.play().catch(() => {});
-    }
-  };
-  pc.onconnectionstatechange = () => {
-    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-      removeGcTile(pin);
-      delete gcPeers[pin];
-      delete gcStreams[pin];
-    }
-  };
-  return pc;
 }
 
 function addGcTile(pin, stream, isLocal) {
@@ -1396,14 +1263,14 @@ function addGcTile(pin, stream, isLocal) {
   const tile = document.createElement('div');
   tile.className = 'gc-tile';
   tile.id = 'gc-tile-' + pin;
-  tile.dataset.pin = pin;
-  const hasVideo = stream.getVideoTracks().some(t => t.enabled && t.readyState === 'live');
+  const hasVideo = stream.getVideoTracks().some(t => t.enabled);
   if (hasVideo) {
     const vid = document.createElement('video');
-    vid.autoplay = true; vid.playsInline = true;
+    vid.autoplay = true;
+    vid.playsInline = true;
     if (isLocal) vid.muted = true;
     vid.srcObject = stream;
-    vid.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+    vid.style.cssText = 'width:100%;height:100%;object-fit:cover';
     tile.appendChild(vid);
   } else {
     const av = document.createElement('div');
@@ -1417,51 +1284,24 @@ function addGcTile(pin, stream, isLocal) {
   tile.appendChild(overlay);
   grid.appendChild(tile);
   updateGcGrid();
-  if (!isLocal && stream.getAudioTracks().length) {
-    setupSpeakerDetect(pin, stream);
-  }
 }
 
 function removeGcTile(pin) {
-  const el = document.getElementById('gc-tile-' + pin);
-  if (el) el.remove();
+  document.getElementById('gc-tile-' + pin)?.remove();
   updateGcGrid();
 }
 
 function updateGcGrid() {
   const grid = document.getElementById('gcGrid');
-  const count = Math.min(grid.children.length, 6);
-  grid.setAttribute('data-count', String(count || 1));
-}
-
-function setupSpeakerDetect(pin, stream) {
-  try {
-    const ctx = new AudioContext();
-    const src = ctx.createMediaStreamSource(stream);
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 512;
-    src.connect(analyser);
-    const buf = new Uint8Array(analyser.fftSize);
-    let speaking = false;
-    setInterval(() => {
-      analyser.getByteTimeDomainData(buf);
-      const vol = buf.reduce((s,v) => s + Math.abs(v - 128), 0) / buf.length;
-      const isSpeaking = vol > 8;
-      if (isSpeaking !== speaking) {
-        speaking = isSpeaking;
-        const tile = document.getElementById('gc-tile-' + pin);
-        if (tile) tile.classList.toggle('speaking', speaking);
-      }
-    }, 200);
-  } catch {}
+  grid.setAttribute('data-count', String(Math.min(grid.children.length, 4)));
 }
 
 function startGcTimer() {
   gcSeconds = 0;
   gcTimer = setInterval(() => {
     gcSeconds++;
-    const m = String(Math.floor(gcSeconds / 60)).padStart(2, '0');
-    const s = String(gcSeconds % 60).padStart(2, '0');
+    const m = String(Math.floor(gcSeconds / 60)).padStart(2,'0');
+    const s = String(gcSeconds % 60).padStart(2,'0');
     document.getElementById('gcTimer').textContent = m + ':' + s;
   }, 1000);
 }
@@ -1469,62 +1309,38 @@ function startGcTimer() {
 function endGroupCall() {
   signalRoom(gcRoomId, 'gc_leave', { from: myPin });
   document.getElementById('groupCallScreen').classList.remove('show');
-  if (gcTimer) { clearInterval(gcTimer); gcTimer = null; }
-  if (gcStream) { gcStream.getTracks().forEach(t => t.stop()); gcStream = null; }
+  clearInterval(gcTimer);
+  if (gcStream) gcStream.getTracks().forEach(t => t.stop());
   Object.values(gcPeers).forEach(pc => pc.close());
-  gcPeers = {}; gcStreams = {};
+  gcPeers = {};
+  gcStreams = {};
   document.getElementById('gcGrid').innerHTML = '';
-  updateGcGrid();
-  gcRoomId = null; gcMuted = false; gcCamOff = false;
 }
 
 function toggleGcMute() {
   gcMuted = !gcMuted;
   if (gcStream) gcStream.getAudioTracks().forEach(t => t.enabled = !gcMuted);
-  const btn = document.getElementById('gcMuteBtn');
-  btn.classList.toggle('muted', gcMuted);
+  document.getElementById('gcMuteBtn').classList.toggle('muted', gcMuted);
 }
 
 function toggleGcCam() {
   gcCamOff = !gcCamOff;
   if (gcStream) gcStream.getVideoTracks().forEach(t => t.enabled = !gcCamOff);
-  const btn = document.getElementById('gcCamBtn');
-  btn.classList.toggle('cam-off', gcCamOff);
-  const tile = document.getElementById('gc-tile-' + myPin);
-  if (tile) {
-    const vid = tile.querySelector('video');
-    if (vid) vid.style.display = gcCamOff ? 'none' : 'block';
-  }
+  document.getElementById('gcCamBtn').classList.toggle('cam-off', gcCamOff);
 }
-
-function toggleGcSpeaker() { toast('Speaker: system default'); }
 
 function shareGroupCallLink() {
   if (!gcRoomId) return;
   const url = `${location.origin}${location.pathname}#room:${gcRoomId}`;
-  if (navigator.share) {
-    navigator.share({ title: 'Join my iNet call', url });
-  } else {
-    navigator.clipboard?.writeText(url);
-    toast('Link copied!');
-  }
+  if (navigator.share) navigator.share({ title: 'Join my iNet call', url });
+  else navigator.clipboard?.writeText(url).then(() => toast('Link copied!'));
 }
 
 function showInviteToCall() {
-  const pins = contacts
-    .filter(c => onlineStatus[c.pin]?.online && !gcPeers[c.pin] && c.pin !== myPin)
-    .map(c => c.pin);
+  const pins = contacts.filter(c => onlineStatus[c.pin]?.online && !gcPeers[c.pin] && c.pin !== myPin).map(c => c.pin);
   if (!pins.length) { toast('No online contacts to invite'); return; }
-  pins.forEach(pin => signal(pin, 'gc_invite', { room: gcRoomId, from: myPin, type: 'video' }));
-  toast('Invites sent to ' + pins.length + ' contact(s)');
-}
-
-// ========== CALL LOGS ==========
-function logCall(pin, type, dir, status, duration) {
-  calls.unshift({ with: pin, type, dir, status, duration: duration || 0, time: new Date().toISOString() });
-  if (calls.length > 100) calls.length = 100;
-  localStorage.setItem('calls', JSON.stringify(calls));
-  renderCalls();
+  pins.forEach(pin => signal(pin, 'gc_invite', { room: gcRoomId, from: myPin }));
+  toast('Invites sent');
 }
 
 // ========== LINK CALLS ==========
@@ -1532,53 +1348,42 @@ function createLinkCall() {
   myRoomId = 'room:' + Date.now();
   localStorage.setItem('myRoomId', myRoomId);
   updateLinkView();
-  toast('Room created! Share the link to invite people.');
+  toast('Room created! Share the link.');
 }
 
 function updateLinkView() {
   const card = document.getElementById('myLinkCard');
   if (myRoomId) {
-    const url = `${location.origin}${location.pathname}#room:${myRoomId}`;
-    document.getElementById('myLinkUrl').textContent = url;
+    document.getElementById('myLinkUrl').textContent = `${location.origin}${location.pathname}#room:${myRoomId}`;
     card.style.display = 'block';
   } else card.style.display = 'none';
   const recent = document.getElementById('recentRooms');
-  if (recentRooms.length) {
-    recent.innerHTML = recentRooms.map(r => `
-      <div class="item" onclick="joinRoomById('${r.id}')">
-        <div class="avatar" style="background:var(--blue-dim);color:var(--blue);font-size:1rem">🔗</div>
-        <div class="item-info">
-          <div class="item-name">Room ${r.id.slice(-6)}</div>
-          <div class="item-sub">${new Date(r.time).toLocaleDateString()}</div>
-        </div>
-      </div>
-    `).join('');
-  } else {
-    recent.innerHTML = '<div style="color:var(--text3);font-size:0.82rem;padding:8px 4px">No recent rooms</div>';
-  }
+  recent.innerHTML = recentRooms.length ? recentRooms.map(r => `
+    <div class="item" onclick="joinRoomById('${r.id}')">
+      <div class="avatar" style="background:var(--blue-dim);color:var(--blue)">🔗</div>
+      <div class="item-info"><div class="item-name">Room ${r.id.slice(-6)}</div></div>
+    </div>`).join('') : '<div style="color:var(--text3);padding:8px">No recent rooms</div>';
 }
 
 function copyLink() {
-  const url = document.getElementById('myLinkUrl').textContent;
-  navigator.clipboard?.writeText(url).then(() => toast('Link copied!')).catch(() => toast(url));
+  navigator.clipboard?.writeText(document.getElementById('myLinkUrl').textContent).then(() => toast('Link copied!'));
 }
 
-function joinMyLinkCall() { if (myRoomId) joinRoomById(myRoomId); }
+function joinMyLinkCall() { myRoomId && joinRoomById(myRoomId); }
 
 function joinLinkCall() {
   let val = document.getElementById('joinRoomId').value.trim();
   if (val.includes('#room:')) val = val.split('#room:')[1];
   if (val.includes('room:')) val = val.replace('room:', '');
-  if (!val) { toast('Enter a room link or ID'); return; }
-  joinRoomById('room:' + val.replace('room:', ''));
+  val && joinRoomById('room:' + val);
 }
 
 function addToRecentRooms(roomId) {
-  recentRooms = [{ id: roomId, time: Date.now() }, ...recentRooms.filter(r => r.id !== roomId)].slice(0, 10);
+  recentRooms = [{ id: roomId, time: Date.now() }, ...recentRooms.filter(r => r.id !== roomId)].slice(0,10);
   localStorage.setItem('recentRooms', JSON.stringify(recentRooms));
 }
 
-// ========== VOICE RECORDING ==========
+// ========== VOICE ==========
 async function toggleVoice() {
   if (!isRecording) {
     try {
@@ -1587,20 +1392,19 @@ async function toggleVoice() {
       audioChunks = [];
       mediaRec.ondataavailable = e => audioChunks.push(e.data);
       mediaRec.onstop = () => {
-        const blob = new Blob(audioChunks, { type: 'audio/webm' });
         const reader = new FileReader();
         reader.onload = ev => {
           const msg = { id: Date.now(), type: 'audio', content: ev.target.result, time: new Date().toISOString(), from: myPin };
           dispatchMsg(currentChatId, currentChatType, msg);
         };
-        reader.readAsDataURL(blob);
+        reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
         stream.getTracks().forEach(t => t.stop());
       };
       mediaRec.start();
       isRecording = true;
       document.getElementById('voiceBtn').classList.add('recording');
-      toast('Recording… tap again to send');
-    } catch(e) { toast('Mic needed: ' + e.message); }
+      toast('Recording…');
+    } catch(e) { toast('Mic needed'); }
   } else {
     mediaRec?.stop();
     isRecording = false;
@@ -1618,7 +1422,6 @@ function handleFileInput(e) {
     dispatchMsg(currentChatId, currentChatType, msg);
   };
   reader.readAsDataURL(file);
-  e.target.value = '';
 }
 
 // ========== CONTACTS ==========
@@ -1627,16 +1430,15 @@ function showAddContactModal() { closeFab(); openModal('addContactModal'); }
 function addContact() {
   const pin = document.getElementById('contactPinInput').value.trim();
   const name = document.getElementById('contactNameInput').value.trim();
-  if (pin.length !== 6) { toast('Enter a valid 6-digit PIN'); return; }
-  if (pin === myPin) { toast("That's your own PIN!"); return; }
-  if (contacts.find(c => c.pin === pin)) { toast('Already in contacts'); closeModal('addContactModal'); return; }
+  if (pin.length !== 6) { toast('Enter valid PIN'); return; }
+  if (pin === myPin) { toast("That's you!"); return; }
+  if (contacts.find(c => c.pin === pin)) { toast('Already added'); closeModal('addContactModal'); return; }
   contacts.push({ pin, name: name || pin, added: new Date().toISOString() });
   localStorage.setItem('contacts', JSON.stringify(contacts));
   renderContacts();
   closeModal('addContactModal');
   document.getElementById('contactPinInput').value = '';
   document.getElementById('contactNameInput').value = '';
-  toast('Contact added!');
 }
 
 function getContactName(pin) {
@@ -1646,9 +1448,7 @@ function getContactName(pin) {
 }
 
 // ========== RENDER ==========
-function renderAll() {
-  renderContacts(); renderChats(); renderCalls(); updateUnreadBadge(); updateLinkView();
-}
+function renderAll() { renderContacts(); renderChats(); renderCalls(); updateUnreadBadge(); updateLinkView(); }
 
 function renderContacts() {
   const list = document.getElementById('contactsList');
@@ -1663,9 +1463,7 @@ function renderContacts() {
         <div class="item-name">${c.name || c.pin}</div>
         <div class="item-sub">PIN ${c.pin}</div>
       </div>
-      <div style="font-size:0.72rem;color:${online ? 'var(--green)' : 'var(--text3)'}">
-        ${online ? 'online' : 'offline'}
-      </div>
+      <div style="color:${online ? 'var(--green)' : 'var(--text3)'}">${online ? 'online' : 'offline'}</div>
     </div>`;
   }).join('');
 }
@@ -1676,32 +1474,20 @@ function renderChats() {
   const keys = Object.keys(chats).filter(k => !k.startsWith('grp:'));
   if (!keys.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-  const sorted = keys.sort((a,b) => {
-    const la = chats[a].slice(-1)[0]?.time || '';
-    const lb = chats[b].slice(-1)[0]?.time || '';
-    return lb.localeCompare(la);
-  });
+  const sorted = keys.sort((a,b) => (chats[b]?.slice(-1)[0]?.time || '') < (chats[a]?.slice(-1)[0]?.time || '') ? -1 : 1);
   list.innerHTML = sorted.map(key => {
-    const msgs = chats[key];
-    const last = msgs[msgs.length - 1];
+    const last = chats[key]?.slice(-1)[0];
     const name = getContactName(key);
-    const online = onlineStatus[key]?.online;
-    const ub = unread[key] || 0;
-    const pend = pending[key]?.length;
-    const preview = last.type === 'text' ? last.content.substring(0,35) :
-                    last.type === 'image' ? '📷 Image' :
-                    last.type === 'audio' ? '🎤 Voice note' :
-                    last.type === 'video' ? '🎥 Video' : '📎 File';
+    const preview = last ? (last.type === 'text' ? last.content.substring(0,35) : '📎 Media') : '';
     return `<div class="item" onclick="openDMChat('${key}')">
-      <div class="avatar ${online ? 'avatar-online' : ''}">${name[0]}</div>
+      <div class="avatar ${onlineStatus[key]?.online ? 'avatar-online' : ''}">${name[0]}</div>
       <div class="item-info">
         <div class="item-name">${name}</div>
-        <div class="item-sub">${last.dir === 'out' ? 'You: ' : ''}${preview}</div>
+        <div class="item-sub">${last?.dir === 'out' ? 'You: ' : ''}${preview}</div>
       </div>
       <div class="item-right">
-        <span class="item-time">${fmtTime(last.time)}</span>
-        ${ub ? `<span class="unread-badge">${ub}</span>` : ''}
-        ${pend ? `<span class="pending-badge">⏳${pend}</span>` : ''}
+        <span class="item-time">${last ? fmtTime(last.time) : ''}</span>
+        ${unread[key] ? `<span class="unread-badge">${unread[key]}</span>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1712,20 +1498,12 @@ function renderCalls() {
   const empty = document.getElementById('callsEmpty');
   if (!calls.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-  list.innerHTML = calls.map(c => {
-    const name = getContactName(c.with);
-    const icon = c.status === 'missed' || (c.dir === 'in' && c.status !== 'connected') ? '↙️' :
-                 c.dir === 'out' ? '↗️' : '↙️';
-    const color = (c.status === 'missed' || c.status === 'no-answer') ? 'var(--accent)' : 'var(--text2)';
-    return `<div class="item" onclick="openDMChat('${c.with}')">
+  list.innerHTML = calls.map(c => `
+    <div class="item" onclick="openDMChat('${c.with}')">
       <div class="avatar" style="font-size:1.3rem">${c.type === 'video' ? '📹' : '📞'}</div>
-      <div class="item-info">
-        <div class="item-name" style="color:${color}">${icon} ${name}</div>
-        <div class="item-sub">${c.type} · ${c.dir} · ${c.status}</div>
-      </div>
+      <div class="item-info"><div class="item-name">${getContactName(c.with)}</div></div>
       <span class="item-time">${fmtTime(c.time)}</span>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
 function renderChatMessages() {
@@ -1736,20 +1514,16 @@ function renderChatMessages() {
     const own = m.dir === 'out';
     let body = '';
     if (m.type === 'text') body = `<div class="bubble">${esc(m.content)}</div>`;
-    else if (m.type === 'image') body = `<img src="${m.content}" class="msg-img" onclick="window.open('${m.content}')">`;
-    else if (m.type === 'video') body = `<video src="${m.content}" class="msg-video" controls></video>`;
+    else if (m.type === 'image') body = `<img src="${m.content}" class="msg-img">`;
     else if (m.type === 'audio') body = `<audio src="${m.content}" class="msg-audio" controls></audio>`;
     else body = `<div class="bubble">📎 ${m.fileName || 'File'}</div>`;
-    const tick = own ? `<span class="tick ${m.status === 'sent' || m.status === 'delivered' ? 'sent' : ''}">${m.status === 'pending' ? '⏳' : '✓'}</span>` : '';
-    return `<div class="msg ${own ? 'own' : ''}">
-      ${body}
-      <div class="msg-meta">${fmtTime(m.time)} ${tick}</div>
-    </div>`;
+    const tick = own ? `<span class="tick ${m.status === 'sent' ? 'sent' : ''}">${m.status === 'pending' ? '⏳' : '✓'}</span>` : '';
+    return `<div class="msg ${own ? 'own' : ''}">${body}<div class="msg-meta">${fmtTime(m.time)} ${tick}</div></div>`;
   }).join('');
   c.scrollTop = c.scrollHeight;
 }
 
-// ========== UI ACTIONS ==========
+// ========== UI ==========
 function switchTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1762,19 +1536,14 @@ function toggleFab() {
   fabOpen = !fabOpen;
   document.getElementById('fabMenu').classList.toggle('open', fabOpen);
   document.getElementById('fab').innerHTML = fabOpen
-    ? `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`
-    : `<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>`;
+    ? '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>'
+    : '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
 }
 
-function closeFab() {
-  fabOpen = false;
-  document.getElementById('fabMenu').classList.remove('open');
-  document.getElementById('fab').innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>`;
-}
+function closeFab() { fabOpen = false; document.getElementById('fabMenu').classList.remove('open'); }
 
 function openDMChat(pin) {
   currentChatId = pin;
-  currentChatType = 'dm';
   clearUnread(pin);
   document.getElementById('chatName').textContent = getContactName(pin);
   document.getElementById('chatActions').style.display = 'flex';
@@ -1788,34 +1557,21 @@ function clearUnread(key) {
 }
 
 function updateChatStatus() {
-  const online = onlineStatus[currentChatId]?.online;
   const s = document.getElementById('chatStatus');
-  s.textContent = online ? 'online' : 'offline';
-  s.className = 'screen-status' + (online ? ' online' : '');
+  s.textContent = onlineStatus[currentChatId]?.online ? 'online' : 'offline';
+  s.className = 'screen-status' + (onlineStatus[currentChatId]?.online ? ' online' : '');
 }
 
-function closeChat() {
-  document.getElementById('chatScreen').classList.remove('show');
-  currentChatId = null;
-}
+function closeChat() { document.getElementById('chatScreen').classList.remove('show'); currentChatId = null; }
 
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-function copyPin() {
-  navigator.clipboard?.writeText(myPin).then(() => toast('PIN copied!')).catch(() => {});
-}
+function copyPin() { navigator.clipboard?.writeText(myPin).then(() => toast('PIN copied!')); }
 
-function installApp() {
-  if (!deferredPrompt) { toast('Already installed or use browser menu to install'); return; }
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-}
+function installApp() { location.href = '#install'; }
 
-function autoResize(el) {
-  el.style.height = '';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
+function autoResize(el) { el.style.height = ''; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 
 function makeDraggable(el) {
   let startX, startY, elX, elY;
@@ -1827,9 +1583,8 @@ function makeDraggable(el) {
   }, { passive: true });
   el.addEventListener('touchmove', e => {
     const t = e.touches[0];
-    const dx = t.clientX - startX, dy = t.clientY - startY;
-    el.style.left = (elX + dx) + 'px';
-    el.style.top = (elY + dy) + 'px';
+    el.style.left = (elX + t.clientX - startX) + 'px';
+    el.style.top = (elY + t.clientY - startY) + 'px';
     el.style.right = 'auto'; el.style.bottom = 'auto';
   }, { passive: true });
 }
@@ -1837,13 +1592,12 @@ function makeDraggable(el) {
 function fmtTime(iso) {
   const d = new Date(iso);
   const now = new Date();
-  if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  return d.toDateString() === now.toDateString()
+    ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
-function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
 
 function toast(msg) {
   document.querySelectorAll('.toast').forEach(t => t.remove());
@@ -1854,7 +1608,7 @@ function toast(msg) {
   setTimeout(() => el.remove(), 3000);
 }
 
-// ========== PUSH & SERVICE WORKER ==========
+// ========== PUSH ==========
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   try {
@@ -1865,8 +1619,7 @@ async function registerSW() {
 
 async function requestPushPermission() {
   if (!('Notification' in window)) return;
-  const perm = await Notification.requestPermission();
-  if (perm === 'granted' && vapidKey) subscribePush();
+  if (await Notification.requestPermission() === 'granted' && vapidKey) subscribePush();
 }
 
 async function subscribePush() {
@@ -1881,7 +1634,7 @@ async function subscribePush() {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ net_number: myPin, device_id: deviceId, subscription: sub.toJSON() })
     });
-  } catch(e) { console.warn('Push sub:', e); }
+  } catch(e) { console.warn('Push sub error:', e); }
 }
 
 function b64ToUint8(b64) {
@@ -1890,13 +1643,11 @@ function b64ToUint8(b64) {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
-// ========== DISPATCH MSG (for voice/file) ==========
 function dispatchMsg(chatId, chatType, msg) {
   const key = chatId;
   if (!chats[key]) chats[key] = [];
   chats[key].push({ ...msg, dir: 'out', status: 'sending' });
   saveChats();
-
   if (onlineStatus[key]?.online) {
     signal(key, 'chat', msg);
     updateMsgStatus(key, msg.id, 'sent');
@@ -1907,6 +1658,28 @@ function dispatchMsg(chatId, chatType, msg) {
   renderChatMessages();
   renderChats();
 }
+
+// ========== SIGNUP ==========
+async function signup() {
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  document.getElementById('signupError').textContent = '';
+  try {
+    const r = await fetch(API + '/signup', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+    const d = await r.json();
+    if (!d.net_number) throw new Error('Signup failed');
+    myPin = d.net_number; deviceId = d.device_id;
+    localStorage.setItem('myPin', myPin);
+    localStorage.setItem('deviceId', deviceId);
+    localStorage.setItem('vapidKey', VAPID_PUBLIC_KEY);
+    vapidKey = VAPID_PUBLIC_KEY;
+    startApp();
+    requestPushPermission();
+  } catch(e) {
+    document.getElementById('signupError').textContent = e.message;
+    btn.disabled = false; btn.textContent = 'Get your PIN';
+  }
+}
 </script>
 </body>
-</html>
+    </html>
