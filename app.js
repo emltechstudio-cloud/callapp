@@ -101,6 +101,22 @@ let myRoomId = localStorage.getItem('myRoomId') || null;
   makeDraggable(document.getElementById('gcLocalPip'));
   makeDraggable(document.getElementById('localVideo'));
 
+  // Handle ?action=answer — app was opened by tapping Answer on the lock screen
+  const urlParams = new URLSearchParams(location.search);
+  if (urlParams.get('action') === 'answer') {
+    const from     = urlParams.get('from');
+    const callType = urlParams.get('call_type') || 'audio';
+    const room     = urlParams.get('room');
+    if (from && !room) {
+      // Store as pending — will be picked up in startApp after WS connects
+      sessionStorage.setItem('pendingAnswer', JSON.stringify({ from, call_type: callType }));
+    } else if (room) {
+      sessionStorage.setItem('pendingRoom', room);
+    }
+    // Clean URL so a refresh doesn't re-trigger
+    history.replaceState(null, '', location.pathname);
+  }
+
   const hash = location.hash.replace('#', '');
   if (hash.startsWith('room:')) {
     const roomId = hash.slice(5);
@@ -146,6 +162,24 @@ function startApp() {
   if (pendingRoom) {
     sessionStorage.removeItem('pendingRoom');
     setTimeout(() => joinRoom(pendingRoom), 1200);
+  }
+
+  // Auto-answer a call opened from the lock screen notification
+  const pendingAnswerRaw = sessionStorage.getItem('pendingAnswer');
+  if (pendingAnswerRaw) {
+    sessionStorage.removeItem('pendingAnswer');
+    try {
+      const pa = JSON.parse(pendingAnswerRaw);
+      // Give WS time to connect then simulate an incoming call and answer it
+      setTimeout(() => {
+        incomingBuffer    = { from: pa.from, payload: { sdp: null, call_type: pa.call_type } };
+        callDirection     = 'in';
+        incomingAnswerAction = 'dm';
+        // Wait for the actual offer to arrive via WS — just show ringing UI
+        showIncoming(pa.from, pa.call_type);
+        toast('Connecting to call…');
+      }, 1500);
+    } catch {}
   }
 }
 
@@ -364,27 +398,20 @@ function handleMsg(msg) {
 // #11 — removed dead CANCEL_NOTIFICATIONS branch; SW handles that itself
 function onSwMessage(e) {
   const { type, data } = e.data || {};
-  if (type === 'ANSWER_CALL') answerIncomingCall();
-  if (type === 'DECLINE_CALL') declineCall();
+  if (type === 'ANSWER_CALL')                answerIncomingCall();
+  if (type === 'DECLINE_CALL')               declineCall();
+  if (type === 'CALL_NOTIFICATION_DISMISSED') {
+    // User swiped away notification — treat as decline
+    if (incomingBuffer) declineCall();
+  }
 }
 
 function showLocalNotif(from, callType) {
-  if (!document.hidden) return;
+  // Use SHOW_CALL_NOTIFICATION so SW starts the ring loop
   navigator.serviceWorker?.ready.then(reg =>
     reg.active?.postMessage({
-      type:    'SHOW_NOTIFICATION',
-      payload: {
-        title:              `Incoming ${callType === 'video' ? 'Video' : 'Audio'} Call`,
-        body:               `PIN ${from} is calling you`,
-        tag:                'incoming-call',
-        requireInteraction: true,
-        vibrate:            [500, 200, 500, 200, 500],
-        data:               { type: 'incoming_call', from, call_type: callType },
-        actions:            [
-          { action: 'answer',  title: 'Answer'  },
-          { action: 'decline', title: 'Decline' }
-        ]
-      }
+      type:    'SHOW_CALL_NOTIFICATION',
+      payload: { from, call_type: callType, type: 'incoming_call' }
     })
   );
 }
