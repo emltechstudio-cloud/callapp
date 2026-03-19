@@ -531,15 +531,22 @@ async function startDMCall(type) {
 }
 
 function handleCallOffer(from, payload) {
-  incomingBuffer    = { from, payload };
-  callDirection     = 'in'; // #7
-  incomingAnswerAction = 'dm'; // #4
-  showIncoming(from, payload.call_type || 'audio');
-  showLocalNotif(from, payload.call_type || 'audio');
+  incomingBuffer       = { from, payload };
+  callDirection        = 'in';
+  incomingAnswerAction = 'dm';
+  // Only show ringing UI if not already visible (may have been opened from notification)
+  const overlayVisible = document.getElementById('incomingOverlay').classList.contains('show');
+  if (!overlayVisible) {
+    showIncoming(from, payload.call_type || 'audio');
+  }
+  // Only fire SW notification if app is backgrounded/hidden
+  if (document.hidden) {
+    showLocalNotif(from, payload.call_type || 'audio');
+  }
 }
 
 async function answerIncomingCall() {
-  // #4 — check action type instead of relying on overwritten onclick
+  // #4 — group call invite handled separately
   if (incomingAnswerAction === 'group') {
     const room = incomingGroupRoom;
     incomingAnswerAction = 'dm';
@@ -550,9 +557,20 @@ async function answerIncomingCall() {
     return;
   }
 
-  if (!incomingBuffer) return;
+  // If app was opened from a notification, incomingBuffer may not have arrived
+  // yet (offer is still in flight over WS). Wait up to 5s for it.
+  if (!incomingBuffer) {
+    toast('Connecting…');
+    const waited = await waitForIncomingBuffer(5000);
+    if (!waited) {
+      toast('Call no longer available');
+      hideIncoming();
+      return;
+    }
+  }
+
   const { from, payload } = incomingBuffer;
-  incomingBuffer = null; // #9
+  incomingBuffer = null;
   hideIncoming();
 
   callPeer      = from;
@@ -582,6 +600,19 @@ async function answerIncomingCall() {
     toast('Call error: ' + e.message);
     endCall(false);
   }
+}
+
+// Poll every 200ms until incomingBuffer is populated or timeout is reached
+function waitForIncomingBuffer(timeoutMs) {
+  return new Promise(resolve => {
+    const start = Date.now();
+    const check = () => {
+      if (incomingBuffer) { resolve(true); return; }
+      if (Date.now() - start >= timeoutMs) { resolve(false); return; }
+      setTimeout(check, 200);
+    };
+    check();
+  });
 }
 
 function declineCall() {
