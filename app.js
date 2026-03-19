@@ -101,19 +101,17 @@ let myRoomId = localStorage.getItem('myRoomId') || null;
   makeDraggable(document.getElementById('gcLocalPip'));
   makeDraggable(document.getElementById('localVideo'));
 
-  // Handle ?action=answer — app was opened by tapping Answer on the lock screen
+  // Handle ?action=incoming — app was opened by tapping a call notification.
+  // Store call data in sessionStorage; startApp() will pick it up and show
+  // the ringing screen immediately after WS connects.
   const urlParams = new URLSearchParams(location.search);
-  if (urlParams.get('action') === 'answer') {
+  if (urlParams.get('action') === 'incoming') {
     const from     = urlParams.get('from');
     const callType = urlParams.get('call_type') || 'audio';
     const room     = urlParams.get('room');
-    if (from && !room) {
-      // Store as pending — will be picked up in startApp after WS connects
-      sessionStorage.setItem('pendingAnswer', JSON.stringify({ from, call_type: callType }));
-    } else if (room) {
-      sessionStorage.setItem('pendingRoom', room);
+    if (from) {
+      sessionStorage.setItem('pendingIncoming', JSON.stringify({ from, call_type: callType, room }));
     }
-    // Clean URL so a refresh doesn't re-trigger
     history.replaceState(null, '', location.pathname);
   }
 
@@ -164,21 +162,17 @@ function startApp() {
     setTimeout(() => joinRoom(pendingRoom), 1200);
   }
 
-  // Auto-answer a call opened from the lock screen notification
-  const pendingAnswerRaw = sessionStorage.getItem('pendingAnswer');
-  if (pendingAnswerRaw) {
-    sessionStorage.removeItem('pendingAnswer');
+  // Opened from a call notification — show ringing screen straight away
+  const pendingIncomingRaw = sessionStorage.getItem('pendingIncoming');
+  if (pendingIncomingRaw) {
+    sessionStorage.removeItem('pendingIncoming');
     try {
-      const pa = JSON.parse(pendingAnswerRaw);
-      // Give WS time to connect then simulate an incoming call and answer it
-      setTimeout(() => {
-        incomingBuffer    = { from: pa.from, payload: { sdp: null, call_type: pa.call_type } };
-        callDirection     = 'in';
-        incomingAnswerAction = 'dm';
-        // Wait for the actual offer to arrive via WS — just show ringing UI
-        showIncoming(pa.from, pa.call_type);
-        toast('Connecting to call…');
-      }, 1500);
+      const pi = JSON.parse(pendingIncomingRaw);
+      // Show ringing UI immediately; the actual WebRTC offer will arrive
+      // via WS within a second and handleCallOffer() will populate incomingBuffer
+      callDirection        = 'in';
+      incomingAnswerAction = 'dm';
+      setTimeout(() => showIncoming(pi.from, pi.call_type || 'audio'), 400);
     } catch {}
   }
 }
@@ -398,10 +392,15 @@ function handleMsg(msg) {
 // #11 — removed dead CANCEL_NOTIFICATIONS branch; SW handles that itself
 function onSwMessage(e) {
   const { type, data } = e.data || {};
+  // Notification tapped while app was open in background — show ringing screen
+  if (type === 'SHOW_INCOMING' && data?.from) {
+    callDirection        = 'in';
+    incomingAnswerAction = 'dm';
+    showIncoming(data.from, data.call_type || 'audio');
+  }
   if (type === 'ANSWER_CALL')                answerIncomingCall();
   if (type === 'DECLINE_CALL')               declineCall();
   if (type === 'CALL_NOTIFICATION_DISMISSED') {
-    // User swiped away notification — treat as decline
     if (incomingBuffer) declineCall();
   }
 }

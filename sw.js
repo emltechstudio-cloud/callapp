@@ -104,44 +104,38 @@ self.addEventListener('push', e => {
 });
 
 // ── RINGING ────────────────────────────────────────
-// Shows the call notification and repeats it every 4s so the
-// vibration pattern keeps firing — simulating a ringtone.
+// Shows a call notification and repeats vibration every 1s.
+// No Answer/Decline buttons — tapping opens the app to the
+// ringing screen where the user answers or declines.
 async function startRinging(call) {
   stopRinging();
 
   const isGroup   = call.type === 'incoming_group_call';
-  const typeLabel = isGroup             ? 'Group Call'
+  const typeLabel = isGroup                   ? 'Group Call'
                   : call.call_type === 'video' ? 'Video Call'
                   : 'Audio Call';
 
   const notifOptions = {
-    body:               `PIN ${call.from} is calling you`,
+    body:               'Tap to open iNet and answer',
     icon:               '/icon.svg',
     badge:              '/icon.svg',
-    tag:                'incoming-call',  // single tag deduplicates
-    renotify:           true,             // re-alert each time even on same tag
-    requireInteraction: true,             // stay on screen — don't auto-dismiss
+    tag:                'incoming-call',
+    renotify:           true,
+    requireInteraction: true,
     silent:             false,
-    // Vibration: 3 short buzzes, pause, repeat — like a real ringtone
-    vibrate: [300, 150, 300, 150, 300, 600, 300, 150, 300, 150, 300],
-    data:    call,
-    actions: [
-      { action: 'answer',  title: 'Answer'  },
-      { action: 'decline', title: 'Decline' }
-    ]
+    vibrate:            [400, 600],
+    data:               call,
+    actions:            []
   };
 
-  await self.registration.showNotification(`Incoming ${typeLabel}`, notifOptions);
+  await self.registration.showNotification(`Incoming ${typeLabel} from ${call.from}`, notifOptions);
 
-  // Ring loop — re-fire notification every 4s to keep vibrating
+  // Re-fire every 1s to keep vibrating
   ringInterval = setInterval(async () => {
     const active = await self.registration.getNotifications({ tag: 'incoming-call' });
-    if (!active.length) {
-      stopRinging();
-      return;
-    }
-    await self.registration.showNotification(`Incoming ${typeLabel}`, notifOptions);
-  }, 4000);
+    if (!active.length) { stopRinging(); return; }
+    await self.registration.showNotification(`Incoming ${typeLabel} from ${call.from}`, notifOptions);
+  }, 1000);
 }
 
 function stopRinging() {
@@ -149,23 +143,16 @@ function stopRinging() {
 }
 
 // ── NOTIFICATION CLICK ─────────────────────────────
+// Any tap (body or action) opens the app.
+// The app reads sessionStorage to show the ringing screen immediately.
 self.addEventListener('notificationclick', e => {
-  const action = e.action;
-  const data   = e.notification.data || pendingCall || {};
+  const data = e.notification.data || pendingCall || {};
 
   e.notification.close();
   stopRinging();
 
-  if (action === 'decline') {
-    // Tell any open app windows to signal the caller
-    e.waitUntil(notifyClients({ type: 'DECLINE_CALL', data }));
-    pendingCall = null;
-    return;
-  }
-
-  // Answer (button or tapping the notification body) — open app with ?action=answer
-  // so app.js detects it on load and auto-answers even from a cold start
-  const params = new URLSearchParams({ action: 'answer' });
+  // Build URL with call params so app shows ringing screen on open
+  const params = new URLSearchParams({ action: 'incoming' });
   if (data.from)      params.set('from',      data.from);
   if (data.call_type) params.set('call_type', data.call_type);
   if (data.room)      params.set('room',      data.room);
@@ -174,11 +161,10 @@ self.addEventListener('notificationclick', e => {
 
   e.waitUntil(
     focusOrOpen(targetUrl).then(client => {
-      // Also post a message in case the app was already open in background
-      if (client) client.postMessage({ type: 'ANSWER_CALL', data });
+      // Also message in case app was already open in background
+      if (client) client.postMessage({ type: 'SHOW_INCOMING', data });
     })
   );
-  pendingCall = null;
 });
 
 // ── NOTIFICATION CLOSE (swiped away) ──────────────
