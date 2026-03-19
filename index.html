@@ -601,9 +601,8 @@ footer p{color:var(--muted);font-size:0.8rem;}
   <a class="f-logo" href="/">
     <div class="f-logo-mark">iN</div>
     <span class="f-logo-text">iNet</span>
-    <a class="final-cta" href="https://emltechstudio.site">EML TECH STUDIO</a>
   </a>
-  <p>&copy; 2026&middot; No data collected. No logs kept.</p>
+  <p>&copy; 2026 <a href="https://emltechstudio.site" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border2);transition:color .15s;" onmouseover="this.style.color='var(--muted2)'" onmouseout="this.style.color='var(--muted)'">EML Tech Studio</a> &middot; No data collected. No logs kept.</p>
   <div class="footer-links">
     <a href="app.html">App</a>
     <a href="install.html">Install</a>
@@ -634,14 +633,16 @@ function submitFeedback() {
   if (!email || !msg) { alert('Please fill in both fields.'); return; }
 
   const subject = encodeURIComponent('iNet Feedback from ' + email);
-  const body    = encodeURIComponent(msg + '\n\n— Sent from ' + email);
-  window.location.href = 'mailto:emltechstudio@gmail.com?subject=' + subject + '&body=' + body;
+  const body    = encodeURIComponent(msg + '\n\n-- Sent from: ' + email);
 
-  // Show thank-you after a short delay so the mail client has time to open
-  setTimeout(() => {
-    document.getElementById('feedback-form').style.display  = 'none';
-    document.getElementById('feedback-thanks').style.display = 'block';
-  }, 800);
+  const a = document.createElement('a');
+  a.href = 'mailto:emltechstudio@gmail.com?subject=' + subject + '&body=' + body;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  document.getElementById('feedback-form').style.display   = 'none';
+  document.getElementById('feedback-thanks').style.display = 'block';
 }
 </script>
 </body>
