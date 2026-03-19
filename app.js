@@ -1,16 +1,34 @@
 // ═══════════════════════════════════════════════════
 // iNet app.js  — all JavaScript for app.html
+// Bug fixes:
+//  #1  Contacts view blank on startup            → view.active in HTML + explicit activate in startApp
+//  #2  Incoming overlay stuck if caller cancels  → endCall clears incomingBuffer & hides overlay
+//  #3  Group call — new joiner invisible         → existing member ALWAYS initiates; handles gc_members
+//  #4  answerBtn.onclick overwritten by gc invite → incomingAnswerAction state variable
+//  #5  Voice note sent to wrong chat             → capture currentChatId at recording start
+//  #6  Stale gcPeers entry on failure            → delete gcPeers[pin] + pc.close() in handler
+//  #7  Missed call direction wrong               → dedicated callDirection variable
+//  #8  startGcTimer interval leak                → clearInterval before starting
+//  #9  endCall doesn't clear incomingBuffer      → covered in #2 fix
+//  #10 handleGcOffer double-processes peers      → guard on existing remoteDescription
+//  #11 Dead CANCEL_NOTIFICATIONS in onSwMessage  → removed
+//  #12 No file size check before base64 send     → 2 MB cap on handleFile
+//  #13 No clipboard fallback                     → fallbackCopy() with execCommand
+//  #14 SW focusOrOpen URL mismatch               → fixed in sw.js
+//  #15 gcLocalVideo.srcObject not nulled         → nulled in endGroupCall
 // ═══════════════════════════════════════════════════
 
-const API = 'https://emltechstudio-inet.hf.space';
+const API    = 'https://emltechstudio-inet.hf.space';
 const WS_URL = 'wss://emltechstudio-inet.hf.space/ws';
-const ICE = { iceServers: [
+const ICE    = { iceServers: [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
-  { urls: 'turn:openrelay.metered.ca:80',  username:'openrelayproject', credential:'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443', username:'openrelayproject', credential:'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject' }
+  { urls: 'turn:openrelay.metered.ca:80',              username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443',             username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
 ]};
+
+const FILE_MAX_BYTES = 2 * 1024 * 1024; // #12 — 2 MB file cap
 
 // ── STATE ──────────────────────────────────────────
 let myPin    = localStorage.getItem('myPin');
@@ -18,12 +36,13 @@ let deviceId = localStorage.getItem('deviceId');
 let vapidKey = localStorage.getItem('vapidKey');
 
 let ws = null, wsTimer = null, wsConnecting = false, wsHeartbeat = null;
-let contacts  = JSON.parse(localStorage.getItem('contacts')    || '[]');
-let chats     = JSON.parse(localStorage.getItem('chats')       || '{}');
-let calls     = JSON.parse(localStorage.getItem('calls')       || '[]');
-let pending   = JSON.parse(localStorage.getItem('pending')     || '{}');
-let unread    = JSON.parse(localStorage.getItem('unread')      || '{}');
-let recentRooms = JSON.parse(localStorage.getItem('recentRooms') || '[]');
+
+let contacts    = JSON.parse(localStorage.getItem('contacts')     || '[]');
+let chats       = JSON.parse(localStorage.getItem('chats')        || '{}');
+let calls       = JSON.parse(localStorage.getItem('calls')        || '[]');
+let pending     = JSON.parse(localStorage.getItem('pending')      || '{}');
+let unread      = JSON.parse(localStorage.getItem('unread')       || '{}');
+let recentRooms = JSON.parse(localStorage.getItem('recentRooms')  || '[]');
 
 let onlineStatus  = {};
 let currentChatId = null;
@@ -31,21 +50,38 @@ let fabOpen       = false;
 let deferredPrompt = null;
 
 // 1:1 call state
-let localStream = null, peerConn = null, callPeer = null, callType = null;
-let callTimer = null, isMuted = false, isCamOff = false;
+let localStream    = null;
+let peerConn       = null;
+let callPeer       = null;
+let callType       = null;
+let callTimer      = null;
+let isMuted        = false;
+let isCamOff       = false;
 let incomingBuffer = null;
-let iceCandQueue = [];
-let remoteDescSet = false;
-let callConnected = false;   // whether call ever connected (for missed call recording)
+let iceCandQueue   = [];
+let remoteDescSet  = false;
+let callConnected  = false;
+let callDirection  = 'out'; // #7 — 'out' | 'in'
+
+// #4 — incoming answer action state (prevents answerBtn.onclick from being overwritten)
+let incomingAnswerAction = 'dm'; // 'dm' | 'group'
+let incomingGroupRoom    = null;
 
 // Group call state
-let gcRoomId = null, gcStream = null, gcPeers = {}, gcTimer = null, gcSecs = 0;
-let gcMuted = false, gcCamOff = false;
+let gcRoomId  = null;
+let gcStream  = null;
+let gcPeers   = {};
+let gcTimer   = null;
+let gcSecs    = 0;
+let gcMuted   = false;
+let gcCamOff  = false;
 
 // Voice recording
-let mediaRec = null, audioChunks = [], isRecording = false;
+let mediaRec    = null;
+let audioChunks = [];
+let isRecording = false;
 
-// My link-call room
+// Link call room
 let myRoomId = localStorage.getItem('myRoomId') || null;
 
 // ── INIT ───────────────────────────────────────────
@@ -79,22 +115,25 @@ let myRoomId = localStorage.getItem('myRoomId') || null;
   }
 
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      if (!ws || ws.readyState !== WebSocket.OPEN) connectWS();
-    }
+    if (!document.hidden && (!ws || ws.readyState !== WebSocket.OPEN)) connectWS();
   });
   window.addEventListener('online', () => connectWS());
 })();
 
+// ── START APP ──────────────────────────────────────
 function startApp() {
   document.getElementById('signupView').style.display = 'none';
-  document.getElementById('tabs').style.display      = 'flex';
-  document.querySelector('.main').style.overflow     = 'hidden';
+  document.getElementById('tabs').style.display       = 'flex';
   document.getElementById('fab').classList.add('visible');
 
   const badge = document.getElementById('pinBadge');
   badge.textContent = myPin;
   badge.classList.add('active');
+
+  // #1 — explicitly activate contacts view (HTML already has class="view active" as default)
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('contactsView').classList.add('active');
+  document.querySelector('.tab[data-tab="contacts"]').classList.add('active');
 
   connectWS();
   renderAll();
@@ -113,20 +152,21 @@ function startApp() {
 // ── SIGNUP ─────────────────────────────────────────
 async function signup() {
   const btn = document.getElementById('signupBtn');
-  btn.disabled = true; btn.textContent = 'Creating…';
+  btn.disabled = true;
+  btn.textContent = 'Creating…';
   document.getElementById('signupError').textContent = '';
   try {
     const r = await fetch(API + '/signup', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({})
+      body:    JSON.stringify({})
     });
     const d = await r.json();
     if (!d.net_number) throw new Error('Signup failed');
 
     myPin    = d.net_number;
     deviceId = d.device_id;
-    localStorage.setItem('myPin', myPin);
+    localStorage.setItem('myPin',    myPin);
     localStorage.setItem('deviceId', deviceId);
 
     if (d.vapid_public_key) {
@@ -140,9 +180,9 @@ async function signup() {
       const perm = await Notification.requestPermission();
       if (perm === 'granted' && vapidKey) subscribePush(vapidKey);
     }
-  } catch(e) {
+  } catch (e) {
     document.getElementById('signupError').textContent = e.message;
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = 'Get your PIN';
   }
 }
@@ -153,18 +193,16 @@ async function subscribePush(key) {
   try {
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
+      userVisibleOnly:      true,
       applicationServerKey: b64ToUint8(key)
     });
     await fetch(API + '/push/subscribe', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ net_number: myPin, device_id: deviceId, subscription: sub.toJSON() })
+      body:    JSON.stringify({ net_number: myPin, device_id: deviceId, subscription: sub.toJSON() })
     });
-    console.log('[iNet] Push subscribed ✓');
-  } catch(e) {
-    console.warn('[iNet] Push subscription failed:', e.message);
-    if (e.name === 'InvalidStateError' || e.message.includes('key')) {
+  } catch (e) {
+    if (e.name === 'InvalidStateError' || String(e.message).includes('key')) {
       await refreshVapidAndRetry();
     }
   }
@@ -177,14 +215,12 @@ async function refreshVapidAndRetry() {
     if (d.vapid_public_key && d.vapid_public_key !== vapidKey) {
       vapidKey = d.vapid_public_key;
       localStorage.setItem('vapidKey', vapidKey);
-      const reg = await navigator.serviceWorker.ready;
+      const reg    = await navigator.serviceWorker.ready;
       const oldSub = await reg.pushManager.getSubscription();
       if (oldSub) await oldSub.unsubscribe();
       await subscribePush(vapidKey);
     }
-  } catch(e) {
-    console.warn('[iNet] VAPID refresh failed:', e.message);
-  }
+  } catch {}
 }
 
 function b64ToUint8(b64) {
@@ -195,9 +231,9 @@ function b64ToUint8(b64) {
 
 // ── WEBSOCKET ──────────────────────────────────────
 function connectWS() {
-  if (!myPin || !deviceId) return;
-  if (wsConnecting) return;
-  if (ws && ws.readyState === WebSocket.OPEN) return;
+  if (!myPin || !deviceId)                          return;
+  if (wsConnecting)                                  return;
+  if (ws && ws.readyState === WebSocket.OPEN)        return;
 
   wsConnecting = true;
   setDot('ing');
@@ -213,9 +249,9 @@ function connectWS() {
   ws.onopen = () => {
     wsConnecting = false;
     setDot('on');
-    clearTimeout(wsTimer); wsTimer = null;
+    clearTimeout(wsTimer);
+    wsTimer = null;
     startHeartbeat();
-    console.log('[iNet] WS connected');
   };
 
   ws.onmessage = e => {
@@ -280,9 +316,9 @@ async function pingContacts() {
   if (!contacts.length) return;
   try {
     const r = await fetch(API + '/status/batch', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(contacts.map(c => c.pin))
+      body:    JSON.stringify(contacts.map(c => c.pin))
     });
     const statuses = await r.json();
     Object.assign(onlineStatus, statuses);
@@ -300,55 +336,57 @@ function handleMsg(msg) {
 
   if (type === 'status_change') {
     onlineStatus[payload.net_number] = { online: payload.online, last_seen: payload.last_seen };
-    renderContacts(); renderChats();
+    renderContacts();
+    renderChats();
     if (currentChatId === payload.net_number) updateChatStatus();
     return;
   }
 
   switch (type) {
-    case 'chat':         receiveChat(from, payload); break;
-    case 'sync_deliver': payload.messages?.forEach(m => receiveChat(from, m)); break;
-    case 'sync_request': flushPending(from); break;
-    case 'call_offer':   handleCallOffer(from, payload); break;
-    case 'call_answer':  handleCallAnswer(from, payload); break;
-    case 'ice_candidate': handleIce(from, payload); break;
-    case 'call_end':     endCall(false); break;
-    case 'gc_offer':     handleGcOffer(from, payload); break;
-    case 'gc_answer':    handleGcAnswer(from, payload); break;
-    case 'gc_ice':       handleGcIce(from, payload); break;
-    case 'gc_join':      handleGcJoin(from); break;
-    case 'gc_leave':     handleGcLeave(from); break;
-    case 'gc_invite':    handleGcInvite(from, payload); break;
+    case 'chat':          receiveChat(from, payload);          break;
+    case 'sync_deliver':  payload.messages?.forEach(m => receiveChat(from, m)); break;
+    case 'sync_request':  flushPending(from);                  break;
+    case 'call_offer':    handleCallOffer(from, payload);      break;
+    case 'call_answer':   handleCallAnswer(from, payload);     break;
+    case 'ice_candidate': handleIce(from, payload);            break;
+    case 'call_end':      handleRemoteCallEnd();               break;
+    // Group calls
+    case 'gc_join':       handleGcJoin(from);                  break;
+    case 'gc_members':    handleGcMembers(payload);            break; // #3
+    case 'gc_offer':      handleGcOffer(from, payload);        break;
+    case 'gc_answer':     handleGcAnswer(from, payload);       break;
+    case 'gc_ice':        handleGcIce(from, payload);          break;
+    case 'gc_leave':      handleGcLeave(from);                 break;
+    case 'gc_invite':     handleGcInvite(from, payload);       break;
   }
 }
 
+// #11 — removed dead CANCEL_NOTIFICATIONS branch; SW handles that itself
 function onSwMessage(e) {
   const { type, data } = e.data || {};
-  if (type === 'ANSWER_CALL' && incomingBuffer) answerIncomingCall();
+  if (type === 'ANSWER_CALL') answerIncomingCall();
   if (type === 'DECLINE_CALL') declineCall();
-  if (type === 'CANCEL_NOTIFICATIONS') {
-    navigator.serviceWorker.ready.then(reg =>
-      reg.active?.postMessage({ type: 'CANCEL_NOTIFICATIONS', payload: { tag: 'incoming-call' } })
-    );
-  }
 }
 
 function showLocalNotif(from, callType) {
   if (!document.hidden) return;
-  navigator.serviceWorker.ready.then(reg => {
+  navigator.serviceWorker?.ready.then(reg =>
     reg.active?.postMessage({
-      type: 'SHOW_NOTIFICATION',
+      type:    'SHOW_NOTIFICATION',
       payload: {
-        title:              `📞 Incoming ${callType === 'video' ? 'Video' : 'Audio'} Call`,
+        title:              `Incoming ${callType === 'video' ? 'Video' : 'Audio'} Call`,
         body:               `PIN ${from} is calling you`,
         tag:                'incoming-call',
         requireInteraction: true,
         vibrate:            [500, 200, 500, 200, 500],
         data:               { type: 'incoming_call', from, call_type: callType },
-        actions:            [{ action: 'answer', title: '✅ Answer' }, { action: 'decline', title: '❌ Decline' }]
+        actions:            [
+          { action: 'answer',  title: 'Answer'  },
+          { action: 'decline', title: 'Decline' }
+        ]
       }
-    });
-  });
+    })
+  );
 }
 
 // ── CHAT ───────────────────────────────────────────
@@ -357,10 +395,15 @@ function sendMsg() {
   const text  = input.value.trim();
   if (!text || !currentChatId) return;
 
-  const msg = { id: Date.now(), type: 'text', content: text,
-                time: new Date().toISOString(), from: myPin };
+  const msg = {
+    id:      Date.now(),
+    type:    'text',
+    content: text,
+    time:    new Date().toISOString(),
+    from:    myPin
+  };
   dispatchMsg(currentChatId, msg);
-  input.value = '';
+  input.value        = '';
   input.style.height = '';
 }
 
@@ -382,7 +425,7 @@ function dispatchMsg(pin, msg) {
 
 function receiveChat(from, msg) {
   if (!chats[from]) chats[from] = [];
-  if (chats[from].find(m => m.id === msg.id)) return;
+  if (chats[from].find(m => m.id === msg.id)) return; // dedup
   chats[from].push({ ...msg, dir: 'in', status: 'delivered' });
   saveChats();
 
@@ -427,9 +470,11 @@ function updateUnreadBadge() {
 // ── 1:1 CALLS ──────────────────────────────────────
 async function startDMCall(type) {
   if (!currentChatId) return;
-  callPeer = currentChatId;
-  callType = type;
-  callConnected = false;
+
+  callPeer       = currentChatId;
+  callType       = type;
+  callConnected  = false;
+  callDirection  = 'out'; // #7
 
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
@@ -438,9 +483,9 @@ async function startDMCall(type) {
     });
 
     showCallScreen(callPeer, 'Calling…', type);
-    peerConn      = makePeerConn(callPeer);
     remoteDescSet = false;
     iceCandQueue  = [];
+    peerConn      = makePeerConn(callPeer);
     localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
 
     const offer = await peerConn.createOffer();
@@ -453,25 +498,39 @@ async function startDMCall(type) {
         setTimeout(() => endCall(true), 2000);
       }
     }, 45000);
-  } catch(e) {
+  } catch (e) {
     toast('Media error: ' + e.message);
-    endCall(true);
+    endCall(false);
   }
 }
 
 function handleCallOffer(from, payload) {
-  incomingBuffer = { from, payload };
+  incomingBuffer    = { from, payload };
+  callDirection     = 'in'; // #7
+  incomingAnswerAction = 'dm'; // #4
   showIncoming(from, payload.call_type || 'audio');
   showLocalNotif(from, payload.call_type || 'audio');
 }
 
 async function answerIncomingCall() {
+  // #4 — check action type instead of relying on overwritten onclick
+  if (incomingAnswerAction === 'group') {
+    const room = incomingGroupRoom;
+    incomingAnswerAction = 'dm';
+    incomingGroupRoom    = null;
+    incomingBuffer       = null;
+    hideIncoming();
+    joinRoom(room);
+    return;
+  }
+
   if (!incomingBuffer) return;
   const { from, payload } = incomingBuffer;
-  incomingBuffer = null;
+  incomingBuffer = null; // #9
   hideIncoming();
-  callPeer = from;
-  callType = payload.call_type || 'audio';
+
+  callPeer      = from;
+  callType      = payload.call_type || 'audio';
   callConnected = false;
 
   try {
@@ -481,9 +540,9 @@ async function answerIncomingCall() {
     });
 
     showCallScreen(from, 'Connecting…', callType);
-    peerConn      = makePeerConn(from);
     remoteDescSet = false;
     iceCandQueue  = [];
+    peerConn      = makePeerConn(from);
     localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
 
     await peerConn.setRemoteDescription(new RTCSessionDescription(payload.sdp));
@@ -493,13 +552,17 @@ async function answerIncomingCall() {
     const answer = await peerConn.createAnswer();
     await peerConn.setLocalDescription(answer);
     signal(from, 'call_answer', { sdp: peerConn.localDescription });
-  } catch(e) {
+  } catch (e) {
     toast('Call error: ' + e.message);
-    endCall(true);
+    endCall(false);
   }
 }
 
 function declineCall() {
+  if (incomingAnswerAction === 'group') {
+    incomingAnswerAction = 'dm';
+    incomingGroupRoom    = null;
+  }
   if (incomingBuffer) {
     signal(incomingBuffer.from, 'call_end', {});
     incomingBuffer = null;
@@ -510,7 +573,8 @@ function declineCall() {
 function handleCallAnswer(from, payload) {
   if (!peerConn) return;
   peerConn.setRemoteDescription(new RTCSessionDescription(payload.sdp))
-    .then(() => { remoteDescSet = true; flushIceCandidates(); });
+    .then(() => { remoteDescSet = true; flushIceCandidates(); })
+    .catch(() => {});
 }
 
 function handleIce(from, payload) {
@@ -528,6 +592,18 @@ function flushIceCandidates() {
   }
 }
 
+// #2 — caller sent call_end while we were ringing; dismiss everything cleanly
+function handleRemoteCallEnd() {
+  if (incomingBuffer) {
+    incomingBuffer = null;
+    hideIncoming();
+    stopRingtone();
+    cancelCallNotif();
+    return;
+  }
+  endCall(false);
+}
+
 function makePeerConn(pin) {
   const pc = new RTCPeerConnection(ICE);
 
@@ -541,6 +617,8 @@ function makePeerConn(pin) {
       callConnected = true;
       setCallStatus('Connected');
       document.getElementById('callOverlay').style.opacity = '0';
+      stopRingtone();
+      clearTimeout(callTimer);
     }
     if (s === 'disconnected' || s === 'failed' || s === 'closed') {
       endCall(false);
@@ -555,6 +633,7 @@ function makePeerConn(pin) {
     }
     setCallStatus('Connected');
     document.getElementById('callOverlay').style.opacity = '0';
+    callConnected = true;
     clearTimeout(callTimer);
     stopRingtone();
   };
@@ -569,7 +648,7 @@ function showCallScreen(pin, status, type) {
   document.getElementById('callOverlay').style.opacity = '1';
 
   const lv = document.getElementById('localVideo');
-  lv.srcObject  = localStream;
+  lv.srcObject    = localStream;
   lv.style.display = type === 'video' ? 'block' : 'none';
   document.getElementById('remoteVideo').srcObject = null;
 
@@ -582,16 +661,19 @@ function setCallStatus(s) {
 }
 
 function endCall(notify = true) {
-  // Record missed call if never connected
+  // #2 & #9 — always clear incomingBuffer and hide overlay
+  if (incomingBuffer) { incomingBuffer = null; }
+  hideIncoming();
+
+  // #7 — record missed call using callDirection
   if (!callConnected && callPeer) {
-    const missedCall = {
-      with: callPeer,
-      type: callType,
-      dir: (callPeer === currentChatId ? 'out' : 'in'),
-      time: new Date().toISOString(),
+    calls.unshift({
+      with:   callPeer,
+      type:   callType   || 'audio',
+      dir:    callDirection,            // #7 fix
+      time:   new Date().toISOString(),
       missed: true
-    };
-    calls.unshift(missedCall);
+    });
     localStorage.setItem('calls', JSON.stringify(calls.slice(0, 100)));
     renderCalls();
   }
@@ -599,15 +681,22 @@ function endCall(notify = true) {
   document.getElementById('callScreen').classList.remove('show');
   clearTimeout(callTimer);
   stopRingtone();
+  cancelCallNotif();
 
   if (notify && callPeer) signal(callPeer, 'call_end', {});
+
   peerConn?.close();
   localStream?.getTracks().forEach(t => t.stop());
 
-  peerConn = null; localStream = null; callPeer = null;
-  remoteDescSet = false; iceCandQueue = [];
-  callConnected = false;
+  peerConn       = null;
+  localStream    = null;
+  callPeer       = null;
+  remoteDescSet  = false;
+  iceCandQueue   = [];
+  callConnected  = false;
+}
 
+function cancelCallNotif() {
   navigator.serviceWorker?.ready.then(reg =>
     reg.active?.postMessage({ type: 'CANCEL_NOTIFICATIONS', payload: { tag: 'incoming-call' } })
   );
@@ -627,7 +716,9 @@ function toggleCallCam() {
 
 function toggleSpeaker() { toast('Speaker toggle — coming soon'); }
 
+// ── RINGTONE ───────────────────────────────────────
 let ringtoneCtx = null, ringtoneInt = null;
+
 function startRingtone() {
   stopRingtone();
   try {
@@ -643,6 +734,7 @@ function startRingtone() {
     ringtoneInt = setInterval(play, 2000);
   } catch {}
 }
+
 function stopRingtone() {
   clearInterval(ringtoneInt); ringtoneInt = null;
   ringtoneCtx?.close().catch(() => {}); ringtoneCtx = null;
@@ -652,9 +744,10 @@ function showIncoming(from, type) {
   startRingtone();
   document.getElementById('incomingName').textContent = getContactName(from);
   document.getElementById('incomingType').textContent =
-    (type === 'video' ? '📹 Video' : '📞 Audio') + ' Call';
+    (type === 'video' ? 'Video' : type === 'group' ? 'Group' : 'Audio') + ' Call';
   document.getElementById('incomingOverlay').classList.add('show');
 }
+
 function hideIncoming() {
   document.getElementById('incomingOverlay').classList.remove('show');
   stopRingtone();
@@ -697,7 +790,7 @@ function updateLinkView() {
   el.innerHTML = recentRooms.length
     ? recentRooms.map(r => `
         <div class="item" onclick="joinRoom('${r.id}')">
-          <div class="avatar" style="background:var(--blue-dim);color:var(--blue)">🔗</div>
+          <div class="avatar" style="background:var(--blue-dim);color:var(--blue)">&#128279;</div>
           <div class="item-info">
             <div class="item-name">Room …${r.id.slice(-6)}</div>
             <div class="item-sub">${fmtTime(new Date(r.time).toISOString())}</div>
@@ -707,7 +800,7 @@ function updateLinkView() {
 }
 
 function copyLink() {
-  navigator.clipboard?.writeText(getRoomUrl(myRoomId)).then(() => toast('Link copied!'));
+  copyToClipboard(getRoomUrl(myRoomId), 'Link copied!');
 }
 
 function joinMyLinkCall() {
@@ -733,23 +826,32 @@ async function joinRoom(roomId) {
     gcStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
   } catch {
     try { gcStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-    catch(e) { toast('Mic needed for calls: ' + e.message); return; }
+    catch (e) { toast('Mic needed: ' + e.message); return; }
   }
 
   document.getElementById('gcLocalVideo').srcObject = gcStream;
   document.getElementById('groupCallScreen').classList.add('show');
   addGcTile(myPin, gcStream, true);
 
+  // Signal the room — backend will send back gc_members with existing members (#3)
   sigRoom(roomId, 'gc_join', { from: myPin });
-  startGcTimer();
+  startGcTimer(); // #8 — clears old timer internally
   addRecentRoom(roomId);
 }
 
+// #3 — existing member always initiates to new joiner (no more PIN comparison)
 function handleGcJoin(from) {
   if (!gcRoomId) return;
   toast(`${getContactName(from)} joined`);
-  if (myPin < from) createGcPeer(from, true);
-  else createGcPeer(from, false);
+  createGcPeer(from, true); // existing member sends the offer
+}
+
+// #3 — new joiner receives member list from backend and initiates to all of them
+function handleGcMembers(payload) {
+  const members = payload?.members || [];
+  members.forEach(pin => {
+    if (pin !== myPin) createGcPeer(pin, true); // new joiner initiates
+  });
 }
 
 async function createGcPeer(pin, initiator) {
@@ -757,44 +859,58 @@ async function createGcPeer(pin, initiator) {
   const pc = new RTCPeerConnection(ICE);
   gcPeers[pin] = pc;
 
-  gcStream.getTracks().forEach(t => pc.addTrack(t, gcStream));
+  gcStream?.getTracks().forEach(t => pc.addTrack(t, gcStream));
 
   pc.onicecandidate = e => {
     if (e.candidate) sigRoom(gcRoomId, 'gc_ice', { to: pin, candidate: e.candidate, from: myPin });
   };
 
-  pc.ontrack = e => {
-    addGcTile(pin, e.streams[0], false);
-  };
+  pc.ontrack = e => { addGcTile(pin, e.streams[0], false); };
 
+  // #6 — properly clean up stale peer on failure
   pc.onconnectionstatechange = () => {
-    if (pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+    const s = pc.connectionState;
+    if (s === 'failed' || s === 'closed') {
       removeGcTile(pin);
+      delete gcPeers[pin];
+      try { pc.close(); } catch {}
     }
   };
 
   if (initiator) {
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    sigRoom(gcRoomId, 'gc_offer', { to: pin, sdp: pc.localDescription, from: myPin });
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      sigRoom(gcRoomId, 'gc_offer', { to: pin, sdp: pc.localDescription, from: myPin });
+    } catch {}
   }
 }
 
+// #10 — guard against double-processing existing peers
 async function handleGcOffer(from, payload) {
   if (payload.to !== myPin) return;
+
+  // If peer already exists with a remote description, skip (already negotiated)
+  if (gcPeers[from]?.remoteDescription) return;
+
   await createGcPeer(from, false);
   const pc = gcPeers[from];
   if (!pc) return;
-  await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-  sigRoom(gcRoomId, 'gc_answer', { to: from, sdp: pc.localDescription, from: myPin });
+
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    sigRoom(gcRoomId, 'gc_answer', { to: from, sdp: pc.localDescription, from: myPin });
+  } catch {}
 }
 
 async function handleGcAnswer(from, payload) {
   if (payload.to !== myPin) return;
   const pc = gcPeers[from];
-  if (pc) await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+  if (pc) {
+    try { await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp)); } catch {}
+  }
 }
 
 function handleGcIce(from, payload) {
@@ -805,17 +921,15 @@ function handleGcIce(from, payload) {
 
 function handleGcLeave(from) {
   removeGcTile(from);
-  gcPeers[from]?.close();
-  delete gcPeers[from];
+  const pc = gcPeers[from];
+  if (pc) { try { pc.close(); } catch {} delete gcPeers[from]; }
 }
 
+// #4 — group call invite uses state variable instead of overwriting answerBtn.onclick
 function handleGcInvite(from, payload) {
+  incomingAnswerAction = 'group';
+  incomingGroupRoom    = payload.room;
   showIncoming(from, 'group');
-  document.getElementById('incomingType').textContent = '👥 Group Call';
-  document.getElementById('answerBtn').onclick = () => {
-    hideIncoming();
-    joinRoom(payload.room);
-  };
 }
 
 function addGcTile(pin, stream, isLocal) {
@@ -823,8 +937,9 @@ function addGcTile(pin, stream, isLocal) {
   const grid = document.getElementById('gcGrid');
   const tile = document.createElement('div');
   tile.className = 'gc-tile';
-  tile.id = 'gc-tile-' + pin;
-  const hasVideo = stream.getVideoTracks().some(t => t.enabled);
+  tile.id        = 'gc-tile-' + pin;
+
+  const hasVideo = stream?.getVideoTracks().some(t => t.enabled && t.readyState === 'live');
   if (hasVideo) {
     const v = document.createElement('video');
     v.autoplay = true; v.playsInline = true;
@@ -834,13 +949,14 @@ function addGcTile(pin, stream, isLocal) {
     tile.appendChild(v);
   } else {
     const av = document.createElement('div');
-    av.className = 'gc-tile-avatar';
+    av.className   = 'gc-tile-avatar';
     av.textContent = pin[0];
     tile.appendChild(av);
   }
+
   const ov = document.createElement('div');
   ov.className = 'gc-tile-overlay';
-  ov.innerHTML = `<span class="gc-tile-name">${isLocal ? 'You' : getContactName(pin)}</span>`;
+  ov.innerHTML = `<span class="gc-tile-name">${isLocal ? 'You' : esc(getContactName(pin))}</span>`;
   tile.appendChild(ov);
   grid.appendChild(tile);
   updateGcGrid();
@@ -856,8 +972,10 @@ function updateGcGrid() {
   grid.setAttribute('data-count', String(Math.min(grid.children.length, 4)));
 }
 
+// #8 — always clear any existing timer before starting a new one
 function startGcTimer() {
-  gcSecs = 0;
+  clearInterval(gcTimer);
+  gcSecs  = 0;
   gcTimer = setInterval(() => {
     gcSecs++;
     const m = String(Math.floor(gcSecs / 60)).padStart(2, '0');
@@ -870,9 +988,16 @@ function endGroupCall() {
   sigRoom(gcRoomId, 'gc_leave', { from: myPin });
   document.getElementById('groupCallScreen').classList.remove('show');
   clearInterval(gcTimer);
+
   gcStream?.getTracks().forEach(t => t.stop());
-  Object.values(gcPeers).forEach(pc => pc.close());
-  gcPeers = {}; gcRoomId = null;
+
+  // #15 — null the video element srcObject to release the stream reference
+  const gcLocalVideo = document.getElementById('gcLocalVideo');
+  gcLocalVideo.srcObject = null;
+
+  Object.values(gcPeers).forEach(pc => { try { pc.close(); } catch {} });
+  gcPeers  = {};
+  gcRoomId = null;
   document.getElementById('gcGrid').innerHTML = '';
 }
 
@@ -885,13 +1010,14 @@ function toggleGcMute() {
 function toggleGcCam() {
   gcCamOff = !gcCamOff;
   gcStream?.getVideoTracks().forEach(t => t.enabled = !gcCamOff);
+  document.getElementById('gcCamBtn').classList.toggle('muted', gcCamOff);
 }
 
 function shareGroupCallLink() {
   if (!gcRoomId) return;
   const url = getRoomUrl(gcRoomId);
   if (navigator.share) navigator.share({ title: 'Join my iNet call', url });
-  else navigator.clipboard?.writeText(url).then(() => toast('Link copied!'));
+  else copyToClipboard(url, 'Link copied!');
 }
 
 function showInviteToCall() {
@@ -909,26 +1035,39 @@ function addRecentRoom(id) {
 // ── VOICE RECORDING ────────────────────────────────
 async function toggleVoice() {
   if (!isRecording) {
+    if (!currentChatId) { toast('Open a chat first'); return; }
+    const targetPin = currentChatId; // #5 — capture NOW, not later
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRec = new MediaRecorder(stream);
-      audioChunks = [];
+      mediaRec     = new MediaRecorder(stream);
+      audioChunks  = [];
+
       mediaRec.ondataavailable = e => audioChunks.push(e.data);
+
       mediaRec.onstop = () => {
         const reader = new FileReader();
         reader.onload = ev => {
-          const msg = { id: Date.now(), type: 'audio', content: ev.target.result,
-                        time: new Date().toISOString(), from: myPin };
-          dispatchMsg(currentChatId, msg);
+          const msg = {
+            id:      Date.now(),
+            type:    'audio',
+            content: ev.target.result,
+            time:    new Date().toISOString(),
+            from:    myPin
+          };
+          dispatchMsg(targetPin, msg); // #5 — use captured pin
         };
         reader.readAsDataURL(new Blob(audioChunks, { type: 'audio/webm' }));
         stream.getTracks().forEach(t => t.stop());
       };
+
       mediaRec.start();
       isRecording = true;
       document.getElementById('voiceBtn').classList.add('recording');
-      toast('Recording…');
-    } catch { toast('Microphone permission needed'); }
+      toast('Recording… tap again to send');
+    } catch {
+      toast('Microphone permission needed');
+    }
   } else {
     mediaRec?.stop();
     isRecording = false;
@@ -936,16 +1075,31 @@ async function toggleVoice() {
   }
 }
 
+// ── FILE HANDLING ──────────────────────────────────
 function handleFile(e) {
   const file = e.target.files[0];
   if (!file || !currentChatId) return;
+
+  // #12 — reject files over 2 MB to avoid oversized WebSocket payloads
+  if (file.size > FILE_MAX_BYTES) {
+    toast('File too large — max 2 MB');
+    e.target.value = '';
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = ev => {
     const type = file.type.startsWith('image/') ? 'image'
                : file.type.startsWith('video/') ? 'video'
                : file.type.startsWith('audio/') ? 'audio' : 'file';
-    const msg = { id: Date.now(), type, content: ev.target.result,
-                  fileName: file.name, time: new Date().toISOString(), from: myPin };
+    const msg = {
+      id:       Date.now(),
+      type,
+      content:  ev.target.result,
+      fileName: file.name,
+      time:     new Date().toISOString(),
+      from:     myPin
+    };
     dispatchMsg(currentChatId, msg);
   };
   reader.readAsDataURL(file);
@@ -959,8 +1113,12 @@ function addContact() {
   const pin  = document.getElementById('contactPinInput').value.trim();
   const name = document.getElementById('contactNameInput').value.trim();
   if (pin.length !== 6 || !/^\d{6}$/.test(pin)) { toast('Enter a valid 6-digit PIN'); return; }
-  if (pin === myPin) { toast("That's your own PIN!"); return; }
-  if (contacts.find(c => c.pin === pin)) { toast('Already in contacts'); closeModal('addContactModal'); return; }
+  if (pin === myPin)                              { toast("That's your own PIN!");      return; }
+  if (contacts.find(c => c.pin === pin))          {
+    toast('Already in contacts');
+    closeModal('addContactModal');
+    return;
+  }
   contacts.push({ pin, name: name || pin, added: new Date().toISOString() });
   localStorage.setItem('contacts', JSON.stringify(contacts));
   document.getElementById('contactPinInput').value = '';
@@ -976,7 +1134,12 @@ function getContactName(pin) {
 }
 
 // ── RENDER ─────────────────────────────────────────
-function renderAll() { renderContacts(); renderChats(); renderCalls(); updateUnreadBadge(); }
+function renderAll() {
+  renderContacts();
+  renderChats();
+  renderCalls();
+  updateUnreadBadge();
+}
 
 function renderContacts() {
   const list  = document.getElementById('contactsList');
@@ -1012,7 +1175,7 @@ function renderChats() {
   list.innerHTML = sorted.map(key => {
     const last    = chats[key]?.slice(-1)[0];
     const name    = getContactName(key);
-    const preview = last ? (last.type === 'text' ? last.content.slice(0, 40) : '📎 Media') : '';
+    const preview = last ? (last.type === 'text' ? last.content.slice(0, 40) : 'Media') : '';
     const online  = onlineStatus[key]?.online;
     return `<div class="item" onclick="openDMChat('${key}')">
       <div class="avatar ${online ? 'avatar-online' : ''}">${name[0]}</div>
@@ -1035,7 +1198,7 @@ function renderCalls() {
   empty.style.display = 'none';
   list.innerHTML = calls.slice(0, 50).map(c => `
     <div class="item" onclick="openDMChat('${c.with}')">
-      <div class="avatar" style="font-size:1.3rem">${c.type === 'video' ? '📹' : '📞'}</div>
+      <div class="avatar" style="font-size:1.3rem">${c.type === 'video' ? '&#128249;' : '&#128222;'}</div>
       <div class="item-info">
         <div class="item-name">${esc(getContactName(c.with))}</div>
         <div class="item-sub">${c.dir === 'out' ? 'Outgoing' : 'Incoming'} ${c.type} ${c.missed ? '(missed)' : ''}</div>
@@ -1054,9 +1217,12 @@ function renderChatMessages() {
     if      (m.type === 'text')  body = `<div class="bubble">${esc(m.content)}</div>`;
     else if (m.type === 'image') body = `<img src="${m.content}" class="msg-img" onclick="window.open(this.src)">`;
     else if (m.type === 'audio') body = `<audio src="${m.content}" class="msg-audio" controls></audio>`;
-    else                         body = `<div class="bubble">📎 ${esc(m.fileName || 'File')}</div>`;
+    else                         body = `<div class="bubble">&#128206; ${esc(m.fileName || 'File')}</div>`;
+
     const tick = own
-      ? `<span class="tick ${m.status === 'sent' ? 'sent' : ''}">${m.status === 'pending' ? '⏳' : '✓'}</span>`
+      ? `<span class="tick ${m.status === 'sent' ? 'sent' : ''}">
+           ${m.status === 'pending' ? '&#9203;' : '&#10003;'}
+         </span>`
       : '';
     return `<div class="msg ${own ? 'own' : ''}">${body}
       <div class="msg-meta">${fmtTime(m.time)} ${tick}</div>
@@ -1067,15 +1233,17 @@ function renderChatMessages() {
 
 // ── UI HELPERS ─────────────────────────────────────
 function switchTab(tab, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t  => t.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(tab + 'View').classList.add('active');
+
   if (tab === 'chats') {
     unread = {};
     localStorage.setItem('unread', JSON.stringify(unread));
     updateUnreadBadge();
   }
+  if (tab === 'callLink') updateLinkView();
 }
 
 function toggleFab() {
@@ -1085,6 +1253,7 @@ function toggleFab() {
     ? '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>'
     : '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
 }
+
 function closeFab() {
   fabOpen = false;
   document.getElementById('fabMenu').classList.remove('open');
@@ -1094,7 +1263,7 @@ function closeFab() {
 function openDMChat(pin) {
   currentChatId = pin;
   clearUnread(pin);
-  document.getElementById('chatName').textContent   = getContactName(pin);
+  document.getElementById('chatName').textContent      = getContactName(pin);
   document.getElementById('chatActions').style.display = 'flex';
   updateChatStatus();
   document.getElementById('chatScreen').classList.add('show');
@@ -1124,17 +1293,49 @@ function closeChat() {
 
 function openModal(id)  { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function copyPin()      { navigator.clipboard?.writeText(myPin).then(() => toast('PIN copied!')); }
-function installApp()   {
+
+// #13 — copyPin uses safe clipboard helper
+function copyPin() { copyToClipboard(myPin, 'PIN copied!'); }
+
+function installApp() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-  } else toast('Use browser menu → Add to Home Screen');
+  } else {
+    toast('Use browser menu \u2192 Add to Home Screen');
+  }
 }
 
 function autoResize(el) {
   el.style.height = '';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// #13 — safe clipboard with execCommand fallback
+function copyToClipboard(text, successMsg) {
+  const msg = successMsg || 'Copied!';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text)
+      .then(() => toast(msg))
+      .catch(() => fallbackCopy(text, msg));
+  } else {
+    fallbackCopy(text, msg);
+  }
+}
+
+function fallbackCopy(text, msg) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try {
+    document.execCommand('copy');
+    toast(msg || 'Copied!');
+  } catch {
+    toast('Copy failed — select manually');
+  }
+  document.body.removeChild(ta);
 }
 
 function makeDraggable(el) {
@@ -1165,22 +1366,22 @@ function fmtTime(iso) {
 function esc(s) {
   if (!s) return '';
   return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>');
 }
 
 function toast(msg) {
   document.querySelectorAll('.toast').forEach(t => t.remove());
-  const el = document.createElement('div');
+  const el       = document.createElement('div');
   el.className   = 'toast';
   el.textContent = msg;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 3000);
 }
 
-function log(...args) { console.log('[iNet]', ...args); }
-
-// ── EXPOSE TO HTML onclick handlers ───────────────
+// ── EXPOSE TO HTML onclick HANDLERS ───────────────
 Object.assign(window, {
   signup, copyPin, installApp,
   switchTab, toggleFab, closeFab,
@@ -1195,5 +1396,6 @@ Object.assign(window, {
   copyLink, joinMyLinkCall, joinLinkCall,
   endGroupCall, toggleGcMute, toggleGcCam,
   shareGroupCallLink, showInviteToCall,
-  toggleGcSpeaker: () => toast('Speaker toggle coming soon'),
+  toggleGcSpeaker: () => toast('Speaker toggle — coming soon'),
+  joinRoom,
 });
