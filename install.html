@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Install iNet</title>
+<meta name="description" content="Install iNet on your device — works on Android, iPhone, and desktop. No app store required.">
+<meta name="theme-color" content="#e63946">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0e0e10;--surface:#18181c;--surface2:#222228;--surface3:#2a2a32;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --accent:#e63946;--accent-dim:rgba(230,57,70,0.12);--accent-glow:rgba(230,57,70,0.28);
+  --green:#22c55e;--green-dim:rgba(34,197,94,0.1);
+  --blue:#3b82f6;--purple:#8b5cf6;
+  --text:#f4f4f6;--text2:#a0a0b0;--text3:#606070;
+  --radius:16px;--radius-sm:10px;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html{font-size:16px;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+body{
+  background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;
+  min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
+}
+a{text-decoration:none;color:inherit}
+
+/* ── TOP BAR ── */
+.topbar{
+  padding:calc(var(--safe-top) + 14px) 20px 14px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+  background:rgba(14,14,16,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:50;
+}
+.logo{
+  width:34px;height:34px;background:var(--accent);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-weight:500;font-size:0.85rem;color:#fff;
+  box-shadow:0 0 14px var(--accent-glow);flex-shrink:0;
+}
+.logo-name{font-weight:700;font-size:0.95rem;flex:1}
+.back-link{
+  font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text3);
+  padding:7px 12px;border-radius:20px;border:1px solid var(--border);transition:all .15s;
+  display:flex;align-items:center;gap:4px;
+}
+.back-link:hover{color:var(--text2);border-color:var(--border2)}
+
+/* ── MAIN ── */
+main{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px calc(40px + var(--safe-bottom));
+  max-width:480px;margin:0 auto;width:100%;gap:20px;
+}
+
+/* ── APP HERO ── */
+.app-hero{text-align:center}
+.app-icon{
+  width:88px;height:88px;background:var(--accent);border-radius:22px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:2rem;color:#fff;font-weight:500;
+  box-shadow:0 0 36px var(--accent-glow);margin:0 auto 20px;
+}
+.app-hero h1{font-size:1.9rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:8px}
+.app-hero h1 span{color:var(--accent)}
+.app-hero p{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text2);line-height:1.8}
+
+/* ── CARDS ── */
+.card{
+  width:100%;background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:16px;
+}
+.card-title{font-weight:700;font-size:0.9rem;color:var(--text)}
+
+/* ── INSTALL BUTTON ── */
+#android-section{display:none}
+.btn-install{
+  width:100%;padding:15px;background:var(--accent);color:#fff;border:none;
+  font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;
+  border-radius:var(--radius-sm);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 20px var(--accent-glow);transition:all .2s;
+}
+.btn-install:hover{transform:translateY(-2px);box-shadow:0 8px 28px var(--accent-glow)}
+.btn-install:active{transform:scale(0.97)}
+.btn-install:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-install svg{flex-shrink:0}
+
+.installed-badge{
+  display:none;align-items:center;justify-content:center;gap:8px;
+  background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);
+  padding:13px;border-radius:var(--radius-sm);
+  font-weight:700;font-size:0.88rem;color:var(--green);
+}
+.installed-badge svg{width:18px;height:18px;stroke:var(--green);fill:none;flex-shrink:0}
+
+/* ── IOS STEPS ── */
+#ios-section{display:none}
+.ios-steps{display:flex;flex-direction:column;gap:10px}
+.ios-step{
+  display:flex;align-items:flex-start;gap:14px;
+  background:var(--surface2);border-radius:var(--radius-sm);padding:14px;
+}
+.ios-num{
+  width:26px;height:26px;border-radius:50%;flex-shrink:0;margin-top:1px;
+  background:var(--accent-dim);border:1px solid rgba(230,57,70,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:0.68rem;font-weight:500;color:var(--accent);
+}
+.ios-text{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text2);line-height:1.75}
+.ios-text strong{color:var(--text)}
+.ios-safari-note{
+  font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text3);
+  line-height:1.6;
+}
+.ios-safari-note strong{color:var(--text2)}
+
+/* ── OPEN IN BROWSER ── */
+.btn-open{
+  width:100%;padding:14px;background:transparent;color:var(--text);
+  border:1px solid var(--border2);border-radius:var(--radius-sm);
+  font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .15s;
+}
+.btn-open:hover{background:var(--surface);border-color:rgba(255,255,255,0.2)}
+
+/* ── MINI FEATURES ── */
+.mini-features{
+  width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.mf{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px;display:flex;align-items:center;gap:10px;
+}
+.mf-icon{width:20px;height:20px;flex-shrink:0;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round}
+.mf-text{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);line-height:1.5}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;padding:20px;padding-bottom:calc(20px + var(--safe-bottom));
+  font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text3);
+}
+footer a{color:var(--text3);transition:color .15s}
+footer a:hover{color:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="logo">iN</div>
+  <div class="logo-name">iNet</div>
+  <a href="index.html" class="back-link">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--text3)"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Home
+  </a>
+</div>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- APP HERO -->
+  <div class="app-hero">
+    <div class="app-icon">iN</div>
+    <h1>Install <span>iNet</span></h1>
+    <p>Add to your home screen for the full app experience.<br>Works offline &middot; No app store &middot; Always free.</p>
+  </div>
+
+  <!-- ANDROID / DESKTOP -->
+  <div class="card" id="android-section">
+    <div class="card-title" id="install-card-title">Install on your device</div>
+    <div id="install-btn-wrap">
+      <button class="btn-install" id="install-btn" onclick="triggerInstall()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Add to Home Screen
+      </button>
+    </div>
+    <div class="installed-badge" id="installed-msg">
+      <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      iNet is already installed
+    </div>
+  </div>
+
+  <!-- IOS -->
+  <div class="card" id="ios-section">
+    <div class="card-title">Install on iPhone / iPad</div>
+    <div class="ios-steps">
+      <div class="ios-step">
+        <div class="ios-num">1</div>
+        <div class="ios-text">
+          Tap the <strong>Share</strong> button
+          <svg style="display:inline-block;vertical-align:middle;margin:0 3px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e63946" stroke-width="2" stroke-linecap="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          at the bottom of <strong>Safari</strong>
+        </div>
+      </div>
+      <div class="ios-step">
+        <div class="ios-num">2</div>
+        <div class="ios-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
+      </div>
+      <div class="ios-step">
+        <div class="ios-num">3</div>
+        <div class="ios-text">Tap <strong>Add</strong> in the top-right corner &mdash; done.</div>
+      </div>
+    </div>
+    <p class="ios-safari-note">Must be opened in <strong>Safari</strong> for this to work on iOS. Chrome and Firefox do not support PWA installation on iPhone.</p>
+  </div>
+
+  <!-- OPEN IN BROWSER -->
+  <a href="app.html" class="btn-open">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+    Open App in Browser
+  </a>
+
+  <!-- MINI FEATURES -->
+  <div class="mini-features">
+    <div class="mf">
+      <svg class="mf-icon" viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+      <div class="mf-text">Works offline</div>
+    </div>
+    <div class="mf">
+      <svg class="mf-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div class="mf-text">100% private</div>
+    </div>
+    <div class="mf">
+      <svg class="mf-icon" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <div class="mf-text">No app store</div>
+    </div>
+    <div class="mf">
+      <svg class="mf-icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <div class="mf-text">Always free</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  iNet by <a href="index.html">EML Tech Studio</a> &middot; emltechstudio@gmail.com
+</footer>
+
+<script>
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+let dP = null;
+
+const ua           = navigator.userAgent.toLowerCase();
+const isIOS        = /iphone|ipad|ipod/.test(ua);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                     || window.navigator.standalone === true;
+
+// Android/desktop: catch the install prompt
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  dP = e;
+  showAndroid();
+});
+
+function showAndroid() {
+  document.getElementById('android-section').style.display = 'flex';
+  document.getElementById('ios-section').style.display     = 'none';
+}
+function showIOS() {
+  document.getElementById('ios-section').style.display     = 'flex';
+  document.getElementById('android-section').style.display = 'none';
+}
+
+async function triggerInstall() {
+  if (!dP) return;
+  const btn = document.getElementById('install-btn');
+  btn.disabled = true;
+  dP.prompt();
+  const { outcome } = await dP.userChoice;
+  dP = null;
+  if (outcome === 'accepted') {
+    document.getElementById('install-btn-wrap').style.display = 'none';
+    document.getElementById('installed-msg').style.display    = 'flex';
+    document.getElementById('install-card-title').textContent = 'Installation complete!';
+  } else {
+    btn.disabled = false;
+  }
+}
+
+// On load — decide what to show
+window.addEventListener('load', () => {
+  if (isStandalone) {
+    document.getElementById('android-section').style.display = 'flex';
+    document.getElementById('install-btn-wrap').style.display = 'none';
+    document.getElementById('installed-msg').style.display    = 'flex';
+    document.getElementById('install-card-title').textContent = 'Already installed!';
+    return;
+  }
+  if (isIOS) {
+    showIOS();
+    return;
+  }
+  // Android/Desktop: wait up to 2s for beforeinstallprompt
+  setTimeout(() => {
+    if (!dP && !isStandalone) {
+      // Show the card with a disabled button as fallback
+      document.getElementById('android-section').style.display = 'flex';
+      const btn = document.getElementById('install-btn');
+      btn.textContent = 'May already be installed';
+      btn.disabled    = true;
+    }
+  }, 2000);
+});
+</script>
+</body>
+</html>
