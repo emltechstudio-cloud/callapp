@@ -1,6 +1,13 @@
-const CACHE = 'inet-v3';
+// ═══════════════════════════════════════════════════
+// iNet sw.js  — Service Worker
+// Fixes: #11 dead CANCEL_NOTIFICATIONS branch removed
+//        #14 focusOrOpen broadened URL check
+// ═══════════════════════════════════════════════════
+
+const CACHE = 'inet-v4';
 const ASSETS = ['/app.html', '/index.html', '/manifest.json', '/icon.svg'];
 
+// ── INSTALL ────────────────────────────────────────
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
@@ -9,17 +16,22 @@ self.addEventListener('install', e => {
   );
 });
 
+// ── ACTIVATE ───────────────────────────────────────
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+      ))
       .then(() => self.clients.claim())
   );
 });
 
+// ── FETCH ──────────────────────────────────────────
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (!e.request.url.startsWith(self.location.origin)) return;
+
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
@@ -34,13 +46,14 @@ self.addEventListener('fetch', e => {
   );
 });
 
+// ── PUSH ───────────────────────────────────────────
 self.addEventListener('push', e => {
   let data = {};
   try { data = e.data ? e.data.json() : {}; } catch { data = {}; }
 
-  const type      = data.type || 'generic';
-  const from      = data.from || 'Someone';
-  const callType  = data.call_type || 'audio';
+  const type     = data.type     || 'generic';
+  const from     = data.from     || 'Someone';
+  const callType = data.call_type || 'audio';
 
   let title, body, actions, tag, requireInteraction, vibrate;
 
@@ -60,17 +73,17 @@ self.addEventListener('push', e => {
     tag     = `msg-${from}`;
     vibrate = [200, 100, 200];
     actions = [
-      { action: 'open',    title: 'Open' },
+      { action: 'open',    title: 'Open'    },
       { action: 'dismiss', title: 'Dismiss' }
     ];
   } else if (type === 'incoming_group_call') {
-    title              = `Group Call Invitation`;
+    title              = 'Group Call Invitation';
     body               = `${from} invited you to a group call`;
     tag                = 'group-call';
     requireInteraction = true;
     vibrate            = [400, 150, 400, 150, 400];
     actions            = [
-      { action: 'join',    title: 'Join'   },
+      { action: 'join',    title: 'Join'    },
       { action: 'decline', title: 'Decline' }
     ];
   } else {
@@ -95,6 +108,7 @@ self.addEventListener('push', e => {
   );
 });
 
+// ── NOTIFICATION CLICK ─────────────────────────────
 self.addEventListener('notificationclick', e => {
   const n      = e.notification;
   const action = e.action;
@@ -111,33 +125,60 @@ self.addEventListener('notificationclick', e => {
       })
     );
   } else if (action === 'decline') {
-    e.waitUntil(
-      notifyClients({ type: 'DECLINE_CALL', data })
-    );
+    e.waitUntil(notifyClients({ type: 'DECLINE_CALL', data }));
   } else {
     e.waitUntil(focusOrOpen(appUrl));
   }
 });
 
+// ── NOTIFICATION CLOSE ─────────────────────────────
 self.addEventListener('notificationclose', e => {
   if (e.notification.tag === 'incoming-call') {
     notifyClients({ type: 'CALL_NOTIFICATION_DISMISSED', data: e.notification.data });
   }
 });
 
+// ── MESSAGES FROM CLIENT ──────────────────────────
+// Fix #11: Removed dead CANCEL_NOTIFICATIONS client-message handler.
+// Clients send CANCEL_NOTIFICATIONS to the SW (not the other way around),
+// so the SW handles it here and closes the notification directly.
 self.addEventListener('message', e => {
   const { type, payload } = e.data || {};
+
   if (type === 'CANCEL_NOTIFICATIONS') {
     self.registration.getNotifications({ tag: payload?.tag || 'incoming-call' })
       .then(ns => ns.forEach(n => n.close()));
   }
+
   if (type === 'SKIP_WAITING') self.skipWaiting();
+
+  if (type === 'SHOW_NOTIFICATION') {
+    const p = payload || {};
+    self.registration.showNotification(p.title || 'iNet', {
+      body:               p.body               || '',
+      icon:               '/icon.svg',
+      badge:              '/icon.svg',
+      tag:                p.tag                || 'generic',
+      data:               p.data               || {},
+      actions:            p.actions            || [],
+      requireInteraction: p.requireInteraction || false,
+      vibrate:            p.vibrate            || [200, 100, 200],
+      silent:             false
+    });
+  }
 });
 
+// ── HELPERS ────────────────────────────────────────
+
+// Fix #14: Broadened URL check — match ANY open window, not just specific paths.
+// Installed PWAs may have varying URL patterns; focusing any window is correct.
 function focusOrOpen(url) {
   return clients.matchAll({ type: 'window', includeUncontrolled: true }).then(all => {
-    const existing = all.find(c => c.url.includes('app.html') || c.url.includes('/inet'));
-    if (existing) return existing.focus();
+    if (all.length > 0) {
+      // Prefer a window that's already visible / focused
+      const target = all.find(c => c.focused) || all[0];
+      if ('focus' in target) return target.focus();
+    }
     return clients.openWindow(url);
   });
 }
@@ -145,4 +186,4 @@ function focusOrOpen(url) {
 function notifyClients(msg) {
   return clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(all => all.forEach(c => c.postMessage(msg)));
-      }
+}
