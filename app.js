@@ -15,8 +15,6 @@ const ICE = { iceServers: [
 // ── STATE ──────────────────────────────────────────
 let myPin    = localStorage.getItem('myPin');
 let deviceId = localStorage.getItem('deviceId');
-// VAPID key — always comes from backend, stored locally
-// Never hardcoded here. Refreshed if push subscription fails.
 let vapidKey = localStorage.getItem('vapidKey');
 
 let ws = null, wsTimer = null, wsConnecting = false, wsHeartbeat = null;
@@ -35,11 +33,10 @@ let deferredPrompt = null;
 // 1:1 call state
 let localStream = null, peerConn = null, callPeer = null, callType = null;
 let callTimer = null, isMuted = false, isCamOff = false;
-let incomingBuffer = null;   // { from, payload }
-// ICE candidate queue (fixes race condition)
+let incomingBuffer = null;
 let iceCandQueue = [];
 let remoteDescSet = false;
-let callConnected = false;   // <-- NEW: whether call ever connected
+let callConnected = false;   // whether call ever connected (for missed call recording)
 
 // Group call state
 let gcRoomId = null, gcStream = null, gcPeers = {}, gcTimer = null, gcSecs = 0;
@@ -53,13 +50,11 @@ let myRoomId = localStorage.getItem('myRoomId') || null;
 
 // ── INIT ───────────────────────────────────────────
 (function init() {
-  // Service worker — listens for push notification actions
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
     navigator.serviceWorker.addEventListener('message', onSwMessage);
   }
 
-  // PWA install prompt
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
@@ -70,10 +65,9 @@ let myRoomId = localStorage.getItem('myRoomId') || null;
   makeDraggable(document.getElementById('gcLocalPip'));
   makeDraggable(document.getElementById('localVideo'));
 
-  // Handle deep link room join (e.g. app.html#room:abc123)
   const hash = location.hash.replace('#', '');
   if (hash.startsWith('room:')) {
-    const roomId = hash.slice(5);   // strip 'room:' prefix — no double prefix
+    const roomId = hash.slice(5);
     if (myPin) setTimeout(() => joinRoom(roomId), 1200);
     else sessionStorage.setItem('pendingRoom', roomId);
   }
@@ -81,11 +75,9 @@ let myRoomId = localStorage.getItem('myRoomId') || null;
   if (myPin && deviceId) {
     startApp();
   } else {
-    // Show signup
     document.getElementById('signupView').style.display = 'flex';
   }
 
-  // Stay online even in background — reconnect when tab is visible again
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       if (!ws || ws.readyState !== WebSocket.OPEN) connectWS();
@@ -109,11 +101,8 @@ function startApp() {
   startPingLoop();
   updateLinkView();
 
-  // Subscribe to push using stored vapid key
-  // If it fails, we'll fetch a fresh key from /whoami
   if (vapidKey) subscribePush(vapidKey);
 
-  // Join pending room if navigated here via link
   const pendingRoom = sessionStorage.getItem('pendingRoom');
   if (pendingRoom) {
     sessionStorage.removeItem('pendingRoom');
@@ -140,7 +129,6 @@ async function signup() {
     localStorage.setItem('myPin', myPin);
     localStorage.setItem('deviceId', deviceId);
 
-    // Save VAPID key from backend — this is the only source of truth
     if (d.vapid_public_key) {
       vapidKey = d.vapid_public_key;
       localStorage.setItem('vapidKey', vapidKey);
@@ -148,7 +136,6 @@ async function signup() {
 
     startApp();
 
-    // Request notification permission and subscribe
     if ('Notification' in window) {
       const perm = await Notification.requestPermission();
       if (perm === 'granted' && vapidKey) subscribePush(vapidKey);
@@ -177,7 +164,6 @@ async function subscribePush(key) {
     console.log('[iNet] Push subscribed ✓');
   } catch(e) {
     console.warn('[iNet] Push subscription failed:', e.message);
-    // Key mismatch or expired — fetch fresh key from backend and retry once
     if (e.name === 'InvalidStateError' || e.message.includes('key')) {
       await refreshVapidAndRetry();
     }
@@ -191,7 +177,6 @@ async function refreshVapidAndRetry() {
     if (d.vapid_public_key && d.vapid_public_key !== vapidKey) {
       vapidKey = d.vapid_public_key;
       localStorage.setItem('vapidKey', vapidKey);
-      // Unsubscribe old, resubscribe with new key
       const reg = await navigator.serviceWorker.ready;
       const oldSub = await reg.pushManager.getSubscription();
       if (oldSub) await oldSub.unsubscribe();
@@ -251,7 +236,6 @@ function schedReconnect() {
   if (!wsTimer) wsTimer = setTimeout(() => { wsTimer = null; connectWS(); }, 3000);
 }
 
-// Heartbeat — keeps connection alive even when screen sleeps
 function startHeartbeat() {
   stopHeartbeat();
   wsHeartbeat = setInterval(() => {
@@ -281,15 +265,12 @@ function signal(target, type, payload) {
   ws.send(JSON.stringify({ target, type, payload }));
 }
 
-// Group/room signal — uses `room` key not `target`
 function sigRoom(room, type, payload) {
   if (ws && ws.readyState === WebSocket.OPEN)
     ws.send(JSON.stringify({ room, type, payload }));
 }
 
 // ── PING / ONLINE STATUS ───────────────────────────
-// Poll every 30s — marks contacts online/offline
-// WhatsApp rule: if WS connected = online, even in background
 function startPingLoop() {
   pingContacts();
   setInterval(pingContacts, 30000);
@@ -341,7 +322,6 @@ function handleMsg(msg) {
   }
 }
 
-// Messages from service worker (e.g. user tapped notification)
 function onSwMessage(e) {
   const { type, data } = e.data || {};
   if (type === 'ANSWER_CALL' && incomingBuffer) answerIncomingCall();
@@ -353,9 +333,8 @@ function onSwMessage(e) {
   }
 }
 
-// Show local notification when app is backgrounded (incoming call)
 function showLocalNotif(from, callType) {
-  if (!document.hidden) return;   // app is visible — in-app UI is enough
+  if (!document.hidden) return;
   navigator.serviceWorker.ready.then(reg => {
     reg.active?.postMessage({
       type: 'SHOW_NOTIFICATION',
@@ -403,7 +382,7 @@ function dispatchMsg(pin, msg) {
 
 function receiveChat(from, msg) {
   if (!chats[from]) chats[from] = [];
-  if (chats[from].find(m => m.id === msg.id)) return;   // deduplicate
+  if (chats[from].find(m => m.id === msg.id)) return;
   chats[from].push({ ...msg, dir: 'in', status: 'delivered' });
   saveChats();
 
@@ -450,7 +429,7 @@ async function startDMCall(type) {
   if (!currentChatId) return;
   callPeer = currentChatId;
   callType = type;
-  callConnected = false;   // <-- reset
+  callConnected = false;
 
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
@@ -468,7 +447,6 @@ async function startDMCall(type) {
     await peerConn.setLocalDescription(offer);
     signal(callPeer, 'call_offer', { sdp: peerConn.localDescription, call_type: type });
 
-    // 45s no-answer timeout
     callTimer = setTimeout(() => {
       if (document.getElementById('callStatus').textContent !== 'Connected') {
         document.getElementById('callStatus').textContent = 'No answer';
@@ -494,7 +472,7 @@ async function answerIncomingCall() {
   hideIncoming();
   callPeer = from;
   callType = payload.call_type || 'audio';
-  callConnected = false;   // <-- reset
+  callConnected = false;
 
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
@@ -540,7 +518,7 @@ function handleIce(from, payload) {
   if (peerConn && remoteDescSet) {
     peerConn.addIceCandidate(candidate).catch(() => {});
   } else {
-    iceCandQueue.push(candidate);   // buffer until remote desc is set
+    iceCandQueue.push(candidate);
   }
 }
 
@@ -560,7 +538,7 @@ function makePeerConn(pin) {
   pc.onconnectionstatechange = () => {
     const s = pc.connectionState;
     if (s === 'connected') {
-      callConnected = true;   // <-- mark as connected
+      callConnected = true;
       setCallStatus('Connected');
       document.getElementById('callOverlay').style.opacity = '0';
     }
@@ -615,7 +593,7 @@ function endCall(notify = true) {
     };
     calls.unshift(missedCall);
     localStorage.setItem('calls', JSON.stringify(calls.slice(0, 100)));
-    renderCalls(); // if needed
+    renderCalls();
   }
 
   document.getElementById('callScreen').classList.remove('show');
@@ -628,9 +606,8 @@ function endCall(notify = true) {
 
   peerConn = null; localStream = null; callPeer = null;
   remoteDescSet = false; iceCandQueue = [];
-  callConnected = false; // reset
+  callConnected = false;
 
-  // Dismiss the incoming-call notification if it's showing
   navigator.serviceWorker?.ready.then(reg =>
     reg.active?.postMessage({ type: 'CANCEL_NOTIFICATIONS', payload: { tag: 'incoming-call' } })
   );
@@ -684,12 +661,7 @@ function hideIncoming() {
 }
 
 // ── GROUP / LINK CALLS ─────────────────────────────
-// Room ID is just a short random string — NO 'room:' prefix stored here.
-// The URL hash format is #room:ROOMID
-// All internal state just uses the plain ROOMID.
-
 function createLinkCall() {
-  // Generate a clean room ID — no prefix
   myRoomId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   localStorage.setItem('myRoomId', myRoomId);
   updateLinkView();
@@ -702,19 +674,14 @@ function createLinkCallAndStart() {
   setTimeout(() => joinRoom(myRoomId), 100);
 }
 
-// The shareable URL always embeds the roomId cleanly
 function getRoomUrl(roomId) {
   return `${location.origin}${location.pathname}#room:${roomId}`;
 }
 
-// Parse roomId from any input: URL, hash, or raw ID
 function parseRoomId(input) {
   input = input.trim();
-  // Full URL with hash
   if (input.includes('#room:')) return input.split('#room:')[1];
-  // Just the hash part
   if (input.startsWith('room:')) return input.slice(5);
-  // Raw ID
   return input;
 }
 
@@ -758,7 +725,6 @@ async function joinRoom(roomId) {
   if (!myPin) { toast('Please sign up first'); return; }
   gcRoomId = roomId;
 
-  // Clear hash so refreshing doesn't re-join
   if (location.hash) history.replaceState(null, '', location.pathname);
 
   document.getElementById('gcTitle').textContent = 'Room …' + roomId.slice(-6);
@@ -774,17 +740,14 @@ async function joinRoom(roomId) {
   document.getElementById('groupCallScreen').classList.add('show');
   addGcTile(myPin, gcStream, true);
 
-  // Tell backend we joined this room (broadcasts gc_join to all in room)
   sigRoom(roomId, 'gc_join', { from: myPin });
   startGcTimer();
   addRecentRoom(roomId);
 }
 
-// Received when another peer joins the room
 function handleGcJoin(from) {
   if (!gcRoomId) return;
   toast(`${getContactName(from)} joined`);
-  // We initiate the offer (lower PIN starts)
   if (myPin < from) createGcPeer(from, true);
   else createGcPeer(from, false);
 }
@@ -1136,7 +1099,6 @@ function openDMChat(pin) {
   updateChatStatus();
   document.getElementById('chatScreen').classList.add('show');
   renderChatMessages();
-  // When this contact comes online, flush pending messages
   flushPending(pin);
 }
 
