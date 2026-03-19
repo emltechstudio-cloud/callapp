@@ -601,8 +601,9 @@ footer p{color:var(--muted);font-size:0.8rem;}
   <a class="f-logo" href="/">
     <div class="f-logo-mark">iN</div>
     <span class="f-logo-text">iNet</span>
+    <a class="final-cta" href="https://emltechstudio.site">EML TECH STUDIO</a>
   </a>
-  <p>&copy; 2025 EML Tech Studio &middot; No data collected. No logs kept.</p>
+  <p>&copy; 2026&middot; No data collected. No logs kept.</p>
   <div class="footer-links">
     <a href="app.html">App</a>
     <a href="install.html">Install</a>
@@ -631,8 +632,16 @@ function submitFeedback() {
   const email = document.getElementById('fb-email').value.trim();
   const msg   = document.getElementById('fb-msg').value.trim();
   if (!email || !msg) { alert('Please fill in both fields.'); return; }
-  document.getElementById('feedback-form').style.display = 'none';
-  document.getElementById('feedback-thanks').style.display = 'block';
+
+  const subject = encodeURIComponent('iNet Feedback from ' + email);
+  const body    = encodeURIComponent(msg + '\n\n— Sent from ' + email);
+  window.location.href = 'mailto:emltechstudio@gmail.com?subject=' + subject + '&body=' + body;
+
+  // Show thank-you after a short delay so the mail client has time to open
+  setTimeout(() => {
+    document.getElementById('feedback-form').style.display  = 'none';
+    document.getElementById('feedback-thanks').style.display = 'block';
+  }, 800);
 }
 </script>
 </body>
